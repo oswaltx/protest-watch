@@ -73,6 +73,9 @@ skripte/          Erzeugung der Daten (brauchen die nicht veröffentlichten Rohd
                   außer menge_berechnen.py, das nur mengen.json und OSM-Daten liest)
 ```
 
+Über „✎ Einzeichnen“ können Besuchende Fahrzeuge, Gruppen und Zonen einsenden. Ein Dienst auf dem Server
+nimmt sie an, verschlüsselt sie sofort und speichert keine IP-Adressen; auf die Karte kommt nichts automatisch.
+
 Auf dem Server zählt ein kleiner Dienst die Seitenaufrufe anonym (Tagessummen, ohne Skript, Cookies oder
 gespeicherte IP-Adressen). Die Hintergrundkarte kommt über einen eigenen Kachel-Cache (`/osm/`), damit beim Aufruf keine IP-Adressen an
 Dritte gehen; der lokale Testserver reicht diese Anfragen an OpenStreetMap durch.
