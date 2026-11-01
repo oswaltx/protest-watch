@@ -1,0 +1,3 @@
+# CesiumJS wird mit skripte/cesium_holen.sh geladen, nicht eingecheckt
+karte/cesium/
+__pycache__/

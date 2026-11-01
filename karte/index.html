@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob: https://www.youtube.com https://s.ytimg.com 'unsafe-eval' 'wasm-unsafe-eval'; frame-src https://www.youtube-nocookie.com https://www.tiktok.com https://www.instagram.com https://t.me; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; connect-src 'self' data: blob:; font-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Demo Köln 31.10.2026 – 3D</title>
+<link rel="stylesheet" href="cesium/Widgets/widgets.css">
+<style>
+  [hidden] { display: none !important; }
+  html, body, #karte { margin: 0; width: 100%; height: 100%; overflow: hidden; font-family: system-ui, sans-serif; }
+  .feld { position: absolute; z-index: 5; background: rgba(20,20,24,.88); color: #eee; padding: 10px 12px;
+          border-radius: 6px; font-size: 13px; }
+  .feld h1, .feld h2 { font-size: 14px; margin: 0 0 6px; }
+  .feld h2 { font-size: 13px; margin-top: 10px; color: #bbb; }
+  .feld button { display: block; width: 100%; text-align: left; margin: 2px 0; padding: 4px 6px; background: #333;
+                 color: #eee; border: 0; border-radius: 3px; cursor: pointer; font-size: 12px; }
+  .feld button:hover { background: #555; }
+  .feld a { color: #ffcf66; }
+  #leiste { top: 10px; left: 10px; max-width: 240px; }
+  #status { margin-top: 6px; color: #aaa; font-size: 11px; }
+  #jetzt { top: 10px; right: 10px; width: 320px; max-height: calc(100% - 200px); overflow-y: auto; }
+  #jetzt-uhr { font-size: 22px; font-weight: 600; }
+  .ev { margin: 6px 0; padding-left: 6px; border-left: 3px solid #ffb000; }
+  .sicher { font-size: 10px; background: #444; padding: 0 4px; border-radius: 3px; }
+  #jetzt-videos button.clip { background: #2a2a30; }
+  #streifen { position: absolute; z-index: 4; cursor: pointer; background: rgba(20,20,24,.75); }
+  #legende { font-size: 11px; color: #aaa; margin-top: 8px; }
+  #legende i { display: inline-block; width: 10px; height: 8px; margin: 0 3px 0 8px; }
+  #player { top: 10px; left: 50%; transform: translateX(-50%); width: min(560px, 50vw); }
+  #player video { width: 100%; max-height: 55vh; background: #000; }
+  #player-kopf { display: flex; gap: 8px; align-items: start; margin-bottom: 6px; }
+  #player-titel { flex: 1; font-size: 12px; }
+  #player-zu { width: auto !important; }
+  #player-einbettung #player-youtube, #player-einbettung iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; }
+  #player-einbettung iframe.hochkant { aspect-ratio: 9 / 14; max-height: 60vh; }
+  #player-zustimmung p { margin: 0 0 8px; }
+  #player-zustimmung button { width: auto; background: #ffcf66; color: #111; font-weight: 600; }
+  #hinweis { margin-top: 8px; line-height: 1.4; }
+  #diagramm { left: 10px; bottom: 150px; width: min(560px, 60vw); }
+  #diagramm-kopf { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  #diagramm-kopf button { width: auto; }
+  #diagramm svg { display: block; width: 100%; height: auto; cursor: crosshair; }
+  #diagramm-legende i { display: inline-block; width: 12px; height: 3px; margin: 0 4px 2px 10px; vertical-align: middle; }
+  .klein { font-size: 11px; color: #bbb; }
+  .kopf { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .feld .kopf button { width: auto; margin: 0; padding: 2px 8px; }
+  .feld.zu .inhalt { display: none; }
+  #hilfe { top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(520px, 92vw); z-index: 8; font-size: 13px; line-height: 1.45; }
+  #warnung { position: absolute; z-index: 6; top: 10px; left: 50%; transform: translateX(-50%); width: min(520px, 40vw);
+    background: rgba(120, 60, 0, .92); color: #fff3e0; border: 1px solid #ffb347; border-radius: 6px; padding: 6px 10px;
+    font-size: 12px; line-height: 1.35; text-align: center; pointer-events: none; }
+  #impressum-link { position: absolute; z-index: 6; right: 10px; bottom: 112px; font-size: 11px; color: #ddd;
+    background: rgba(20,20,24,.8); padding: 2px 6px; border-radius: 4px; }
+  #melden { top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(460px, 92vw); z-index: 9; }
+  #melden label { display: block; margin: 3px 0; }
+  #melden textarea { width: 100%; box-sizing: border-box; margin: 6px 0; background: #2a2a30; color: #eee; border: 1px solid #555;
+    border-radius: 4px; font: inherit; padding: 6px; }
+  #melden-kontext { white-space: pre-wrap; font-size: 11px; color: #aaa; background: #1b1b1f; padding: 6px; border-radius: 4px; margin: 0 0 8px; }
+  .melden-wege { display: flex; gap: 8px; flex-wrap: wrap; }
+  .melden-knopf { background: #ffcf66; color: #111 !important; font-weight: 600; padding: 6px 10px; border-radius: 4px;
+    text-decoration: none; cursor: pointer; }
+  #melden-anonym { background: #444; color: #eee !important; }
+  #hilfe ul { padding-left: 18px; margin: 6px 0 0; }
+  #hilfe li { margin: 6px 0; }
+  @media (max-width: 700px) {
+    .feld { font-size: 12px; padding: 8px; }
+    #leiste { max-width: 46vw; max-height: 45vh; overflow-y: auto; }
+    #jetzt { width: 48vw; max-height: 45vh; }
+    #player { top: auto; bottom: 130px; width: 94vw; }
+    #player video, #player-einbettung iframe.hochkant { max-height: 38vh; }
+    #diagramm { width: 94vw; bottom: 130px; }
+    #legende { display: none; }
+    #warnung { top: auto; bottom: 150px; width: 92vw; font-size: 11px; }
+    .feld h1 { font-size: 12px; }
+    #jetzt-uhr { font-size: 16px; }
+    #jetzt { width: 40vw; }
+    #leiste { max-width: 52vw; }
+  }
+</style>
+</head>
+<body>
+<div id="karte"></div>
+<div id="leiste" class="feld">
+  <div class="kopf"><h1>Gen-Z-Demo Köln, 31.10.2026</h1><button class="einklappen" title="ein-/ausklappen">☰</button></div>
+  <div class="inhalt">
+  <div id="orte"></div>
+  <button id="uebersicht">↺ Übersicht</button>
+  <button id="google-knopf">📷 Google-Fotokacheln</button>
+  <button id="tonmodell">◻ Fotos aus (Tonmodell)</button>
+  <button id="menge-knopf">👥 Menge aus</button>
+  <button id="diagramm-knopf">📈 Diagramm</button>
+  <button id="link-knopf">🔗 Link zu diesem Moment</button>
+  <button id="melden-knopf">⚑ Melden: Info, Korrektur, Entfernen</button>
+  <button id="hilfe-knopf">❓ So funktioniert die Karte</button>
+  <div id="legende">Streifen unten:<br><i style="background:#3a8ee6"></i>Livestream
+    <i style="background:#ddd"></i>YouTube-Upload<br><i style="background:#e64a8b"></i>TikTok-Upload
+    <i style="background:#ffb000"></i>Ereignis<br>Karte: <i style="background:#ffcf66"></i>Menge
+    <i style="background:#4d8bff"></i>Polizei <i style="background:#ff3b3b"></i>Gewaltbereite <i style="background:#2d5fd6"></i>Fahrzeug</div>
+  <div id="status">lädt…</div>
+  <div id="hinweis" class="klein">Rekonstruktion aus öffentlichen Videos und Medienberichten.
+    Mengen, Wege und Polizeizahlen sind <b>Schätzungen</b>, keine Zählungen. Eingebettet sind nur öffentlich
+    gepostete Originalvideos; eingesandtes Material wird nicht gezeigt. Stand: 1.11.2026.<br>
+    <a href="https://github.com/oswaltx/protest-watch">Methodik und Daten</a> · <a href="https://oswalt.eu/demo-koeln/">Material einreichen</a> ·
+    <a href="datenschutz.html">Impressum und Datenschutz</a></div>
+  </div>
+</div>
+<div id="jetzt" class="feld">
+  <div class="kopf"><div id="jetzt-uhr"></div><button class="einklappen" title="ein-/ausklappen">☰</button></div>
+  <div class="inhalt">
+  <h2>Ereignisse (laut Medien)</h2>
+  <div id="jetzt-ereignisse"></div>
+  <h2>Menge (geschätzt)</h2>
+  <div id="jetzt-menge"></div>
+  <h2>Videos zu diesem Zeitpunkt</h2>
+  <div id="jetzt-videos"></div>
+  </div>
+</div>
+<div id="melden" class="feld" hidden>
+  <div class="kopf"><h2>Melden</h2><button id="melden-zu" title="schließen">✕</button></div>
+  <p class="klein">Uhrzeit, Kartenausschnitt und das ausgewählte Element werden automatisch mitgeschickt.</p>
+  <div id="melden-art">
+    <label><input type="radio" name="melden-art" value="Information ergänzen" checked> Information ergänzen</label>
+    <label><input type="radio" name="melden-art" value="Korrektur"> Etwas ist falsch</label>
+    <label><input type="radio" name="melden-art" value="Entfernen lassen"> Entfernen lassen (Name, Weg, Video)</label>
+  </div>
+  <textarea id="melden-text" rows="5" maxlength="4000" placeholder="Was soll ergänzt, korrigiert oder entfernt werden?"></textarea>
+  <pre id="melden-kontext"></pre>
+  <div class="melden-wege">
+    <a id="melden-mail" class="melden-knopf">✉ Per Mail senden</a>
+    <a id="melden-anonym" class="melden-knopf" target="_blank" rel="noopener">Anonym über die Einreichseite</a>
+  </div>
+  <p class="klein" id="melden-hinweis">Per Mail an protest-watch@pm.me öffnet sich dein Mailprogramm. Anonym kann ich nicht antworten;
+    für Entfernen-Wünsche deshalb besser per Mail. Prüfung innerhalb von 3 Tagen.</p>
+</div>
+<div id="hilfe" class="feld">
+  <div class="kopf"><h2>So funktioniert die Karte</h2><button id="hilfe-zu" title="schließen">✕</button></div>
+  <ul>
+    <li><b>Zeit:</b> Unten an der Zeitleiste ziehen (12–23 Uhr) oder ▶ drücken. Der farbige Streifen darüber zeigt
+      Livestreams (blau), hochgeladene Videos (Striche) und gemeldete Ereignisse (Dreiecke); ein Klick springt hin.</li>
+    <li><b>Rechts</b> steht, was zur eingestellten Zeit laut Medien passiert, wie viele Menschen geschätzt da sind
+      und welche Videos es gibt. ▶ öffnet ein Video an der passenden Stelle.</li>
+    <li><b>Wichtig:</b> Die Menge ist eine <b>Simulation</b>, nicht die Wirklichkeit. Ein Punkt entspricht keiner
+      echten Person und keiner echten Position; Zahlen und Abläufe sind Schätzungen und können falsch sein.
+      Belegt ist nur, was mit einer Quelle verlinkt ist.</li>
+    <li><b>Auf der Karte:</b> gelbe Punkte sind Demonstrierende, blaue Polizei, rote Gewaltbereite – alles
+      <b>geschätzt und simuliert</b>, keine echten Personen. Farbige Linien sind Wege von Livestreams, kleine
+      Kamerapunkte mit Pfeil zeigen, wo und wohin ein Video gefilmt wurde. Klick auf einen Punkt zeigt Details.</li>
+    <li><b>Bewegen:</b> linke Maustaste verschieben, rechte oder Mausrad zoomen, Strg + Ziehen kippen.
+      Am Handy mit zwei Fingern.</li>
+    <li><b>Teilen:</b> „🔗 Link zu diesem Moment“ kopiert einen Link mit Uhrzeit und Blickwinkel.</li>
+    <li><b>Melden:</b> Fehlt etwas, stimmt etwas nicht oder willst du etwas entfernen lassen? „⚑ Melden“ schickt
+      Uhrzeit und Ort gleich mit.</li>
+  </ul>
+</div>
+<div id="player" class="feld" hidden>
+  <div id="player-kopf"><span id="player-titel"></span><a id="player-link" target="_blank" rel="noopener">Original öffnen ↗</a>
+    <button id="player-zu">✕</button></div>
+  <video id="player-video" controls hidden></video>
+  <div id="player-zustimmung" hidden><p></p><button></button></div>
+  <div id="player-einbettung" hidden><div id="player-youtube"></div><div class="klein" id="player-hinweis"></div></div>
+</div>
+<div id="diagramm" class="feld" hidden>
+  <div id="diagramm-kopf"><b>Personen über den Tag (geschätzt)</b>
+    <button id="diagramm-zu">✕</button></div>
+  <div id="diagramm-flaeche"></div>
+  <div class="klein" id="diagramm-legende"></div>
+</div>
+<div id="streifen"></div>
+<div id="warnung" role="note"><b>⚠ Simulation, keine Abbildung der Wirklichkeit.</b> Die Punkte und Figuren sind
+  <b>keine einzelnen Personen</b> und keine echten Positionen. Personenzahlen, Wege und Abläufe sind
+  <b>Schätzungen</b> aus Videos und Berichten und können falsch sein. Belegt sind nur die verlinkten Quellen.</div>
+<a id="impressum-link" href="datenschutz.html#impressum">Impressum · Datenschutz</a>
+<script src="oeffentlich.js"></script><script src="gebaeude.js"></script>
+<script src="cesium/Cesium.js"></script>
+<script src="orte.js"></script>
+<script src="ereignisse.js"></script>
+<script src="videos.js"></script>
+<script src="wege.js"></script>
+<script src="kameras.js"></script>
+<script src="menge.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1336 @@
+{
+ "_hinweis": "Geschätzte Mengen. Eine Population sind dieselben Personen über die Zeit: Zwischen zwei Zeitpunkten geht jede Person den kürzesten Weg zu ihrer neuen Position (optimale Zuordnung). Wächst die Population, kommen Leute über den nächsten Zugang; schrumpft sie, gehen Leute über den nächsten Zugang weg. Formen: korridor = Abschnitt des Konrad-Adenauer-Ufers (KAU) [lat_von, lat_bis, links_m, rechts_m], rechts = Richtung Rhein; kreis = [lat, lon, radius_m]; linie = Kette quer über den KAU [lat, links_m, rechts_m]; ring = Kette um einen Korridor; ring_kreis = Kette um einen Kreis; strecke = Band [lat1, lon1, lat2, lon2, breite_m].",
+ "populationen": [
+  {
+   "name": "Demonstrierende",
+   "gruppe": "menge",
+   "quelle": "taz/t-online-Angaben, Streams (Livestream A, Livestream B, Livestream D), verortete Clips, Augenzeugenbericht; Menge nur oben (Straße + obere Promenade), unten am Wasser Polizeiwall (Augenzeugenbericht); Polizei: 'knapp 1000 Personen' kontrolliert (Pressemitteilung 01.11.)",
+   "zugaenge": [
+    [
+     50.94425,
+     6.95888
+    ],
+    [
+     50.943,
+     6.9583
+    ],
+    [
+     50.94928,
+     6.96
+    ],
+    [
+     50.9501,
+     6.9608
+    ],
+    [
+     50.9508,
+     6.9592
+    ],
+    [
+     50.9462,
+     6.9605
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "13:00",
+     "teile": [
+      {
+       "anzahl": 50,
+       "korridor": [
+        50.943,
+        50.944,
+        -8,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "13:20",
+     "teile": [
+      {
+       "anzahl": 300,
+       "korridor": [
+        50.9426,
+        50.9446,
+        -10,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "13:50",
+     "teile": [
+      {
+       "anzahl": 1200,
+       "korridor": [
+        50.9424,
+        50.9448,
+        -12,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:05",
+     "teile": [
+      {
+       "anzahl": 2000,
+       "korridor": [
+        50.9424,
+        50.945,
+        -12,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:12",
+     "teile": [
+      {
+       "anzahl": 2200,
+       "korridor": [
+        50.9446,
+        50.9472,
+        -12,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:19",
+     "teile": [
+      {
+       "anzahl": 2400,
+       "korridor": [
+        50.9464,
+        50.9489,
+        -12,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:30",
+     "teile": [
+      {
+       "anzahl": 3000,
+       "korridor": [
+        50.947,
+        50.9495,
+        -15,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:45",
+     "teile": [
+      {
+       "anzahl": 4000,
+       "korridor": [
+        50.9468,
+        50.9497,
+        -18,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "15:30",
+     "teile": [
+      {
+       "anzahl": 3500,
+       "korridor": [
+        50.9468,
+        50.9497,
+        -18,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:00",
+     "teile": [
+      {
+       "anzahl": 3000,
+       "korridor": [
+        50.947,
+        50.9497,
+        -18,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:30",
+     "teile": [
+      {
+       "anzahl": 2200,
+       "korridor": [
+        50.9474,
+        50.9497,
+        -15,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:50",
+     "teile": [
+      {
+       "anzahl": 1300,
+       "korridor": [
+        50.948,
+        50.9498,
+        -15,
+        30
+       ]
+      },
+      {
+       "anzahl": 300,
+       "kreis": [
+        50.94928,
+        6.96056,
+        45
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:15",
+     "teile": [
+      {
+       "anzahl": 600,
+       "korridor": [
+        50.9482,
+        50.9493,
+        -12,
+        30
+       ]
+      },
+      {
+       "anzahl": 150,
+       "kreis": [
+        50.94985,
+        6.966,
+        22
+       ]
+      },
+      {
+       "anzahl": 200,
+       "kreis": [
+        50.94928,
+        6.96056,
+        40
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "18:00",
+     "teile": [
+      {
+       "anzahl": 500,
+       "korridor": [
+        50.9482,
+        50.9492,
+        -12,
+        30
+       ]
+      },
+      {
+       "anzahl": 120,
+       "kreis": [
+        50.94985,
+        6.966,
+        20
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "19:00",
+     "teile": [
+      {
+       "anzahl": 350,
+       "korridor": [
+        50.9483,
+        50.9491,
+        -12,
+        28
+       ]
+      },
+      {
+       "anzahl": 50,
+       "kreis": [
+        50.94985,
+        6.966,
+        15
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "19:30",
+     "teile": [
+      {
+       "anzahl": 250,
+       "korridor": [
+        50.9483,
+        50.9491,
+        -12,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "20:00",
+     "teile": [
+      {
+       "anzahl": 150,
+       "korridor": [
+        50.9484,
+        50.949,
+        -10,
+        20
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "21:00",
+     "teile": [
+      {
+       "anzahl": 20,
+       "korridor": [
+        50.9485,
+        50.9489,
+        -8,
+        12
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Gewaltbereite",
+   "gruppe": "krawall",
+   "quelle": "Grobe Schätzung, Teilmenge der Demonstrierenden: Böller vorne am Demozug, vereinzelt hinten (Augenzeugenbericht); Pyro/Vermummte ab ca. 15:00 (Polizei, t-online), roter Rauch 15:28, Flaschen/Farbbeutel 16:37–16:40 (Livestream A), 'gewaltbereite Demonstranten' beim Wasserwerfer (Innenministerium), Böller/Flaschen Domplatte abends (BILD, t-online)",
+   "zugaenge": [
+    [
+     50.94425,
+     6.95888
+    ],
+    [
+     50.94928,
+     6.96
+    ],
+    [
+     50.9501,
+     6.9608
+    ],
+    [
+     50.943,
+     6.9583
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "14:00",
+     "teile": [
+      {
+       "anzahl": 10,
+       "korridor": [
+        50.9446,
+        50.945,
+        -10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:06",
+     "teile": [
+      {
+       "anzahl": 35,
+       "korridor": [
+        50.9451,
+        50.9455,
+        -10,
+        10
+       ]
+      },
+      {
+       "anzahl": 8,
+       "korridor": [
+        50.9432,
+        50.9435,
+        -10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:12",
+     "teile": [
+      {
+       "anzahl": 40,
+       "korridor": [
+        50.9468,
+        50.9472,
+        -10,
+        10
+       ]
+      },
+      {
+       "anzahl": 8,
+       "korridor": [
+        50.9446,
+        50.9449,
+        -10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:19",
+     "teile": [
+      {
+       "anzahl": 45,
+       "korridor": [
+        50.9485,
+        50.9489,
+        -10,
+        12
+       ]
+      },
+      {
+       "anzahl": 8,
+       "korridor": [
+        50.9464,
+        50.9467,
+        -10,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:45",
+     "teile": [
+      {
+       "anzahl": 50,
+       "korridor": [
+        50.9492,
+        50.9497,
+        -15,
+        25
+       ]
+      },
+      {
+       "anzahl": 10,
+       "korridor": [
+        50.9468,
+        50.9471,
+        -15,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "15:28",
+     "teile": [
+      {
+       "anzahl": 100,
+       "korridor": [
+        50.949,
+        50.9497,
+        -15,
+        28
+       ]
+      },
+      {
+       "anzahl": 15,
+       "korridor": [
+        50.9468,
+        50.9472,
+        -15,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:30",
+     "teile": [
+      {
+       "anzahl": 140,
+       "korridor": [
+        50.9492,
+        50.9497,
+        -15,
+        28
+       ]
+      },
+      {
+       "anzahl": 60,
+       "korridor": [
+        50.9474,
+        50.9478,
+        -15,
+        28
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:50",
+     "teile": [
+      {
+       "anzahl": 150,
+       "korridor": [
+        50.9494,
+        50.9498,
+        -15,
+        28
+       ]
+      },
+      {
+       "anzahl": 60,
+       "korridor": [
+        50.948,
+        50.9483,
+        -15,
+        28
+       ]
+      },
+      {
+       "anzahl": 40,
+       "kreis": [
+        50.94928,
+        6.96056,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:20",
+     "teile": [
+      {
+       "anzahl": 60,
+       "korridor": [
+        50.9483,
+        50.9492,
+        -12,
+        28
+       ]
+      },
+      {
+       "anzahl": 40,
+       "kreis": [
+        50.94928,
+        6.96056,
+        30
+       ]
+      },
+      {
+       "anzahl": 20,
+       "kreis": [
+        50.94985,
+        6.966,
+        18
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "18:30",
+     "teile": [
+      {
+       "anzahl": 30,
+       "korridor": [
+        50.9483,
+        50.9491,
+        -12,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "20:00",
+     "teile": [
+      {
+       "anzahl": 5,
+       "korridor": [
+        50.9484,
+        50.949,
+        -10,
+        20
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "20:45",
+     "teile": [
+      {
+       "anzahl": 50,
+       "kreis": [
+        50.942,
+        6.9576,
+        40
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "21:00",
+     "teile": [
+      {
+       "anzahl": 80,
+       "kreis": [
+        50.942,
+        6.9576,
+        45
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "21:30",
+     "teile": [
+      {
+       "anzahl": 20,
+       "kreis": [
+        50.9415,
+        6.9565,
+        40
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Abends Domplatte",
+   "gruppe": "menge",
+   "quelle": "Livestream D LIVE 20:53–20:57, BILD, t-online",
+   "zugaenge": [
+    [
+     50.943,
+     6.9583
+    ],
+    [
+     50.9395,
+     6.957
+    ],
+    [
+     50.9418,
+     6.9545
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "20:40",
+     "teile": [
+      {
+       "anzahl": 100,
+       "kreis": [
+        50.942,
+        6.9576,
+        45
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "20:53",
+     "teile": [
+      {
+       "anzahl": 300,
+       "kreis": [
+        50.942,
+        6.9576,
+        50
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "21:05",
+     "teile": [
+      {
+       "anzahl": 120,
+       "kreis": [
+        50.942,
+        6.9576,
+        60
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Spontane Solidaritätskundgebung",
+   "gruppe": "menge",
+   "quelle": "Augenzeugenbericht; Ton Livestream A: Reden ab 17:14, Polizei schiebt ab 17:24, Durchsage 'Versammlung ist aufgelöst' 17:29; Anzahl geschätzt",
+   "zugaenge": [
+    [
+     50.9501,
+     6.9608
+    ],
+    [
+     50.9508,
+     6.9592
+    ],
+    [
+     50.94928,
+     6.96
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "17:10",
+     "teile": [
+      {
+       "anzahl": 60,
+       "kreis": [
+        50.95015,
+        6.9652,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:18",
+     "teile": [
+      {
+       "anzahl": 200,
+       "kreis": [
+        50.95015,
+        6.965,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:24",
+     "teile": [
+      {
+       "anzahl": 200,
+       "kreis": [
+        50.9502,
+        6.9649,
+        32
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:29",
+     "teile": [
+      {
+       "anzahl": 120,
+       "kreis": [
+        50.9504,
+        6.9643,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:40",
+     "teile": [
+      {
+       "anzahl": 20,
+       "kreis": [
+        50.9505,
+        6.9635,
+        20
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Polizei Ufer",
+   "gruppe": "polizei",
+   "quelle": "Schätzung: sichtbare Ketten (Videos) + Hundertschaften von Norden, Polizeiwall unten am Wasser und an den Treppen (Augenzeugenbericht), ca. 55 Mannschaftswagen (je ~8 Beamte). Offizielle Gesamtzahl nicht veröffentlicht.",
+   "zugaenge": [
+    [
+     50.9525,
+     6.9685
+    ],
+    [
+     50.946,
+     6.9637
+    ],
+    [
+     50.9445,
+     6.9632
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "14:00",
+     "teile": [
+      {
+       "anzahl": 120,
+       "korridor": [
+        50.944,
+        50.9455,
+        -16,
+        -12
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "14:20",
+     "teile": [
+      {
+       "anzahl": 160,
+       "korridor": [
+        50.9466,
+        50.9472,
+        -15,
+        50
+       ]
+      },
+      {
+       "anzahl": 50,
+       "laengs": [
+        50.9466,
+        50.95,
+        33
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:10",
+     "teile": [
+      {
+       "anzahl": 200,
+       "korridor": [
+        50.9466,
+        50.9472,
+        -15,
+        50
+       ]
+      },
+      {
+       "anzahl": 300,
+       "korridor": [
+        50.9508,
+        50.952,
+        -12,
+        14
+       ]
+      },
+      {
+       "anzahl": 80,
+       "laengs": [
+        50.9466,
+        50.95,
+        33
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:30",
+     "teile": [
+      {
+       "anzahl": 150,
+       "linie": [
+        50.9468,
+        -15,
+        45
+       ]
+      },
+      {
+       "anzahl": 500,
+       "korridor": [
+        50.9505,
+        50.9515,
+        -14,
+        16
+       ]
+      },
+      {
+       "anzahl": 80,
+       "laengs": [
+        50.9466,
+        50.95,
+        33
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "16:50",
+     "teile": [
+      {
+       "anzahl": 175,
+       "linie": [
+        50.9477,
+        -15,
+        45
+       ]
+      },
+      {
+       "anzahl": 500,
+       "korridor": [
+        50.9499,
+        50.9506,
+        -14,
+        18
+       ]
+      },
+      {
+       "anzahl": 80,
+       "laengs": [
+        50.9466,
+        50.95,
+        33
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:15",
+     "teile": [
+      {
+       "anzahl": 275,
+       "ring": [
+        50.9481,
+        50.9494,
+        -14,
+        37
+       ]
+      },
+      {
+       "anzahl": 112,
+       "ring_kreis": [
+        50.94985,
+        6.966,
+        25
+       ]
+      },
+      {
+       "anzahl": 300,
+       "korridor": [
+        50.9502,
+        50.951,
+        -12,
+        14
+       ]
+      },
+      {
+       "anzahl": 100,
+       "linie": [
+        50.9479,
+        -15,
+        40
+       ]
+      },
+      {
+       "anzahl": 80,
+       "laengs": [
+        50.9466,
+        50.95,
+        33
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "19:00",
+     "teile": [
+      {
+       "anzahl": 250,
+       "ring": [
+        50.9482,
+        50.9492,
+        -14,
+        30
+       ]
+      },
+      {
+       "anzahl": 75,
+       "ring_kreis": [
+        50.94985,
+        6.966,
+        18
+       ]
+      },
+      {
+       "anzahl": 150,
+       "korridor": [
+        50.9502,
+        50.951,
+        -10,
+        10
+       ]
+      },
+      {
+       "anzahl": 80,
+       "laengs": [
+        50.9466,
+        50.95,
+        33
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "19:30",
+     "teile": [
+      {
+       "anzahl": 225,
+       "ring": [
+        50.9482,
+        50.9492,
+        -14,
+        27
+       ]
+      },
+      {
+       "anzahl": 150,
+       "korridor": [
+        50.9502,
+        50.951,
+        -10,
+        10
+       ]
+      },
+      {
+       "anzahl": 80,
+       "laengs": [
+        50.9466,
+        50.95,
+        33
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "20:30",
+     "teile": [
+      {
+       "anzahl": 120,
+       "ring": [
+        50.9483,
+        50.9491,
+        -12,
+        22
+       ]
+      },
+      {
+       "anzahl": 80,
+       "korridor": [
+        50.9502,
+        50.951,
+        -10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "21:00",
+     "teile": [
+      {
+       "anzahl": 40,
+       "ring": [
+        50.9484,
+        50.949,
+        -10,
+        14
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Polizei Dom",
+   "gruppe": "polizei",
+   "quelle": "Livestream D LIVE 20:53–20:55",
+   "zugaenge": [
+    [
+     50.943,
+     6.9583
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "20:45",
+     "teile": [
+      {
+       "anzahl": 20,
+       "kreis": [
+        50.94165,
+        6.9573,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "20:53",
+     "teile": [
+      {
+       "anzahl": 35,
+       "kreis": [
+        50.94165,
+        6.9573,
+        15
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "21:05",
+     "teile": [
+      {
+       "anzahl": 30,
+       "kreis": [
+        50.94165,
+        6.9573,
+        15
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Mannschaftswagen KAU Nord",
+   "gruppe": "fahrzeug",
+   "quelle": "Augenzeugenbericht; Anzahl und Zeit geschätzt",
+   "zugaenge": [
+    [
+     50.954,
+     6.9705
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "15:30",
+     "teile": [
+      {
+       "anzahl": 25,
+       "korridor": [
+        50.9506,
+        50.953,
+        -8,
+        4
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "19:30",
+     "teile": [
+      {
+       "anzahl": 25,
+       "korridor": [
+        50.9506,
+        50.953,
+        -8,
+        4
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Mannschaftswagen Zoobrücke",
+   "gruppe": "fahrzeug",
+   "quelle": "Augenzeugenbericht: viele wartende Mannschaftswagen auf der Zoobrücke; Anzahl und Zeit geschätzt",
+   "zugaenge": [
+    [
+     50.9476,
+     6.985
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "15:00",
+     "teile": [
+      {
+       "anzahl": 30,
+       "strecke": [
+        50.955,
+        6.9745,
+        50.9527,
+        6.9779,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "19:30",
+     "teile": [
+      {
+       "anzahl": 30,
+       "strecke": [
+        50.955,
+        6.9745,
+        50.9527,
+        6.9779,
+        7
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "markierungen": [
+  {
+   "name": "Angemeldete Kundgebungsfläche (Standkundgebung südl. Bastei)",
+   "art": "flaeche",
+   "korridor": [
+    50.947,
+    50.9497,
+    -18,
+    60
+   ],
+   "quelle": "Radio Erft 30.10.: Kundgebung südlich der Bastei; Aufzug nur nach Entscheidung vor Ort (nicht erlaubt)"
+  },
+  {
+   "name": "Tatsächlicher Zug Musical Dome → Bastei (14:06–14:19)",
+   "art": "linie",
+   "kau": [
+    50.9432,
+    50.9488
+   ],
+   "quelle": "Livestream B und Livestream A"
+  }
+ ],
+ "fahrzeuge": [
+  {
+   "name": "Wasserwerfer K1",
+   "quelle": "Livestream A, AP, WELT, t-online, YouTube-Video; Anfahrt von Süden laut Augenzeugenbericht",
+   "wege": [
+    {
+     "zeit": "16:30",
+     "lat": 50.947,
+     "lon": 6.9642
+    },
+    {
+     "zeit": "16:49",
+     "lat": 50.949,
+     "lon": 6.9653
+    },
+    {
+     "zeit": "17:15",
+     "lat": 50.9495,
+     "lon": 6.9657
+    },
+    {
+     "zeit": "19:30",
+     "lat": 50.94945,
+     "lon": 6.96565
+    }
+   ]
+  },
+  {
+   "name": "Wasserwerfer K2",
+   "quelle": "TikTok 16:30 (Upload 16:43), TikTok Breslauer Platz, Essen112 Ebertplatz; Anfahrt von Süden laut Augenzeugenbericht",
+   "wege": [
+    {
+     "zeit": "15:30",
+     "lat": 50.946,
+     "lon": 6.9636
+    },
+    {
+     "zeit": "16:20",
+     "lat": 50.9468,
+     "lon": 6.9641
+    },
+    {
+     "zeit": "16:45",
+     "lat": 50.9488,
+     "lon": 6.9652
+    },
+    {
+     "zeit": "17:05",
+     "lat": 50.947,
+     "lon": 6.9642
+    },
+    {
+     "zeit": "17:20",
+     "lat": 50.9442,
+     "lon": 6.95895
+    },
+    {
+     "zeit": "17:45",
+     "lat": 50.94425,
+     "lon": 6.95888
+    },
+    {
+     "zeit": "18:10",
+     "lat": 50.9506,
+     "lon": 6.9593
+    },
+    {
+     "zeit": "19:00",
+     "lat": 50.9506,
+     "lon": 6.9593
+    }
+   ]
+  },
+  {
+   "name": "Räumpanzer",
+   "quelle": "Livestream A ab 16:38, Einsatz-Report24, AP; Anfahrt von Süden laut Augenzeugenbericht",
+   "wege": [
+    {
+     "zeit": "16:38",
+     "lat": 50.9475,
+     "lon": 6.9645
+    },
+    {
+     "zeit": "17:00",
+     "lat": 50.9492,
+     "lon": 6.96545
+    },
+    {
+     "zeit": "17:30",
+     "lat": 50.9494,
+     "lon": 6.9656
+    }
+   ]
+  }
+ ]
+}
