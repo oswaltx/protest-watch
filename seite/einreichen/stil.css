@@ -1,0 +1,40 @@
+:root {
+  --text: #1d1d1f; --leise: #5c5c63; --grund: #fbfaf7; --karte: #ffffff; --linie: #e4e1da;
+  --akzent: #b4421f; --akzent-hell: #f6e7e1;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --text: #ecebe8; --leise: #a4a3a0; --grund: #151517; --karte: #1e1e21; --linie: #333338;
+          --akzent: #f08a63; --akzent-hell: #3a2620; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--grund); color: var(--text);
+       font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 42rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .4rem; }
+h2 { font-size: 1.2rem; margin: 2.2rem 0 .6rem; }
+.unterzeile { color: var(--leise); margin: 0 0 1.8rem; }
+.mail { background: var(--akzent-hell); border: 1px solid var(--akzent); border-radius: 10px;
+        padding: 1rem 1.2rem; margin: 1.2rem 0; }
+ul { padding-left: 1.2rem; }
+li { margin: .25rem 0; }
+.karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: .9rem 1.1rem; margin: .8rem 0; }
+.klein { font-size: .9rem; color: var(--leise); }
+details { border-top: 1px solid var(--linie); padding: .7rem 0; }
+summary { cursor: pointer; font-weight: 600; }
+a { color: var(--akzent); }
+.wahl { display: grid; gap: .6rem; }
+.option, .einwilligung { display: flex; gap: .7rem; align-items: flex-start; background: var(--karte);
+  border: 1px solid var(--linie); border-radius: 10px; padding: .8rem 1rem; cursor: pointer; }
+.option:has(input:checked) { border-color: var(--akzent); }
+.option input, .einwilligung input { margin-top: .35rem; transform: scale(1.2); }
+.einwilligung { margin: 1rem 0; font-size: .95rem; }
+.knopf { display: inline-block; background: var(--akzent); color: #fff; font-weight: 650; text-decoration: none;
+  padding: .7rem 1.1rem; border-radius: 8px; margin-bottom: .6rem; }
+.knopf.aus { opacity: .4; pointer-events: none; }
+footer { margin-top: 2.5rem; border-top: 1px solid var(--linie); padding-top: .8rem; }
+.zeitraffer { margin: 1.2rem 0; }
+.zeitraffer video { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--linie); background: #000; }
+textarea { width: 100%; font: inherit; font-size: .95rem; padding: .6rem; border-radius: 8px;
+  border: 1px solid var(--linie); background: var(--karte); color: var(--text); margin: .3rem 0 .6rem; }
+button.knopf { border: 0; cursor: pointer; }

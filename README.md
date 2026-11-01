@@ -4,7 +4,7 @@ Eine begehbare 3D-Karte der Demonstration am 31. Oktober 2026 in Köln, mit Zeit
 Sie führt öffentlich zugängliche Videos, Livestreams und Medienberichte an einem Ort zusammen:
 Was ist wann wo passiert, und welche Aufnahme zeigt es?
 
-**Karte:** https://protest-watch.org/karte/ · **Material einreichen:** https://oswalt.eu/demo-koeln/
+**Karte:** https://protest-watch.org/karte/ · **Material einreichen:** https://protest-watch.org/einreichen/
 
 ## Was die Karte zeigt
 
@@ -33,7 +33,7 @@ Die Karte ist eine **Rekonstruktion**, kein Messergebnis.
 - **Öffentliche Quellen** (Links zu Videos, Streams, Berichten) und **Korrekturen**: [Issue öffnen](https://github.com/oswaltx/protest-watch/issues/new/choose).
   Issues sind öffentlich und mit deinem Konto verknüpft: nur Links zu schon öffentlichem Material, keine eigenen Dateien mit
   erkennbaren Personen, keine Namen, Personenbeschreibungen, Kennzeichen oder Dienstnummern.
-- **Eigenes Material oder anonym**: [Einreichseite](https://oswalt.eu/demo-koeln/), oder in der Karte „⚑ Melden“.
+- **Eigenes Material oder anonym**: [Einreichseite](https://protest-watch.org/einreichen/), oder in der Karte „⚑ Melden“.
 - **Entfernen-Wünsche**: per Mail an protest-watch@pm.me, nicht als Issue.
 
 ## Videos

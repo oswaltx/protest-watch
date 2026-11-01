@@ -790,7 +790,7 @@ $("link-knopf").onclick = async () => {
 // Ergänzung, Korrektur oder Entfernen-Wunsch mit Uhrzeit, Kartenmitte und ausgewähltem Element: per Mail (eigenes
 // Mailprogramm) oder anonym über die Einreichseite; dorthin geht der Text nur im #-Teil der Adresse, nie an einen Server.
 const MELDE_MAIL = "protest-watch@pm.me";
-const EINREICHEN = "https://oswalt.eu/demo-koeln/";
+const EINREICHEN = "https://protest-watch.org/einreichen/";
 function kartenmitte() {
   const c = viewer.scene.canvas;
   const p = viewer.camera.pickEllipsoid(new Cesium.Cartesian2(c.clientWidth / 2, c.clientHeight / 2));

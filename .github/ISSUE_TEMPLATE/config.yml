@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/oswaltx/protest-watch/security/advisories/new
     about: Bitte nicht als öffentliches Issue. Privat über GitHub oder per Mail an protest-watch@pm.me, siehe SECURITY.md.
   - name: Eigene Videos/Fotos oder anonym einreichen
-    url: https://oswalt.eu/demo-koeln/
+    url: https://protest-watch.org/einreichen/
     about: Issues sind öffentlich und mit deinem GitHub-Konto verknüpft. Eigenes Material und alles, was zeigt, dass du dabei warst, bitte anonym über die Einreichseite.
   - name: Etwas entfernen lassen (Name, Weg, Video)
     url: https://protest-watch.org/datenschutz.html#impressum

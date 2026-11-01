@@ -8,7 +8,7 @@ body:
       value: |
         **Bitte vorher lesen:** Issues sind **öffentlich** und mit deinem GitHub-Konto verknüpft.
         - Nur **Links** zu Material, das schon öffentlich ist (YouTube, TikTok, Instagram, Telegram, Medien). **Keine eigenen Dateien mit erkennbaren Personen hochladen.**
-        - Wenn ein Beitrag zeigt, dass du selbst dabei warst, oder du lieber anonym bleibst: [anonyme Einreichseite](https://oswalt.eu/demo-koeln/).
+        - Wenn ein Beitrag zeigt, dass du selbst dabei warst, oder du lieber anonym bleibst: [anonyme Einreichseite](https://protest-watch.org/einreichen/).
         - Keine Namen, Beschreibungen von Personen, Kennzeichen oder Dienstnummern.
   - type: input
     id: link
