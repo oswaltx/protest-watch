@@ -42,7 +42,7 @@ class RangeHandler(SimpleHTTPRequestHandler):
             return self.send_error(404)
         laenge = min(int(self.headers.get("Content-Length") or 0), 64 * 1024)
         anfrage = urllib.request.Request("http://127.0.0.1:8743/api/einzeichnen", data=self.rfile.read(laenge),
-                                         headers={"Content-Type": "application/json", "X-Forwarded-For": "127.0.0.1"})
+                                         headers={"Content-Type": "application/json", "X-Real-IP": "127.0.0.1"})
         try:
             antwort = urllib.request.urlopen(anfrage, timeout=20)
             code, daten = antwort.status, antwort.read()

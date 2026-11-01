@@ -1,0 +1,26 @@
+name: Korrektur oder Ergänzung zur Karte
+description: Etwas auf der Karte ist falsch, ungenau oder fehlt (Ereignis, Ort, Uhrzeit, Menge, Fahrzeuge).
+title: "Korrektur: "
+labels: ["korrektur"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues sind **öffentlich** und mit deinem GitHub-Konto verknüpft. Anonym geht es über „⚑ Melden“ in der Karte.
+        Bitte keine Namen, Beschreibungen von Personen, Kennzeichen oder Dienstnummern. **Entfernen-Wünsche bitte per Mail** an protest-watch@pm.me.
+  - type: input
+    id: moment
+    attributes:
+      label: Link zum Moment
+      description: In der Karte „🔗 Link zu diesem Moment“ klicken und hier einfügen.
+      placeholder: https://protest-watch.org/karte/#t=…
+  - type: textarea
+    id: was
+    attributes:
+      label: Was stimmt nicht oder fehlt?
+    validations:
+      required: true
+  - type: textarea
+    id: beleg
+    attributes:
+      label: Woher weißt du das? (Link, Bericht, eigene Beobachtung)

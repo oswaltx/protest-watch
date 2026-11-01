@@ -59,6 +59,8 @@
     border-radius: 4px; font: inherit; padding: 4px 6px; }
   .zeichnen-zeile { margin: 4px 0; }
   .zeichnen-zeile button, #zone-fertig, #z-senden { display: inline-block; width: auto; }
+  #z-code { margin-top: 8px; padding: 6px; background: #1b2b1b; border: 1px solid #4a7a4a; border-radius: 4px; }
+  #z-code button { display: inline; width: auto; }
   #z-senden { background: #ffcf66; color: #111; font-weight: 600; }
   #z-senden:disabled { opacity: .4; cursor: default; }
   #z-liste { padding-left: 18px; margin: 4px 0; font-size: 12px; }
@@ -132,7 +134,7 @@
   </div>
 </div>
 <div id="zeichnen" class="feld" hidden>
-  <div class="kopf"><h2>Einzeichnen (Info-Modus)</h2><button id="zeichnen-zu" title="schließen">✕</button></div>
+  <div class="kopf"><h2>Nachträglich einzeichnen: 31.10.2026</h2><button id="zeichnen-zu" title="schließen">✕</button></div>
   <p class="klein">Wähle, was du gesehen hast, und klicke an die Stelle in der Karte. Für Zonen die Ecken nacheinander
     anklicken und dann „Zone fertig“. <b>Nichts erscheint automatisch auf der Karte</b> – ich prüfe jede Einsendung.</p>
   <div id="zeichnen-arten">
@@ -146,15 +148,19 @@
   <div class="zeichnen-zeile">von <input type="time" id="z-von"> bis <input type="time" id="z-bis">
     <button id="z-zeit" type="button" title="Uhrzeit der Zeitleiste übernehmen">⏱</button></div>
   <div class="zeichnen-zeile">Anzahl ca. <input type="number" id="z-anzahl" min="0" max="100000" placeholder="optional"></div>
-  <input id="z-notiz" maxlength="500" placeholder="Notiz zum nächsten Eintrag (keine Namen oder Beschreibungen von Personen)">
+  <label class="klein" for="z-notiz">Bitte keine Namen, Beschreibungen von Personen, Kennzeichen oder Dienstnummern.</label>
+  <input id="z-notiz" maxlength="500" placeholder="Notiz zum nächsten Eintrag (optional)">
   <button id="zone-fertig" type="button" hidden>Zone fertig (<span id="zone-ecken">0</span> Ecken)</button>
   <ol id="z-liste"></ol>
-  <textarea id="z-gesamt" rows="2" maxlength="2000" placeholder="Was du sonst noch sagen willst (optional)"></textarea>
+  <textarea id="z-gesamt" rows="2" maxlength="2000" placeholder="Was du sonst noch sagen willst (optional; keine Namen, Personenbeschreibungen, Kennzeichen oder Dienstnummern)"></textarea>
   <div class="zeichnen-wahl">Auswertung:
     <label><input type="radio" name="z-auswertung" value="ki"> mit KI-Unterstützung</label>
     <label><input type="radio" name="z-auswertung" value="manuell"> nur manuell</label></div>
   <label class="zeichnen-einw"><input type="checkbox" id="z-einwilligung"> <span id="z-einw-text">Bitte zuerst die Auswertung wählen.</span></label>
   <button id="z-senden" type="button" disabled>Einsenden</button> <span id="z-status" class="klein" role="status"></span>
+  <div id="z-code" hidden>Danke. Dein Einsendecode: <b id="z-code-wert"></b> <button id="z-code-kopieren" type="button">kopieren</button><br>
+    <span class="klein">Bewahre ihn auf, wenn du deine Einsendung später zurückziehen willst. Ohne Code kann ich sie nicht finden.
+    Er wird nirgends gespeichert, auch nicht in deinem Browser.</span></div>
 </div>
 <div id="melden" class="feld" hidden>
   <div class="kopf"><h2>Melden</h2><button id="melden-zu" title="schließen">✕</button></div>

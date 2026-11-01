@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Eigene Videos/Fotos oder anonym einreichen
+    url: https://oswalt.eu/demo-koeln/
+    about: Issues sind öffentlich und mit deinem GitHub-Konto verknüpft. Eigenes Material und alles, was zeigt, dass du dabei warst, bitte anonym über die Einreichseite.
+  - name: Etwas entfernen lassen (Name, Weg, Video)
+    url: https://protest-watch.org/datenschutz.html#impressum
+    about: Bitte per Mail an protest-watch@pm.me, nicht als öffentliches Issue. Prüfung innerhalb von 3 Tagen.

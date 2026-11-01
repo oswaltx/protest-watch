@@ -26,7 +26,15 @@ Die Karte ist eine **Rekonstruktion**, kein Messergebnis.
 - Jede Angabe aus Medien oder von der Polizei ist mit Link und Datum belegt.
 - Jede Verortung und jede Uhrzeit hat eine Sicherheitsangabe (hoch, mittel, niedrig). Die Begründung steht
   jeweils dabei.
-- Stand der Daten: 1.11.2026. Fehler und Ergänzungen bitte über die Einreichseite melden.
+- Stand der Daten: 1.11.2026.
+
+## Mitmachen
+
+- **Öffentliche Quellen** (Links zu Videos, Streams, Berichten) und **Korrekturen**: [Issue öffnen](https://github.com/oswaltx/protest-watch/issues/new/choose).
+  Issues sind öffentlich und mit deinem Konto verknüpft: nur Links zu schon öffentlichem Material, keine eigenen Dateien mit
+  erkennbaren Personen, keine Namen, Personenbeschreibungen, Kennzeichen oder Dienstnummern.
+- **Eigenes Material oder anonym**: [Einreichseite](https://oswalt.eu/demo-koeln/), oder in der Karte „⚑ Melden“.
+- **Entfernen-Wünsche**: per Mail an protest-watch@pm.me, nicht als Issue.
 
 ## Videos
 

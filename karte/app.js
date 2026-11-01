@@ -828,12 +828,16 @@ const ZEICHEN = {
   demo: ["🟡 Demonstrierende", "#ffcf66"], polizei: ["🔵 Polizei", "#4d8bff"],
   "demo-zone": ["▱ Zone Demonstrierende", "#ffcf66"], "polizei-zone": ["▱ Zone Polizei", "#4d8bff"],
 };
+// Wortlaut nach Prüfung recht-db 1.11. (Fassungen 2026-11-01-ki / -manuell, Nachweis in dokumentation/)
 const EINWILLIGUNG = {
-  ki: "Ich bin einverstanden, dass David Oswalt meine Einzeichnungen und Notizen für die Rekonstruktion nutzt und dafür auch mit "
-    + "dem KI-Dienst Claude von Anthropic (Anthropic Ireland, Limited, mit Weitergabe an Anthropic PBC in den USA) auswerten lässt. "
-    + "Veröffentlicht werden höchstens daraus abgeleitete Schätzungen, ohne Angaben zu mir. Widerruf per Mail an protest-watch@pm.me.",
-  manuell: "Ich bin einverstanden, dass David Oswalt meine Einzeichnungen und Notizen für die Rekonstruktion nutzt, ohne KI-Dienste. "
-    + "Veröffentlicht werden höchstens daraus abgeleitete Schätzungen, ohne Angaben zu mir. Widerruf per Mail an protest-watch@pm.me.",
+  ki: "Ich bin mindestens 16 Jahre alt und einverstanden, dass David Oswalt meine Einzeichnungen und Notizen, auch soweit sie "
+    + "zeigen, dass ich bei der Demo war, für die Rekonstruktion nutzt und mit dem KI-Dienst Claude auswerten lässt. Dafür gehen "
+    + "sie an Anthropic Ireland, Limited, die sie eigenständig verantwortet und an Anthropic PBC in den USA weitergibt. "
+    + "Veröffentlicht werden höchstens daraus abgeleitete Schätzungen ohne Angaben zu mir. Widerruf jederzeit per Mail an "
+    + "protest-watch@pm.me mit meinem Einsendecode.",
+  manuell: "Ich bin mindestens 16 Jahre alt und einverstanden, dass David Oswalt meine Einzeichnungen und Notizen, auch soweit sie "
+    + "zeigen, dass ich bei der Demo war, für die Rekonstruktion nutzt, ohne KI-Dienste. Veröffentlicht werden höchstens daraus "
+    + "abgeleitete Schätzungen ohne Angaben zu mir. Widerruf jederzeit per Mail an protest-watch@pm.me mit meinem Einsendecode.",
 };
 const einzeichnungen = new Cesium.CustomDataSource("einzeichnungen");
 viewer.dataSources.add(einzeichnungen);
@@ -937,11 +941,15 @@ $("z-senden").onclick = async () => {
   $("z-status").textContent = "wird gesendet …";
   try {
     const r = await fetch("/api/einzeichnen", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ auswertung: zAuswertung(), einwilligung: true, eintraege, notiz: $("z-gesamt").value.trim() }) });
+      body: JSON.stringify({ auswertung: zAuswertung(), einwilligung: true, datum: "2026-10-31", eintraege,
+                             notiz: $("z-gesamt").value.trim() }) });
     const a = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(a.fehler || r.status);
     eintraege = []; zoneEcken = []; $("z-gesamt").value = "";
-    $("z-status").textContent = "Danke, ist angekommen. Ich prüfe es, bevor etwas auf der Karte erscheint.";
+    $("z-status").textContent = "";
+    // Einsendecode nur anzeigen, nirgends speichern (auch nicht im Browser)
+    $("z-code-wert").textContent = a.einsendecode;
+    $("z-code").hidden = false;
   } catch (e) {
     $("z-status").textContent = `Hat nicht geklappt (${e.message}). Du kannst es auch über „⚑ Melden“ schicken.`;
   }
@@ -956,7 +964,11 @@ $("zeichnen-knopf").onclick = () => {
   einzeichnungen.show = !$("zeichnen").hidden;
   zeigeEintraege();
 };
-$("zeichnen-zu").onclick = () => { $("zeichnen").hidden = true; einzeichnungen.show = false; };
+$("zeichnen-zu").onclick = () => { $("zeichnen").hidden = true; einzeichnungen.show = false; $("z-code").hidden = true; };
+$("z-code-kopieren").onclick = async () => {
+  try { await navigator.clipboard.writeText($("z-code-wert").textContent); $("z-code-kopieren").textContent = "kopiert ✓"; }
+  catch { $("z-code-kopieren").textContent = "bitte abschreiben"; }
+};
 
 if (!OEFFENTLICH) $("hilfe").hidden = true;  // lokal kennt man die Karte, öffentlich erscheint die Hilfe beim Start
 $("hilfe-zu").onclick = () => { $("hilfe").hidden = true; };

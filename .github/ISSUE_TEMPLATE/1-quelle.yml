@@ -1,0 +1,41 @@
+name: Quelle melden (öffentliches Video, Livestream, Bericht)
+description: Ein schon öffentlich gepostetes Video, einen Stream oder Bericht zur Demo am 31.10.2026 vorschlagen.
+title: "Quelle: "
+labels: ["quelle"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Bitte vorher lesen:** Issues sind **öffentlich** und mit deinem GitHub-Konto verknüpft.
+        - Nur **Links** zu Material, das schon öffentlich ist (YouTube, TikTok, Instagram, Telegram, Medien). **Keine eigenen Dateien mit erkennbaren Personen hochladen.**
+        - Wenn ein Beitrag zeigt, dass du selbst dabei warst, oder du lieber anonym bleibst: [anonyme Einreichseite](https://oswalt.eu/demo-koeln/).
+        - Keine Namen, Beschreibungen von Personen, Kennzeichen oder Dienstnummern.
+  - type: input
+    id: link
+    attributes:
+      label: Link
+      placeholder: https://…
+    validations:
+      required: true
+  - type: input
+    id: zeit
+    attributes:
+      label: Uhrzeit am 31.10. (ungefähr reicht)
+      placeholder: z. B. 16:40–16:50
+  - type: input
+    id: ort
+    attributes:
+      label: Ort und Blickrichtung
+      placeholder: z. B. Konrad-Adenauer-Ufer beim Weckschnapp, Blick nach Norden
+  - type: textarea
+    id: inhalt
+    attributes:
+      label: Was ist zu sehen?
+      description: Kurz das Geschehen beschreiben, nicht einzelne Personen.
+  - type: checkboxes
+    id: hinweise
+    attributes:
+      label: Bestätigung
+      options:
+        - label: Der Link ist schon öffentlich, und ich habe keine Namen oder Personenbeschreibungen eingetragen.
+          required: true
