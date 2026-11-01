@@ -1,0 +1,24 @@
+name: Wunsch oder Idee für die Karte
+description: Eine neue Funktion oder Verbesserung vorschlagen (Bedienung, Darstellung, Daten, Barrierefreiheit).
+title: "Wunsch: "
+labels: ["wunsch"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues sind **öffentlich**. Sicherheitslücken bitte **nicht** hier, sondern privat melden (siehe Auswahlseite).
+  - type: textarea
+    id: wunsch
+    attributes:
+      label: Was wünschst du dir?
+    validations:
+      required: true
+  - type: textarea
+    id: wozu
+    attributes:
+      label: Wofür brauchst du das? Was geht heute nicht?
+  - type: input
+    id: geraet
+    attributes:
+      label: Gerät und Browser (falls es um die Bedienung geht)
+      placeholder: z. B. Handy, Firefox
