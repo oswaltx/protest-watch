@@ -4,7 +4,7 @@ Eine begehbare 3D-Karte der Demonstration am 31. Oktober 2026 in Köln, mit Zeit
 Sie führt öffentlich zugängliche Videos, Livestreams und Medienberichte an einem Ort zusammen:
 Was ist wann wo passiert, und welche Aufnahme zeigt es?
 
-**Karte:** https://protest-watch.org · **Material einreichen:** https://oswalt.eu/demo-koeln/
+**Karte:** https://protest-watch.org/karte/ · **Material einreichen:** https://oswalt.eu/demo-koeln/
 
 ## Was die Karte zeigt
 
@@ -50,7 +50,8 @@ Vorwürfe stehen nur mit benannter Medienquelle auf der Karte und sind als unbes
 ## Aufbau
 
 ```
-karte/            die Webseite (statisch, CesiumJS)
+seite/            Startseite und Impressum/Datenschutz (protest-watch.org/)
+karte/            die Karte (statisch, CesiumJS; protest-watch.org/karte/)
   index.html, app.js
   ereignisse.js   Ereignisse aus Medienberichten
   orte.js         benannte Orte

@@ -31,6 +31,10 @@ const viewer = new Cesium.Viewer("karte", {
   timeline: true,
   animation: true,
   skyAtmosphere: new Cesium.SkyAtmosphere(),
+  // Nur zeichnen, wenn sich etwas ändert (Kamera, Zeit, nachgeladene Kacheln, Menge) – sonst läuft die Grafikkarte
+  // auch im Stillstand auf Volllast. Höchstens 30 Bilder pro Sekunde.
+  requestRenderMode: true,
+  targetFrameRate: 30,
 });
 
 viewer.clock.startTime = start.clone();
@@ -68,6 +72,7 @@ function setzeTonmodell(an) {
   if (!stadt) return;
   stadt.customShader = an ? TONMODELL : undefined;
   $("tonmodell").textContent = an ? "🖼 Fotos an" : "◻ Fotos aus (Tonmodell)";
+  viewer.scene.requestRender();
 }
 
 // Standard: OSM-Gebäude auf OSM-Karte (lädt einmal, kein Google-Kontingent).
@@ -646,6 +651,7 @@ function aktualisiereMenge() {
     mengeZahlen[p.name] = { n, gruppe: p.gruppe, quelle: p.quelle };
   }
   zeigeMengeZahlen();
+  viewer.scene.requestRender();  // Punkte und Figuren haben sich bewegt
 }
 
 // Zahlen im "Jetzt"-Feld, direkt nach jeder Berechnung (nur neu schreiben, wenn sich etwas ändert)
@@ -813,6 +819,144 @@ $("melden-knopf").onclick = () => {
 $("melden-zu").onclick = () => { $("melden").hidden = true; };
 $("melden-text").addEventListener("input", meldungAktualisieren);
 document.querySelectorAll('input[name="melden-art"]').forEach((r) => r.addEventListener("change", meldungAktualisieren));
+
+// ---------- Info-Modus: Einzeichnen ----------
+// Besuchende zeichnen Wagen, Gruppen und Zonen ein und senden sie an /api/einzeichnen. Dort werden sie sofort
+// verschlüsselt; auf die Karte kommt nichts automatisch. Die Einträge sieht nur, wer sie gerade zeichnet.
+const ZEICHEN = {
+  mannschaftswagen: ["🚐 Mannschaftswagen", "#2d5fd6"], wasserwerfer: ["🚒 Wasserwerfer/Räumfahrzeug", "#7f4dff"],
+  demo: ["🟡 Demonstrierende", "#ffcf66"], polizei: ["🔵 Polizei", "#4d8bff"],
+  "demo-zone": ["▱ Zone Demonstrierende", "#ffcf66"], "polizei-zone": ["▱ Zone Polizei", "#4d8bff"],
+};
+const EINWILLIGUNG = {
+  ki: "Ich bin einverstanden, dass David Oswalt meine Einzeichnungen und Notizen für die Rekonstruktion nutzt und dafür auch mit "
+    + "dem KI-Dienst Claude von Anthropic (Anthropic Ireland, Limited, mit Weitergabe an Anthropic PBC in den USA) auswerten lässt. "
+    + "Veröffentlicht werden höchstens daraus abgeleitete Schätzungen, ohne Angaben zu mir. Widerruf per Mail an protest-watch@pm.me.",
+  manuell: "Ich bin einverstanden, dass David Oswalt meine Einzeichnungen und Notizen für die Rekonstruktion nutzt, ohne KI-Dienste. "
+    + "Veröffentlicht werden höchstens daraus abgeleitete Schätzungen, ohne Angaben zu mir. Widerruf per Mail an protest-watch@pm.me.",
+};
+const einzeichnungen = new Cesium.CustomDataSource("einzeichnungen");
+viewer.dataSources.add(einzeichnungen);
+let eintraege = [], zoneEcken = [], zoneLinie = null;
+const zeichenArt = () => document.querySelector('input[name="zeichnen-art"]:checked').value;
+const istZone = (art) => art.endsWith("-zone");
+const zAuswertung = () => document.querySelector('input[name="z-auswertung"]:checked')?.value;
+
+function zeitVonLeiste() {
+  const s = sek(viewer.clock.currentTime);
+  $("z-von").value = uhr(s);
+  $("z-bis").value = uhr(Math.min(endeS, s + 15 * 60));
+}
+
+// Ort unter dem Mauszeiger: auf Gebäuden deren Dach, sonst der Boden
+function ortAusKlick(pos) {
+  const p = (viewer.scene.pickPositionSupported && viewer.scene.pickPosition(pos)) || viewer.camera.pickEllipsoid(pos);
+  if (!p) return null;
+  const g = Cesium.Cartographic.fromCartesian(p);
+  return [Cesium.Math.toDegrees(g.latitude), Cesium.Math.toDegrees(g.longitude)];
+}
+
+function zeigeEintraege() {
+  einzeichnungen.entities.removeAll();
+  eintraege.forEach((e, i) => {
+    const [name, farbe] = ZEICHEN[e.art];
+    const c = Cesium.Color.fromCssColorString(farbe);
+    const beschriftung = { text: `${i + 1}`, font: "13px sans-serif", fillColor: Cesium.Color.WHITE, outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 3, style: Cesium.LabelStyle.FILL_AND_OUTLINE, pixelOffset: new Cesium.Cartesian2(0, -16),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY };
+    if (istZone(e.art)) {
+      const mitte = e.punkte.reduce((a, p) => [a[0] + p[0] / e.punkte.length, a[1] + p[1] / e.punkte.length], [0, 0]);
+      einzeichnungen.entities.add({ polygon: { hierarchy: Cesium.Cartesian3.fromDegreesArray(e.punkte.flatMap(([la, lo]) => [lo, la])),
+        material: c.withAlpha(0.35), outline: true, outlineColor: c, height: GRUND + 12 } });  // über niedrigen Dächern sichtbar
+      einzeichnungen.entities.add({ position: Cesium.Cartesian3.fromDegrees(mitte[1], mitte[0], GRUND + 14), label: beschriftung });
+    } else {
+      einzeichnungen.entities.add({ position: Cesium.Cartesian3.fromDegrees(e.punkte[0][1], e.punkte[0][0], GRUND + 2),
+        point: { pixelSize: 14, color: c, outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
+                 disableDepthTestDistance: Number.POSITIVE_INFINITY }, label: beschriftung });
+    }
+  });
+  if (zoneEcken.length) {
+    einzeichnungen.entities.add({ polyline: { width: 3, material: Cesium.Color.WHITE,
+      positions: Cesium.Cartesian3.fromDegreesArrayHeights(zoneEcken.flatMap(([la, lo]) => [lo, la, GRUND + 1])) } });
+  }
+  $("z-liste").innerHTML = eintraege.map((e, i) => `<li>${ZEICHEN[e.art][0]} ${e.von}–${e.bis}`
+    + `${e.anzahl != null ? ", ca. " + e.anzahl : ""}${e.notiz ? ": " + e.notiz.replace(/[<>&]/g, "") : ""}`
+    + ` <button data-i="${i}" title="entfernen">✕</button></li>`).join("");
+  $("zone-ecken").textContent = zoneEcken.length;
+  $("zone-fertig").hidden = !istZone(zeichenArt());
+  zSendenFreigeben();
+}
+
+function neuerEintrag(art, punkte) {
+  const anzahl = $("z-anzahl").value === "" ? null : Math.max(0, Math.min(100000, Math.round(+$("z-anzahl").value)));
+  eintraege.push({ art, punkte: punkte.map(([la, lo]) => [+la.toFixed(6), +lo.toFixed(6)]),
+                   von: $("z-von").value || uhr(sek(viewer.clock.currentTime)), bis: $("z-bis").value || $("z-von").value,
+                   anzahl, notiz: $("z-notiz").value.trim().slice(0, 500) });
+  $("z-notiz").value = "";
+  $("z-status").textContent = "";
+  zeigeEintraege();
+}
+
+const zeichenKlick = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+zeichenKlick.setInputAction((klick) => {
+  if ($("zeichnen").hidden) return;
+  const ort = ortAusKlick(klick.position);
+  viewer.selectedEntity = undefined;
+  if (!ort) return;
+  if (istZone(zeichenArt())) { zoneEcken.push(ort); zeigeEintraege(); }
+  else neuerEintrag(zeichenArt(), [ort]);
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+$("zone-fertig").onclick = () => {
+  if (zoneEcken.length < 3) { $("z-status").textContent = "Eine Zone braucht mindestens 3 Ecken."; return; }
+  neuerEintrag(zeichenArt(), zoneEcken.slice(0, 60));
+  zoneEcken = [];
+  zeigeEintraege();
+};
+$("z-liste").addEventListener("click", (ev) => {
+  const i = ev.target.dataset?.i;
+  if (i !== undefined) { eintraege.splice(+i, 1); zeigeEintraege(); }
+});
+document.querySelectorAll('input[name="zeichnen-art"]').forEach((r) => r.addEventListener("change", () => {
+  zoneEcken = []; zeigeEintraege();
+}));
+$("z-zeit").onclick = zeitVonLeiste;
+
+function zSendenFreigeben() {
+  const w = zAuswertung();
+  $("z-einw-text").textContent = w ? EINWILLIGUNG[w] : "Bitte zuerst die Auswertung wählen.";
+  $("z-einwilligung").disabled = !w;
+  if (!w) $("z-einwilligung").checked = false;
+  $("z-senden").disabled = !(w && $("z-einwilligung").checked && eintraege.length);
+}
+document.querySelectorAll('input[name="z-auswertung"]').forEach((r) => r.addEventListener("change", zSendenFreigeben));
+$("z-einwilligung").addEventListener("change", zSendenFreigeben);
+
+$("z-senden").onclick = async () => {
+  $("z-senden").disabled = true;
+  $("z-status").textContent = "wird gesendet …";
+  try {
+    const r = await fetch("/api/einzeichnen", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ auswertung: zAuswertung(), einwilligung: true, eintraege, notiz: $("z-gesamt").value.trim() }) });
+    const a = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(a.fehler || r.status);
+    eintraege = []; zoneEcken = []; $("z-gesamt").value = "";
+    $("z-status").textContent = "Danke, ist angekommen. Ich prüfe es, bevor etwas auf der Karte erscheint.";
+  } catch (e) {
+    $("z-status").textContent = `Hat nicht geklappt (${e.message}). Du kannst es auch über „⚑ Melden“ schicken.`;
+  }
+  zeigeEintraege();
+};
+
+$("zeichnen-knopf").onclick = () => {
+  $("hilfe").hidden = true;
+  $("melden").hidden = true;
+  if ($("zeichnen").hidden) zeitVonLeiste();
+  $("zeichnen").hidden = !$("zeichnen").hidden;
+  einzeichnungen.show = !$("zeichnen").hidden;
+  zeigeEintraege();
+};
+$("zeichnen-zu").onclick = () => { $("zeichnen").hidden = true; einzeichnungen.show = false; };
 
 if (!OEFFENTLICH) $("hilfe").hidden = true;  // lokal kennt man die Karte, öffentlich erscheint die Hilfe beim Start
 $("hilfe-zu").onclick = () => { $("hilfe").hidden = true; };

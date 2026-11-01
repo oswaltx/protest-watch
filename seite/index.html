@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Protest-Watch – Gen-Z-Demo Köln, 31.10.2026</title>
+<meta name="description" content="Begehbare 3D-Rekonstruktion der Gen-Z-Demo in Köln am 31. Oktober 2026 aus öffentlichen Videos, Livestreams und Medienberichten.">
+<script src="weiterleitung.js"></script>
+<style>
+  :root { --text: #1d1d1f; --leise: #5c5c63; --grund: #fbfaf7; --karte: #ffffff; --linie: #e4e1da;
+          --akzent: #b4421f; --warn-grund: #fff3e0; --warn-rand: #e08a1e; color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #ecebe8; --leise: #a4a3a0; --grund: #151517; --karte: #1e1e21; --linie: #333338;
+            --akzent: #f08a63; --warn-grund: #3a2a12; --warn-rand: #ffb347; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--grund); color: var(--text);
+         font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; }
+  h1 { font-size: 2.2rem; line-height: 1.15; margin: 0 0 .3rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.2rem; margin: 2.2rem 0 .5rem; }
+  .unterzeile { color: var(--leise); margin: 0 0 1.6rem; font-size: 1.1rem; }
+  .los { display: inline-block; background: var(--akzent); color: #fff; font-weight: 650; text-decoration: none;
+         padding: .85rem 1.4rem; border-radius: 10px; font-size: 1.1rem; }
+  .los:hover { filter: brightness(1.08); }
+  .klein { font-size: .9rem; color: var(--leise); }
+  .warnung { background: var(--warn-grund); border: 1px solid var(--warn-rand); border-left-width: 6px; border-radius: 10px;
+             padding: .9rem 1.1rem; margin: 1.6rem 0; }
+  .warnung b:first-child { display: block; margin-bottom: .2rem; }
+  figure { margin: 1.8rem 0; }
+  figure img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--linie); display: block; }
+  figcaption { font-size: .85rem; color: var(--leise); margin-top: .4rem; }
+  ul { padding-left: 1.2rem; } li { margin: .3rem 0; }
+  a { color: var(--akzent); }
+  .karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .8rem; margin: .6rem 0; }
+  .karten div { background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: .8rem 1rem; }
+  .karten b { display: block; margin-bottom: .2rem; }
+  footer { margin-top: 2.6rem; border-top: 1px solid var(--linie); padding-top: .8rem; font-size: .9rem; color: var(--leise); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Protest-Watch</h1>
+  <p class="unterzeile">Die Gen-Z-Demo in Köln am 31. Oktober 2026 als begehbare 3D-Karte mit Zeitachse –
+    zusammengesetzt aus öffentlichen Videos, Livestreams, Medienberichten und Polizeimeldungen.</p>
+
+  <p><a class="los" href="/karte/">Zur Karte →</a></p>
+  <p class="klein">Die Karte braucht 3D-Grafik im Browser. Am besten am Computer; auf dem Handy geht es, ist aber eng.</p>
+
+  <div class="warnung" role="note">
+    <b>⚠ Simulation, keine Abbildung der Wirklichkeit</b>
+    Die Punkte und Figuren auf der Karte sind <b>keine einzelnen Personen</b> und keine echten Positionen.
+    Personenzahlen, Wege und Abläufe sind <b>Schätzungen</b> aus Videos und Berichten und können falsch sein.
+    Belegt ist nur, was mit einer Quelle verlinkt ist.
+  </div>
+
+  <figure>
+    <a href="/karte/"><img src="vorschau.jpg" width="1200" height="654"
+      alt="Ausschnitt der Karte: 3D-Gebäude am Rheinufer bei der Bastei, farbige Punkte für geschätzte Menge und Polizei, rechts eine Liste der Ereignisse um 16:49 Uhr"></a>
+    <figcaption>Ausschnitt um 16:49 Uhr am Rheinufer. Kartendaten © OpenStreetMap-Mitwirkende.</figcaption>
+  </figure>
+
+  <h2>Was die Karte zeigt</h2>
+  <div class="karten">
+    <div><b>Ereignisse</b>Was wann wo passiert ist, laut Medien und Polizei – jeweils mit Quelle und Datum.</div>
+    <div><b>Videos am Ort</b>Wo eine Aufnahme entstand und wohin die Kamera zeigte. Das Original lädt erst nach einem Klick.</div>
+    <div><b>Livestreams</b>Die Wege von vier Livestreams, Minute für Minute; Stream und Zeitachse laufen gemeinsam.</div>
+    <div><b>Menge und Polizei</b>Geschätzte Zahlen als simulierte Punkte und als Verlauf über den Tag.</div>
+  </div>
+
+  <h2>Wie belastbar ist das?</h2>
+  <ul>
+    <li>Jede Angabe aus Medien oder von der Polizei ist verlinkt. Vorwürfe stehen nur mit Quelle da und sind als
+      unbestätigt gekennzeichnet.</li>
+    <li>Jeder verortete Ort und jede Uhrzeit hat eine Sicherheitsangabe (hoch, mittel, niedrig) mit Begründung.</li>
+    <li>Die Mengen sind eine Simulation: Sie verteilen geschätzte Zahlen auf die Flächen, auf denen Videos und
+      Berichte Menschen zeigen. Eine offizielle Gesamtzahl der Polizeikräfte gibt es nicht.</li>
+    <li>Daten und Methode sind offen: <a href="https://github.com/oswaltx/protest-watch">Quellcode und Daten auf GitHub</a>.</li>
+  </ul>
+
+  <h2>Mitmachen</h2>
+  <ul>
+    <li><b>Videos, Fotos, Beobachtungen</b> – auch anonym: <a href="https://oswalt.eu/demo-koeln/">Material einreichen</a>.</li>
+    <li><b>Fehler, Ergänzungen, Entfernen-Wünsche:</b> in der Karte über „⚑ Melden“ – Uhrzeit und Ort gehen
+      automatisch mit – oder per Mail an protest-watch@pm.me. Ich prüfe innerhalb von 3 Tagen.</li>
+  </ul>
+
+  <h2>Keine Identifizierung, kein Tracking</h2>
+  <p>Die Karte identifiziert niemanden, weder Demonstrierende noch Polizeikräfte. Livestreams erscheinen pseudonym,
+    kleine private Konten ohne Namen, eingesandtes Material wird nicht gezeigt. Die Seite setzt keine Cookies,
+    lädt nichts von fremden Servern, solange du kein Video anklickst, und zählt Besuche nur anonym als Tagessummen.</p>
+
+  <footer>
+    <a href="/datenschutz.html#impressum">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> ·
+    <a href="https://github.com/oswaltx/protest-watch">Quellcode</a> · Stand 1.11.2026
+  </footer>
+</main>
+</body>
+</html>

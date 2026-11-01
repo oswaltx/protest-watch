@@ -6,9 +6,19 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 SZENE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "karte")
+SEITE = os.path.join(os.path.dirname(SZENE), "seite")
 
 
 class RangeHandler(SimpleHTTPRequestHandler):
+    def translate_path(self, path):
+        # Öffentliche Fassung (Ordner seite/ daneben): Startseite unter /, Karte unter /karte/ wie auf dem Server
+        if os.path.isdir(SEITE):
+            if path == "/karte" or path.startswith("/karte/"):
+                path, self.directory = path[len("/karte"):] or "/", SZENE
+            else:
+                self.directory = SEITE
+        return super().translate_path(path)
+
     def do_GET(self):
         # Kartenkacheln der öffentlichen Fassung (auf dem Server übernimmt das der Kachel-Cache)
         m = re.match(r"^/osm/(\d+/\d+/\d+\.png)$", self.path)
@@ -22,6 +32,26 @@ class RangeHandler(SimpleHTTPRequestHandler):
             return self.send_error(502)
         self.send_response(200)
         self.send_header("Content-Type", "image/png")
+        self.send_header("Content-Length", str(len(daten)))
+        self.end_headers()
+        self.wfile.write(daten)
+
+    def do_POST(self):
+        # Einzeichnungen an den lokal gestarteten Annahme-Dienst (auf dem Server übernimmt das Caddy)
+        if self.path != "/api/einzeichnen":
+            return self.send_error(404)
+        laenge = min(int(self.headers.get("Content-Length") or 0), 64 * 1024)
+        anfrage = urllib.request.Request("http://127.0.0.1:8743/api/einzeichnen", data=self.rfile.read(laenge),
+                                         headers={"Content-Type": "application/json", "X-Forwarded-For": "127.0.0.1"})
+        try:
+            antwort = urllib.request.urlopen(anfrage, timeout=20)
+            code, daten = antwort.status, antwort.read()
+        except urllib.error.HTTPError as e:
+            code, daten = e.code, e.read()
+        except OSError:
+            code, daten = 502, b'{"fehler": "Annahme-Dienst laeuft lokal nicht"}'
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(daten)))
         self.end_headers()
         self.wfile.write(daten)

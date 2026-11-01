@@ -51,6 +51,20 @@
     font-size: 12px; line-height: 1.35; text-align: center; pointer-events: none; }
   #impressum-link { position: absolute; z-index: 6; right: 10px; bottom: 112px; font-size: 11px; color: #ddd;
     background: rgba(20,20,24,.8); padding: 2px 6px; border-radius: 4px; }
+  #zeichnen { top: 100px; left: 270px; width: 310px; max-height: calc(100% - 290px); overflow-y: auto; z-index: 7; }
+  #zeichnen label { display: block; margin: 2px 0; }
+  #zeichnen input[type=time], #zeichnen input[type=number] { background: #2a2a30; color: #eee; border: 1px solid #555; border-radius: 3px; }
+  #zeichnen input[type=number] { width: 90px; }
+  #z-notiz, #z-gesamt { width: 100%; box-sizing: border-box; margin: 4px 0; background: #2a2a30; color: #eee; border: 1px solid #555;
+    border-radius: 4px; font: inherit; padding: 4px 6px; }
+  .zeichnen-zeile { margin: 4px 0; }
+  .zeichnen-zeile button, #zone-fertig, #z-senden { display: inline-block; width: auto; }
+  #z-senden { background: #ffcf66; color: #111; font-weight: 600; }
+  #z-senden:disabled { opacity: .4; cursor: default; }
+  #z-liste { padding-left: 18px; margin: 4px 0; font-size: 12px; }
+  #z-liste button { display: inline; width: auto; padding: 0 5px; margin-left: 4px; }
+  .zeichnen-wahl label, .zeichnen-einw { display: inline; }
+  .zeichnen-einw { display: flex; gap: 6px; font-size: 11px; color: #ccc; margin: 6px 0; }
   #melden { top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(460px, 92vw); z-index: 9; }
   #melden label { display: block; margin: 3px 0; }
   #melden textarea { width: 100%; box-sizing: border-box; margin: 6px 0; background: #2a2a30; color: #eee; border: 1px solid #555;
@@ -71,6 +85,7 @@
     #diagramm { width: 94vw; bottom: 130px; }
     #legende { display: none; }
     #warnung { top: auto; bottom: 150px; width: 92vw; font-size: 11px; }
+    #zeichnen { left: 4vw; width: 92vw; top: 60px; max-height: 50vh; }
     .feld h1 { font-size: 12px; }
     #jetzt-uhr { font-size: 16px; }
     #jetzt { width: 40vw; }
@@ -91,6 +106,7 @@
   <button id="diagramm-knopf">📈 Diagramm</button>
   <button id="link-knopf">🔗 Link zu diesem Moment</button>
   <button id="melden-knopf">⚑ Melden: Info, Korrektur, Entfernen</button>
+  <button id="zeichnen-knopf" hidden>✎ Einzeichnen: Wagen, Gruppen, Zonen</button>
   <button id="hilfe-knopf">❓ So funktioniert die Karte</button>
   <div id="legende">Streifen unten:<br><i style="background:#3a8ee6"></i>Livestream
     <i style="background:#ddd"></i>YouTube-Upload<br><i style="background:#e64a8b"></i>TikTok-Upload
@@ -101,7 +117,7 @@
     Mengen, Wege und Polizeizahlen sind <b>Schätzungen</b>, keine Zählungen. Eingebettet sind nur öffentlich
     gepostete Originalvideos; eingesandtes Material wird nicht gezeigt. Stand: 1.11.2026.<br>
     <a href="https://github.com/oswaltx/protest-watch">Methodik und Daten</a> · <a href="https://oswalt.eu/demo-koeln/">Material einreichen</a> ·
-    <a href="datenschutz.html">Impressum und Datenschutz</a></div>
+    <a href="/datenschutz.html">Impressum und Datenschutz</a> · <a href="/">Startseite</a></div>
   </div>
 </div>
 <div id="jetzt" class="feld">
@@ -114,6 +130,31 @@
   <h2>Videos zu diesem Zeitpunkt</h2>
   <div id="jetzt-videos"></div>
   </div>
+</div>
+<div id="zeichnen" class="feld" hidden>
+  <div class="kopf"><h2>Einzeichnen (Info-Modus)</h2><button id="zeichnen-zu" title="schließen">✕</button></div>
+  <p class="klein">Wähle, was du gesehen hast, und klicke an die Stelle in der Karte. Für Zonen die Ecken nacheinander
+    anklicken und dann „Zone fertig“. <b>Nichts erscheint automatisch auf der Karte</b> – ich prüfe jede Einsendung.</p>
+  <div id="zeichnen-arten">
+    <label><input type="radio" name="zeichnen-art" value="mannschaftswagen" checked> 🚐 Mannschaftswagen</label>
+    <label><input type="radio" name="zeichnen-art" value="wasserwerfer"> 🚒 Wasserwerfer / Räumfahrzeug</label>
+    <label><input type="radio" name="zeichnen-art" value="demo"> 🟡 Gruppe Demonstrierende</label>
+    <label><input type="radio" name="zeichnen-art" value="polizei"> 🔵 Gruppe Polizei</label>
+    <label><input type="radio" name="zeichnen-art" value="demo-zone"> ▱ Zone Demonstrierende</label>
+    <label><input type="radio" name="zeichnen-art" value="polizei-zone"> ▱ Zone Polizei</label>
+  </div>
+  <div class="zeichnen-zeile">von <input type="time" id="z-von"> bis <input type="time" id="z-bis">
+    <button id="z-zeit" type="button" title="Uhrzeit der Zeitleiste übernehmen">⏱</button></div>
+  <div class="zeichnen-zeile">Anzahl ca. <input type="number" id="z-anzahl" min="0" max="100000" placeholder="optional"></div>
+  <input id="z-notiz" maxlength="500" placeholder="Notiz zum nächsten Eintrag (keine Namen oder Beschreibungen von Personen)">
+  <button id="zone-fertig" type="button" hidden>Zone fertig (<span id="zone-ecken">0</span> Ecken)</button>
+  <ol id="z-liste"></ol>
+  <textarea id="z-gesamt" rows="2" maxlength="2000" placeholder="Was du sonst noch sagen willst (optional)"></textarea>
+  <div class="zeichnen-wahl">Auswertung:
+    <label><input type="radio" name="z-auswertung" value="ki"> mit KI-Unterstützung</label>
+    <label><input type="radio" name="z-auswertung" value="manuell"> nur manuell</label></div>
+  <label class="zeichnen-einw"><input type="checkbox" id="z-einwilligung"> <span id="z-einw-text">Bitte zuerst die Auswertung wählen.</span></label>
+  <button id="z-senden" type="button" disabled>Einsenden</button> <span id="z-status" class="klein" role="status"></span>
 </div>
 <div id="melden" class="feld" hidden>
   <div class="kopf"><h2>Melden</h2><button id="melden-zu" title="schließen">✕</button></div>
@@ -169,7 +210,7 @@
 <div id="warnung" role="note"><b>⚠ Simulation, keine Abbildung der Wirklichkeit.</b> Die Punkte und Figuren sind
   <b>keine einzelnen Personen</b> und keine echten Positionen. Personenzahlen, Wege und Abläufe sind
   <b>Schätzungen</b> aus Videos und Berichten und können falsch sein. Belegt sind nur die verlinkten Quellen.</div>
-<a id="impressum-link" href="datenschutz.html#impressum">Impressum · Datenschutz</a>
+<a id="impressum-link" href="/datenschutz.html#impressum">Impressum · Datenschutz</a>
 <script src="oeffentlich.js"></script><script src="gebaeude.js"></script>
 <script src="cesium/Cesium.js"></script>
 <script src="orte.js"></script>

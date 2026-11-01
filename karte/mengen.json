@@ -329,7 +329,7 @@
   {
    "name": "Gewaltbereite",
    "gruppe": "krawall",
-   "quelle": "Grobe Schätzung, Teilmenge der Demonstrierenden: Böller vorne am Demozug, vereinzelt hinten (Augenzeugenbericht); Pyro/Vermummte ab ca. 15:00 (Polizei, t-online), roter Rauch 15:28, Flaschen/Farbbeutel 16:37–16:40 (Livestream A), 'gewaltbereite Demonstranten' beim Wasserwerfer (Innenministerium), Böller/Flaschen Domplatte abends (BILD, t-online)",
+   "quelle": "Grobe Schätzung, Teilmenge der Demonstrierenden: während der Demo insgesamt etwa 30, der Großteil vorne am Demozug (Böller), nur einige wenige hinten (Augenzeugenbericht); Pyro/Vermummte ab ca. 15:00 (Polizei, t-online), roter Rauch 15:28, Flaschen/Farbbeutel 16:37–16:40 (Livestream A). Abends Domplatte: Böller/Flaschen (BILD, t-online)",
    "zugaenge": [
     [
      50.94425,
@@ -353,7 +353,7 @@
      "zeit": "14:00",
      "teile": [
       {
-       "anzahl": 10,
+       "anzahl": 5,
        "korridor": [
         50.9446,
         50.945,
@@ -367,7 +367,7 @@
      "zeit": "14:06",
      "teile": [
       {
-       "anzahl": 35,
+       "anzahl": 15,
        "korridor": [
         50.9451,
         50.9455,
@@ -376,7 +376,7 @@
        ]
       },
       {
-       "anzahl": 8,
+       "anzahl": 2,
        "korridor": [
         50.9432,
         50.9435,
@@ -390,7 +390,7 @@
      "zeit": "14:12",
      "teile": [
       {
-       "anzahl": 40,
+       "anzahl": 18,
        "korridor": [
         50.9468,
         50.9472,
@@ -399,7 +399,7 @@
        ]
       },
       {
-       "anzahl": 8,
+       "anzahl": 3,
        "korridor": [
         50.9446,
         50.9449,
@@ -413,7 +413,7 @@
      "zeit": "14:19",
      "teile": [
       {
-       "anzahl": 45,
+       "anzahl": 20,
        "korridor": [
         50.9485,
         50.9489,
@@ -422,7 +422,7 @@
        ]
       },
       {
-       "anzahl": 8,
+       "anzahl": 3,
        "korridor": [
         50.9464,
         50.9467,
@@ -436,7 +436,7 @@
      "zeit": "14:45",
      "teile": [
       {
-       "anzahl": 50,
+       "anzahl": 22,
        "korridor": [
         50.9492,
         50.9497,
@@ -445,7 +445,7 @@
        ]
       },
       {
-       "anzahl": 10,
+       "anzahl": 4,
        "korridor": [
         50.9468,
         50.9471,
@@ -459,7 +459,7 @@
      "zeit": "15:28",
      "teile": [
       {
-       "anzahl": 100,
+       "anzahl": 25,
        "korridor": [
         50.949,
         50.9497,
@@ -468,7 +468,7 @@
        ]
       },
       {
-       "anzahl": 15,
+       "anzahl": 5,
        "korridor": [
         50.9468,
         50.9472,
@@ -482,7 +482,7 @@
      "zeit": "16:30",
      "teile": [
       {
-       "anzahl": 140,
+       "anzahl": 25,
        "korridor": [
         50.9492,
         50.9497,
@@ -491,7 +491,7 @@
        ]
       },
       {
-       "anzahl": 60,
+       "anzahl": 5,
        "korridor": [
         50.9474,
         50.9478,
@@ -505,7 +505,7 @@
      "zeit": "16:50",
      "teile": [
       {
-       "anzahl": 150,
+       "anzahl": 22,
        "korridor": [
         50.9494,
         50.9498,
@@ -514,20 +514,12 @@
        ]
       },
       {
-       "anzahl": 60,
+       "anzahl": 4,
        "korridor": [
         50.948,
         50.9483,
         -15,
         28
-       ]
-      },
-      {
-       "anzahl": 40,
-       "kreis": [
-        50.94928,
-        6.96056,
-        30
        ]
       }
      ]
@@ -536,7 +528,7 @@
      "zeit": "17:20",
      "teile": [
       {
-       "anzahl": 60,
+       "anzahl": 15,
        "korridor": [
         50.9483,
         50.9492,
@@ -545,15 +537,7 @@
        ]
       },
       {
-       "anzahl": 40,
-       "kreis": [
-        50.94928,
-        6.96056,
-        30
-       ]
-      },
-      {
-       "anzahl": 20,
+       "anzahl": 5,
        "kreis": [
         50.94985,
         6.966,
@@ -566,7 +550,7 @@
      "zeit": "18:30",
      "teile": [
       {
-       "anzahl": 30,
+       "anzahl": 8,
        "korridor": [
         50.9483,
         50.9491,
@@ -580,7 +564,7 @@
      "zeit": "20:00",
      "teile": [
       {
-       "anzahl": 5,
+       "anzahl": 3,
        "korridor": [
         50.9484,
         50.949,
