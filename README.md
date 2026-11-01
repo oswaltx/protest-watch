@@ -10,7 +10,7 @@ Was ist wann wo passiert, und welche Aufnahme zeigt es?
 
 - **Ereignisse** aus Medienberichten und Polizeimeldungen, mit Quelle und Angabe, wie genau die Uhrzeit ist.
 - **Laufwege von Livestreams**, Minute für Minute aus dem Bild verortet, pseudonym („Livestream A–D“), nur im
-  Demo-Gebiet und auf etwa 30 m vergröbert. Klick auf den Punkt öffnet den Stream an der passenden Stelle;
+  Demo-Gebiet und im Zeitfenster des jeweiligen Streams; die Orte sind aus den Videos geschätzt (Genauigkeit je Punkt angegeben). Klick auf den Punkt öffnet den Stream an der passenden Stelle;
   Stream und Zeitachse laufen gekoppelt.
 - **Verortete Clips**: Kamerastandort und Blickrichtung je Szene, mit Zeitfenster.
 - **Menge, Polizei und Fahrzeuge** als simulierte Punkte (nah als Figuren) und als Diagramm über den Tag.
