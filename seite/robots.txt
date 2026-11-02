@@ -1,0 +1,6 @@
+# protest-watch.org: alles darf erfasst werden, außer den Annahme-Schnittstellen und dem Briefkasten
+User-agent: *
+Disallow: /api/
+Disallow: /einreichen/ablage/
+Disallow: /osm/
+Sitemap: https://protest-watch.org/sitemap.xml
