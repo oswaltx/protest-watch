@@ -52,6 +52,8 @@ window.EREIGNISSE = [
     text: "Versammlungsleiterin beendet die Kundgebung (laut taz nach Druck der Polizei)" },
   { von: "16:30", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: `${TAZ()}; ${TONLINE}; ${WZ}`,
     text: "Wasserwerfer gegen Gruppen am Ufer, laut taz in die Menge; Polizei beginnt einzukesseln; mind. eine Festnahme" },
+  { von: "15:24", ort: "Musical Dome", zeit_sicher: "genau", quelle: "Einsendung per Mail (Video, Handy-Zeitstempel), Blick von der Hohenzollernbrücke",
+    text: "Mindestens zwei Polizeitransporter und ein Wasserwerfer (dunkles Fahrzeug) stehen auf der Uferstraße vor dem Musical Dome, wenige Personen auf der Promenade. Laut einsendender Person fährt der Wasserwerfer direkt danach zügig nach Norden (von der Brücke aus nach rechts) Richtung Kundgebung" },
   { von: "15:28", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: "Livestream A",
     text: "Roter Rauch auf dem Ufer südlich der Bastei" },
   { von: "16:36", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A",

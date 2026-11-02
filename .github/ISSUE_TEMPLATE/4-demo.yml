@@ -1,0 +1,43 @@
+name: Demo vorschlagen
+description: Eine Demo vorschlagen, die schon stattgefunden hat und rekonstruiert werden soll.
+title: "Demo: "
+labels: ["demo-vorschlag"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues sind **öffentlich** und mit deinem GitHub-Konto verknüpft. Hier bitte nur Demos, die **schon stattgefunden** haben. Geplante Demos und alles, was du nicht öffentlich schreiben willst, schick über [protest-watch.org/vorschlagen](https://protest-watch.org/vorschlagen/). Schreib nicht dazu, ob du selbst dabei warst. Bitte keine Namen von Privatpersonen, keine Beschreibungen von Personen, Kennzeichen oder Dienstnummern und keine Fotos oder Videos, auf denen Personen erkennbar sind.
+  - type: dropdown
+    id: zeitbezug
+    attributes:
+      label: Hat die Demo schon stattgefunden?
+      options: ["Ja, sie hat schon stattgefunden"]
+    validations:
+      required: true
+  - type: input
+    id: datum
+    attributes:
+      label: Datum und ungefähre Uhrzeit
+      placeholder: z. B. 14.11.2026, ab 14 Uhr
+    validations:
+      required: true
+  - type: input
+    id: ort
+    attributes:
+      label: Stadt, Ort oder Route
+    validations:
+      required: true
+  - type: textarea
+    id: anlass
+    attributes:
+      label: Anlass und Forderungen
+    validations:
+      required: true
+  - type: input
+    id: organisationen
+    attributes:
+      label: Aufrufende Organisationen (nur Organisationen, keine Privatpersonen)
+  - type: textarea
+    id: links
+    attributes:
+      label: Links zu öffentlichen Aufrufen, Streams oder Berichten

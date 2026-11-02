@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Demo vorschlagen – Protest-Watch</title>
+<link rel="stylesheet" href="/einreichen/stil.css">
+<style>
+  label.feld { display: block; margin: .9rem 0 .2rem; font-weight: 600; }
+  input[type=text], input[type=date], input[type=time], textarea { width: 100%; font: inherit; font-size: .95rem; padding: .5rem .6rem;
+    border-radius: 8px; border: 1px solid var(--linie); background: var(--karte); color: var(--text); }
+  .reihe { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+  .code { font-family: ui-monospace, monospace; font-size: 1.2rem; font-weight: 700; letter-spacing: .05em; }
+  #ergebnis { margin-top: 1rem; }
+</style>
+</head>
+<body>
+<main>
+  <p class="klein"><a href="/">← Protest-Watch</a></p>
+  <h1>Demo vorschlagen</h1>
+  <p class="unterzeile">Protest-Watch soll nicht bei Köln stehen bleiben. Schlag eine Demo vor, die rekonstruiert werden
+    soll – eine vergangene oder eine kommende.</p>
+
+  <div class="karte">
+    <b>So läuft es:</b> Ich prüfe jeden Vorschlag. Kommende Demos dokumentiere ich <b>erst danach</b>, aus öffentlichen
+    Videos, Streams und Berichten – nie live und nie in Echtzeit, auch keine Polizeipositionen während einer Demo.
+    Eine öffentliche Liste „diese Demos werden beobachtet“ gibt es nicht. Vor dem Demo-Tag veröffentliche ich nichts dazu,
+    gebe nichts weiter und werte nichts mit KI aus. <b>Bitte nur Demos, zu denen öffentlich aufgerufen wird oder wurde.</b>
+  </div>
+
+  <h2>Die Demo</h2>
+  <div class="wahl" id="zeitbezug">
+    <label class="option"><input type="radio" name="zeitbezug" value="vergangen"> <span>Sie hat schon stattgefunden</span></label>
+    <label class="option"><input type="radio" name="zeitbezug" value="kommend"> <span>Sie ist geplant</span></label>
+  </div>
+  <div class="reihe">
+    <div><label class="feld" for="datum">Datum</label><input type="date" id="datum" min="2020-01-01" required>
+    <p class="klein" id="datum-hinweis">Vergangene Demos ab 2020, geplante bis 180 Tage im Voraus.</p></div>
+    <div><label class="feld" for="uhrzeit">Beginn (ungefähr, optional)</label><input type="time" id="uhrzeit"></div>
+  </div>
+  <label class="feld" for="stadt">Stadt</label>
+  <input type="text" id="stadt" maxlength="100" placeholder="z. B. Frankfurt am Main" required>
+  <label class="feld" for="ort">Ort oder Route (optional)</label>
+  <input type="text" id="ort" maxlength="300" placeholder="z. B. Hauptwache, dann über die Zeil zum Römer">
+  <label class="feld" for="anlass">Anlass und Forderungen</label>
+  <textarea id="anlass" rows="3" maxlength="500" placeholder="Wofür oder wogegen wird demonstriert?" required></textarea>
+  <label class="feld" for="organisationen">Aufrufende Organisationen (optional)</label>
+  <input type="text" id="organisationen" maxlength="300" placeholder="Nur Organisationen, Bündnisse, Initiativen – keine Privatpersonen">
+  <label class="feld" for="links">Links zu öffentlichen Aufrufen, Streams oder Berichten (optional, einer pro Zeile)</label>
+  <p class="klein">Links nutze ich zur Recherche. Als Quelle nenne ich sie nur nach denselben Regeln wie auf der Karte.</p>
+  <textarea id="links" rows="3" maxlength="5100" placeholder="https://…"></textarea>
+  <label class="feld" for="notiz">Was ich noch wissen sollte (optional)</label>
+  <p class="klein">Bitte keine Namen, Beschreibungen von Personen, Kennzeichen oder Dienstnummern.</p>
+  <textarea id="notiz" rows="3" maxlength="2000"></textarea>
+
+  <h2>Auswertung und Einwilligung</h2>
+  <div class="wahl">
+    <label class="option"><input type="radio" name="auswertung" value="ki"> <span><b>mit KI-Unterstützung</b> (Claude, Anthropic)</span></label>
+    <label class="option"><input type="radio" name="auswertung" value="manuell"> <span><b>nur manuell</b>, ohne KI-Dienste</span></label>
+  </div>
+  <label class="einwilligung"><input type="checkbox" id="einwilligung" disabled> <span id="einwilligung-text">Bitte zuerst die Auswertung wählen.</span></label>
+  <button id="senden" class="knopf aus" type="button" disabled>Vorschlag absenden</button>
+  <span id="status" class="klein" role="status"></span>
+  <div id="ergebnis" class="mail" hidden>
+    Danke! Dein Einsendecode: <span class="code" id="code"></span><br>
+    <span class="klein">Bewahre ihn auf, wenn du deinen Vorschlag später zurückziehen willst. Ohne Code kann ich ihn nicht
+      finden. Ich speichere ihn nur verschlüsselt zusammen mit deinem Vorschlag, nicht in deinem Browser.</span>
+  </div>
+
+  <h2>Lieber öffentlich?</h2>
+  <p>Nur für Demos, die schon stattgefunden haben: Mit GitHub-Konto geht es auch als <a href="https://github.com/oswaltx/protest-watch/issues/new?template=4-demo.yml">öffentliches
+    Issue</a>. Das ist für alle sichtbar und mit deinem Konto verknüpft.</p>
+
+  <footer>
+    <a href="/datenschutz.html#impressum">Impressum</a> · <a href="/datenschutz.html#vorschlagen">Datenschutz</a> ·
+    <a href="/">protest-watch.org</a>
+  </footer>
+</main>
+<script src="vorschlagen.js"></script>
+</body>
+</html>

@@ -1198,6 +1198,47 @@
      ]
     }
    ]
+  },
+  {
+   "name": "Polizeifahrzeuge Musical Dome",
+   "gruppe": "fahrzeug",
+   "quelle": "Einsendung per Mail: Video 15:24 von der Hohenzollernbrücke (mind. 3 Fahrzeuge); Dauer geschätzt",
+   "zugaenge": [
+    [
+     50.941,
+     6.9625
+    ]
+   ],
+   "schritte": [
+    {
+     "zeit": "15:00",
+     "teile": [
+      {
+       "anzahl": 3,
+       "korridor": [
+        50.9426,
+        50.9431,
+        -8,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "17:00",
+     "teile": [
+      {
+       "anzahl": 3,
+       "korridor": [
+        50.9426,
+        50.9431,
+        -8,
+        0
+       ]
+      }
+     ]
+    }
+   ]
   }
  ],
  "markierungen": [
@@ -1251,8 +1292,13 @@
   },
   {
    "name": "Wasserwerfer K2",
-   "quelle": "TikTok 16:30 (Upload 16:43), TikTok Breslauer Platz, Essen112 Ebertplatz; Anfahrt von Süden laut Augenzeugenbericht",
+   "quelle": "TikTok 16:30 (Upload 16:43), TikTok Breslauer Platz, Essen112 Ebertplatz; Anfahrt von Süden laut Augenzeugenbericht; 15:24 am Musical Dome, danach zügig nach Norden (Einsendung per Mail + Angabe der einsendenden Person; welcher Wasserwerfer es war, ist unsicher)",
    "wege": [
+    {
+     "zeit": "15:24",
+     "lat": 50.94285,
+     "lon": 6.96235
+    },
     {
      "zeit": "15:30",
      "lat": 50.946,
