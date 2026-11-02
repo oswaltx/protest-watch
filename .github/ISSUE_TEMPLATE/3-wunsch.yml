@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Issues sind **öffentlich**. Sicherheitslücken bitte **nicht** hier, sondern privat melden (siehe Auswahlseite).
+        Issues sind **öffentlich**, mit deinem GitHub-Konto verknüpft und werden auch außerhalb von GitHub kopiert und archiviert. Wer mitliest, sieht also, dass du dich mit der Demo befasst. Willst du das nicht, nutze die [Einreichseite](https://protest-watch.org/einreichen/), dort geht es auch anonym. Bitte nur Links zu schon öffentlich gepostetem Material. Lade keine Fotos oder Videos hoch und nenne keine Namen, Kennzeichen oder Dienstnummern. Beiträge mit Angaben zu anderen Personen lösche ich. Entfernen lassen: protest-watch@pm.me.
   - type: textarea
     id: wunsch
     attributes:

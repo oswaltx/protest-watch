@@ -31,8 +31,7 @@ Die Karte ist eine **Rekonstruktion**, kein Messergebnis.
 ## Mitmachen
 
 - **Öffentliche Quellen** (Links zu Videos, Streams, Berichten) und **Korrekturen**: [Issue öffnen](https://github.com/oswaltx/protest-watch/issues/new/choose).
-  Issues sind öffentlich und mit deinem Konto verknüpft: nur Links zu schon öffentlichem Material, keine eigenen Dateien mit
-  erkennbaren Personen, keine Namen, Personenbeschreibungen, Kennzeichen oder Dienstnummern.
+  Issues sind **öffentlich**, mit deinem GitHub-Konto verknüpft und werden auch außerhalb von GitHub kopiert und archiviert. Wer mitliest, sieht also, dass du dich mit der Demo befasst. Willst du das nicht, nutze die [Einreichseite](https://protest-watch.org/einreichen/), dort geht es auch anonym. Bitte nur Links zu schon öffentlich gepostetem Material. Lade keine Fotos oder Videos hoch und nenne keine Namen, Kennzeichen oder Dienstnummern. Beiträge mit Angaben zu anderen Personen lösche ich. Entfernen lassen: protest-watch@pm.me.
 - **Eigenes Material oder anonym**: [Einreichseite](https://protest-watch.org/einreichen/), oder in der Karte „⚑ Melden“.
 - **Entfernen-Wünsche**: per Mail an protest-watch@pm.me, nicht als Issue.
 
