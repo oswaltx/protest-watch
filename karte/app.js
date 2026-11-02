@@ -972,7 +972,77 @@ $("z-code-kopieren").onclick = async () => {
   catch { $("z-code-kopieren").textContent = "bitte abschreiben"; }
 };
 
-if (!OEFFENTLICH) $("hilfe").hidden = true;  // lokal kennt man die Karte, öffentlich erscheint die Hilfe beim Start
+// ---------- Geführte Tour und einfache Bedienung ----------
+// Für alle, die mit Drehrad, Zeitleiste und Maus-Steuerung nicht zurechtkommen: Startbildschirm mit Tour,
+// eigener Abspiel-Knopf, Zoom-Knöpfe und drei feste Ansichten.
+let tourSchritt = 0;
+function zeigeTourSchritt(i) {
+  const tour = window.TOUR || [];
+  tourSchritt = Math.max(0, Math.min(tour.length - 1, i));
+  const s = tour[tourSchritt], o = ortNach[s.ort];
+  viewer.clock.shouldAnimate = false;
+  viewer.clock.currentTime = ortsZeit(s.zeit);
+  if (o) { normaleSicht(); fliegeZu(o.lat, o.lon, s.hoehe); }
+  $("tour-schritt").textContent = `Schritt ${tourSchritt + 1} von ${tour.length}`;
+  $("tour-zeit").textContent = `${s.zeit} Uhr`;
+  $("tour-titel").textContent = s.titel;
+  $("tour-text").textContent = s.text;
+  $("tour-zurueck").disabled = tourSchritt === 0;
+  $("tour-weiter").textContent = tourSchritt === tour.length - 1 ? "Selbst erkunden ✓" : "Weiter ▶";
+  aktualisiereAbspielen();
+}
+function starteTour() {
+  $("start").hidden = true; $("hilfe").hidden = true; $("melden").hidden = true; $("zeichnen").hidden = true;
+  $("leiste").classList.add("zu"); $("jetzt").classList.add("zu");  // Platz für Karte und Tour, ☰ klappt wieder auf
+  $("tour").hidden = false;
+  zeigeTourSchritt(0);
+}
+function beendeTour() { $("tour").hidden = true; }
+$("tour-starten").onclick = starteTour;
+$("tour-wieder").onclick = starteTour;
+$("selbst-erkunden").onclick = () => { $("start").hidden = true; };
+$("tour-zu").onclick = beendeTour;
+$("tour-zurueck").onclick = () => zeigeTourSchritt(tourSchritt - 1);
+$("tour-weiter").onclick = () => (tourSchritt === (window.TOUR || []).length - 1 ? beendeTour() : zeigeTourSchritt(tourSchritt + 1));
+
+function aktualisiereAbspielen() {
+  $("abspielen").textContent = viewer.clock.shouldAnimate ? "⏸ Anhalten" : "▶ Abspielen";
+}
+$("abspielen").onclick = () => {
+  if (sek(viewer.clock.currentTime) >= endeS - 60) viewer.clock.currentTime = start.clone();  // am Ende von vorn
+  viewer.clock.shouldAnimate = !viewer.clock.shouldAnimate;
+  aktualisiereAbspielen();
+};
+viewer.clock.onStop.addEventListener(aktualisiereAbspielen);
+
+// Zoom und feste Ansichten; „Von oben“ ohne Perspektive wie ein Stadtplan
+const hoeheJetzt = () => viewer.camera.positionCartographic.height;
+$("zoom-rein").onclick = () => { viewer.camera.zoomIn(hoeheJetzt() * 0.35); viewer.scene.requestRender(); };
+$("zoom-raus").onclick = () => { viewer.camera.zoomOut(hoeheJetzt() * 0.5); viewer.scene.requestRender(); };
+function normaleSicht() {
+  if (viewer.camera.frustum instanceof Cesium.OrthographicFrustum) viewer.camera.switchToPerspectiveFrustum();
+}
+function mitteOderUfer() {
+  const m = kartenmitte();
+  return m ? m.map(Number) : [50.9475, 6.9640];
+}
+$("ansicht-oben").onclick = () => {
+  const [lat, lon] = mitteOderUfer();
+  viewer.camera.switchToOrthographicFrustum();
+  viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1600),
+    orientation: { heading: 0, pitch: Cesium.Math.toRadians(-90), roll: 0 }, duration: 1.2 });
+};
+$("ansicht-schraeg").onclick = () => { const [lat, lon] = mitteOderUfer(); normaleSicht(); fliegeZu(lat, lon, 700); };
+$("ansicht-rhein").onclick = () => {
+  normaleSicht();
+  // über dem Wasser östlich des Konrad-Adenauer-Ufers, Blick nach Westen auf Bastei, Weckschnapp und Vincenz-Haus
+  viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(6.9722, 50.9472, 140),
+    orientation: { heading: Cesium.Math.toRadians(282), pitch: Cesium.Math.toRadians(-14), roll: 0 }, duration: 1.5 });
+};
+
+// Öffentlich zeigt der Start die Tour-Auswahl (nicht bei Links auf einen Moment), lokal nichts
+$("start").hidden = !OEFFENTLICH || /^#t=/.test(location.hash);
+$("hilfe").hidden = true;
 $("hilfe-zu").onclick = () => { $("hilfe").hidden = true; };
 $("hilfe-knopf").onclick = () => { $("hilfe").hidden = !$("hilfe").hidden; };
 document.querySelectorAll(".feld .einklappen").forEach((b) => {
