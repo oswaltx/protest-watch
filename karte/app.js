@@ -141,6 +141,16 @@ const ortEntity = {};
 // auch wenn genauere Kacheln nachladen). Auf Bäumen/Dächern sitzt der Punkt dann obendrauf.
 const AUF_KACHELN = Cesium.HeightReference.CLAMP_TO_3D_TILE ?? Cesium.HeightReference.CLAMP_TO_GROUND;
 
+// Beschriftungen: doppelt so groß gezeichnet und halb skaliert (scharf statt verwaschen), auf dunklem Hintergrund statt mit
+// dickem Umriss – der ließ kleine Schrift auf hellem Grund (Wasser, Straßen) zusammenlaufen.
+function schild(text, { farbe = Cesium.Color.WHITE, versatz = -14, amBoden = true } = {}) {
+  return { text, font: "600 26px system-ui, sans-serif", scale: 0.5, fillColor: farbe, style: Cesium.LabelStyle.FILL,
+           showBackground: true, backgroundColor: new Cesium.Color(0.08, 0.08, 0.09, 0.8),
+           backgroundPadding: new Cesium.Cartesian2(10, 6), pixelOffset: new Cesium.Cartesian2(0, versatz),
+           heightReference: amBoden ? AUF_KACHELN : Cesium.HeightReference.NONE,
+           disableDepthTestDistance: Number.POSITIVE_INFINITY };
+}
+
 function zeigeOrte() {
   const liste = $("orte");
   for (const o of window.ORTE) {
@@ -148,9 +158,7 @@ function zeigeOrte() {
       position: Cesium.Cartesian3.fromDegrees(o.lon, o.lat),
       point: { pixelSize: 9, color: Cesium.Color.ORANGE, outlineColor: Cesium.Color.BLACK, outlineWidth: 1,
                heightReference: AUF_KACHELN, disableDepthTestDistance: 50 },
-      label: { text: o.name, font: "13px sans-serif", fillColor: Cesium.Color.WHITE, outlineColor: Cesium.Color.BLACK,
-               outlineWidth: 3, style: Cesium.LabelStyle.FILL_AND_OUTLINE, pixelOffset: new Cesium.Cartesian2(0, -14),
-               heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+      label: schild(o.name, { versatz: -16 }),
       description: `<p>${o.info || ""}</p><p><small>Genauigkeit: ${o.genau}</small></p>`,
       name: o.name,
     });
@@ -453,9 +461,7 @@ function zeigeWege() {
         position: pos,
         point: { pixelSize: 12, color: farbe, outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
                  heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
-        label: { text: `📹 ${w.kanal}`, font: "12px sans-serif", fillColor: farbe, outlineColor: Cesium.Color.BLACK,
-                 outlineWidth: 3, style: Cesium.LabelStyle.FILL_AND_OUTLINE, pixelOffset: new Cesium.Cartesian2(0, 18),
-                 heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+        label: schild(`📹 ${w.kanal}`, { farbe, versatz: 20 }),
         path: { leadTime: 0, trailTime: 15 * 60, width: 3, resolution: 30,
                 material: new Cesium.PolylineGlowMaterialProperty({ color: farbe, glowPower: 0.15 }) },
         properties: { stream: w.id },
@@ -594,9 +600,7 @@ const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
     position: pos,
     point: { pixelSize: 14, color: Cesium.Color.fromCssColorString("#2d5fd6"), outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
              heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
-    label: { text: f.name, font: "12px sans-serif", fillColor: Cesium.Color.WHITE, outlineColor: Cesium.Color.BLACK, outlineWidth: 3,
-             style: Cesium.LabelStyle.FILL_AND_OUTLINE, pixelOffset: new Cesium.Cartesian2(0, -16),
-             heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+    label: schild(f.name, { versatz: -18 }),
     description: `<p>Position geschätzt aus: ${f.quelle}</p>`,
   });
 });
@@ -865,9 +869,7 @@ function zeigeEintraege() {
   eintraege.forEach((e, i) => {
     const [name, farbe] = ZEICHEN[e.art];
     const c = Cesium.Color.fromCssColorString(farbe);
-    const beschriftung = { text: `${i + 1}`, font: "13px sans-serif", fillColor: Cesium.Color.WHITE, outlineColor: Cesium.Color.BLACK,
-      outlineWidth: 3, style: Cesium.LabelStyle.FILL_AND_OUTLINE, pixelOffset: new Cesium.Cartesian2(0, -16),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY };
+    const beschriftung = schild(`${i + 1}`, { versatz: -18, amBoden: false });
     if (istZone(e.art)) {
       const mitte = e.punkte.reduce((a, p) => [a[0] + p[0] / e.punkte.length, a[1] + p[1] / e.punkte.length], [0, 0]);
       einzeichnungen.entities.add({ polygon: { hierarchy: Cesium.Cartesian3.fromDegreesArray(e.punkte.flatMap(([la, lo]) => [lo, la])),
