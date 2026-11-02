@@ -167,7 +167,9 @@
   <section id="reiter-jetzt">
     <h2>Ereignisse (laut Medien)</h2>
     <div id="jetzt-ereignisse"></div>
-    <h2>Menge (geschätzt)</h2>
+    <h2>Menschen (gezählt in Videos)</h2>
+    <div id="jetzt-dichte" class="klein">lädt…</div>
+    <h2>Menge (geschätzt, Simulation)</h2>
     <div id="jetzt-menge"></div>
     <h2>Videos zu diesem Zeitpunkt</h2>
     <div id="jetzt-videos"></div>
@@ -185,7 +187,8 @@
       <button id="uebersicht">↺ Übersicht</button></div>
     <details id="orte-liste"><summary>Orte anspringen</summary><div id="orte"></div></details>
     <h2>Anzeigen</h2>
-    <button id="menge-knopf">👥 Menge aus</button>
+    <button id="dichte-knopf">▦ Gezählte Dichte ausblenden</button>
+    <button id="menge-knopf">👥 Simulierte Punkte zeigen</button>
     <button id="diagramm-knopf">📈 Diagramm: Personen über den Tag</button>
     <button id="streifen-knopf">▤ Übersichtsstreifen an der Zeitleiste zeigen</button>
     <button id="google-knopf">📷 Google-Fotokacheln</button>
@@ -194,9 +197,13 @@
   <section id="reiter-legende" hidden>
     <h2>Auf der Karte</h2>
     <ul class="legende">
-      <li><i style="background:#ffcf66"></i>Menge (Demonstrierende) – <b>simuliert</b>, keine echten Personen</li>
-      <li><i style="background:#ff3b3b"></i>Gewaltbereite (Teil der Menge, geschätzt)</li>
-      <li><i style="background:#4d8bff"></i>Polizeikräfte (geschätzt)</li>
+      <li><b>Felder: Menschen pro m², gezählt in öffentlichen Videobildern</b> (15 × 15 m, Polizei mitgezählt):<br>
+        <i style="background:#fde68a"></i>unter 0,05 <i style="background:#fbbf24"></i>bis 0,1 <i style="background:#f97316"></i>bis 0,2
+        <i style="background:#dc2626"></i>bis 0,3 <i style="background:#7f1d1d"></i>darüber.
+        Kräftig = oft gesehen, blass = selten oder nächste Zählung liegt zeitlich daneben. <b>Kein Feld heißt: keine Kamera, nicht leer.</b>
+        Gezählt ist zu sieben Zeitpunkten (14:20, 14:30, 15:30, 16:00, 16:49, 17:20, 20:50).</li>
+      <li>Nur wenn unter „Steuerung“ eingeschaltet, <b>simulierte Punkte</b> (keine echten Personen):
+        <i style="background:#ffcf66"></i>Menge <i style="background:#ff3b3b"></i>Gewaltbereite <i style="background:#4d8bff"></i>Polizei</li>
       <li><i class="rund" style="background:#2d5fd6"></i>Fahrzeuge: Wasserwerfer K1/K2, Räumpanzer, Mannschaftswagen</li>
       <li><i class="rund" style="background:#ffa500"></i>Benannte Orte; <span style="color:#ff6b6b">rot</span>, wenn dort gerade etwas gemeldet ist</li>
       <li><i class="linie" style="background:#ff4d4d"></i>Weg eines Livestreams (letzte 15 Minuten), Punkt = Standort</li>
@@ -282,7 +289,7 @@
     Ablauf zusammen.</p>
   <button id="tour-starten" class="gross">▶ Geführte Tour <small>(2 Minuten)</small></button>
   <button id="selbst-erkunden" class="gross zweit">Selbst erkunden</button>
-  <p class="klein">Punkte und Figuren sind simuliert, keine echten Personen.</p>
+  <p class="klein">Die Felder zeigen gezählte Menschen aus öffentlichen Videos, mit Unsicherheit. Keine Personen sind erkennbar.</p>
 </div>
 <div id="tour" class="feld" hidden>
   <div class="kopf"><span id="tour-schritt" class="klein"></span><button id="tour-zu">✕ Tour beenden</button></div>
@@ -298,11 +305,11 @@
     <li><b>Rechts</b> in der Leiste: „Jetzt“ zeigt, was zur eingestellten Zeit laut Medien passiert, wie viele Menschen
       geschätzt da sind und welche Videos es gibt (▶ öffnet ein Video an der passenden Stelle). „Steuerung“ hat
       Abspielen, Zoom und Ansichten, „Legende“ erklärt Farben und Zeichen, „Mehr“ Melden, Einzeichnen und Teilen.</li>
-    <li><b>Wichtig:</b> Die Menge ist eine <b>Simulation</b>, nicht die Wirklichkeit. Ein Punkt entspricht keiner
-      echten Person und keiner echten Position; Zahlen und Abläufe sind Schätzungen und können falsch sein.
-      Belegt ist nur, was mit einer Quelle verlinkt ist.</li>
-    <li><b>Auf der Karte:</b> gelbe Punkte sind Demonstrierende, blaue Polizei, rote Gewaltbereite – alles
-      <b>geschätzt und simuliert</b>, keine echten Personen. Farbige Linien sind Wege von Livestreams, kleine
+    <li><b>Wichtig:</b> Die farbigen Felder zeigen, wie viele Menschen pro m² in öffentlichen Videos zu sehen waren,
+      gezählt zu sieben Zeitpunkten und mit Unsicherheit. Wo kein Feld ist, hat keine Kamera hingesehen – das heißt
+      nicht, dass dort niemand war. Belegt ist nur, was mit einer Quelle verlinkt ist.</li>
+    <li><b>Auf der Karte:</b> Unter „Steuerung“ lassen sich zusätzlich <b>simulierte Punkte</b> einschalten (gelb
+      Demonstrierende, blau Polizei, rot Gewaltbereite) – keine echten Personen. Farbige Linien sind Wege von Livestreams, kleine
       Kamerapunkte mit Pfeil zeigen, wo und wohin ein Video gefilmt wurde. Klick auf einen Punkt zeigt Details.</li>
     <li><b>Bewegen:</b> linke Maustaste verschieben, rechte oder Mausrad zoomen, Strg + Ziehen kippen.
       Am Handy mit zwei Fingern.</li>
@@ -331,9 +338,9 @@
   <div id="zl-spur"><svg id="zl-svg"></svg><div id="zl-griff"><span id="zl-uhr"></span></div></div>
 </div>
 <div id="streifen"></div>
-<div id="warnung" role="note"><b>⚠ Simulation, keine Abbildung der Wirklichkeit.</b> Die Punkte und Figuren sind
-  <b>keine einzelnen Personen</b> und keine echten Positionen. Personenzahlen, Wege und Abläufe sind
-  <b>Schätzungen</b> aus Videos und Berichten und können falsch sein. Belegt sind nur die verlinkten Quellen.</div>
+<div id="warnung" role="note"><b>⚠ Rekonstruktion, keine Abbildung der Wirklichkeit.</b> Die farbigen Felder sind
+  <b>aus Videobildern gezählt</b>, mit Unsicherheit, und nur dort, wo eine Kamera hinsah. Fahrzeuge, Wege und Abläufe
+  sind <b>Schätzungen</b> und können falsch sein. Belegt sind nur die verlinkten Quellen.</div>
 <a id="impressum-link" href="/datenschutz.html#impressum">Impressum · Datenschutz</a>
 <script src="oeffentlich.js"></script><script src="gebaeude.js"></script>
 <script src="cesium/Cesium.js"></script>

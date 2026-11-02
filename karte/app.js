@@ -619,7 +619,7 @@ for (const m of MENGE.markierungen) {
 }
 
 const zuGrad = (dx, dy) => [LON0 + dx / 10 / MX, LAT0 + dy / 10 / MY];
-let mengeSichtbar = true;
+let mengeSichtbar = false;  // simulierte Punkte nur auf Wunsch; Standard ist die gezählte Dichte
 let letzteAktualisierung = 0, letzteZeit = -1;
 const mengeZahlen = {};
 
@@ -633,13 +633,15 @@ function aktualisiereMenge() {
   for (const p of populationen) {
     const { T, K, wege, punkte, figuren } = p;
     let k = -1;
-    if (mengeSichtbar && t >= T[0] && t < T[K - 1]) { k = 0; while (k < K - 2 && T[k + 1] <= t) k++; }
+    if (t >= T[0] && t < T[K - 1]) { k = 0; while (k < K - 2 && T[k + 1] <= t) k++; }
     const f = k >= 0 ? (t - T[k]) / (T[k + 1] - T[k]) : 0;
     let n = 0;
     for (let i = 0; i < punkte.length; i++) {
       const pp = punkte[i], fig = figuren[i];
       const a = (i * K + k) * 2, b = a + 2;
       if (k < 0 || wege[a] === FEHLT || wege[b] === FEHLT) { pp.show = false; fig.show = false; continue; }
+      n++;
+      if (!mengeSichtbar) { pp.show = false; fig.show = false; continue; }
       // leichte Eigenbewegung im Stand (±0,3 m), damit die Menge nicht wie eingefroren wirkt
       const wackeln = p.gruppe === "fahrzeug" ? 0 : 3 * Math.sin(t / 7 + i * 1.7);
       const x = wege[a] + (wege[b] - wege[a]) * f + wackeln;
@@ -650,7 +652,6 @@ function aktualisiereMenge() {
       if (nah) fig.position = boden; else pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, bodenHoehe + 1);
       fig.show = nah;
       pp.show = !nah;
-      n++;
     }
     mengeZahlen[p.name] = { n, gruppe: p.gruppe, quelle: p.quelle };
   }
@@ -1140,7 +1141,60 @@ viewer.camera.changed.addEventListener(() => { letzteZeit = -2; });
 $("menge-knopf").onclick = () => {
   mengeSichtbar = !mengeSichtbar;
   letzteZeit = -2;
-  $("menge-knopf").textContent = mengeSichtbar ? "👥 Menge aus" : "👥 Menge an";
+  $("menge-knopf").textContent = mengeSichtbar ? "👥 Simulierte Punkte ausblenden" : "👥 Simulierte Punkte zeigen";
+};
+
+// ---------- Gezählte Dichte (aus Videobildern, dichte.json) ----------
+// Sieben Zeitpunkte auf einem 15-m-Raster. Gezeigt wird der Zeitpunkt, in dessen Fenster (von–bis) die Uhrzeit liegt,
+// bis 30 Minuten daneben blasser. Fehlende Zelle = nicht gesehen, nicht leer.
+const DICHTE_STUFEN = [[0.05, "#fde68a"], [0.1, "#fbbf24"], [0.2, "#f97316"], [0.3, "#dc2626"], [Infinity, "#7f1d1d"]];
+const dichteFarbe = (d) => DICHTE_STUFEN.find(([g]) => d < g)[1];
+const zahl = (x) => Math.round(x).toLocaleString("de-DE");
+let dichteSichtbar = true, dichteZeitpunkte = [], dichteAktiv = null, dichteBlass = null;
+fetch("dichte.json").then((a) => a.json()).then((d) => {
+  const { dlat, dlon } = d.raster;
+  dichteZeitpunkte = d.zeitpunkte.map((z) => {
+    const s = sek(ortsZeit(z.zeit)), von = sek(ortsZeit(z.von)), bis = sek(ortsZeit(z.bis));
+    const zellen = z.zellen.map((c) => Object.assign(viewer.entities.add({
+      show: false,
+      rectangle: {
+        coordinates: Cesium.Rectangle.fromDegrees(c.lon - dlon / 2, c.lat - dlat / 2, c.lon + dlon / 2, c.lat + dlat / 2),
+        height: GRUND + 0.4,
+        material: Cesium.Color.WHITE,
+      },
+      name: `Gezählte Dichte ${z.von}–${z.bis} Uhr`,
+      description: `<p>${String(c.dichte).replace(".", ",")} Personen/m² (68 %: ${String(c.p16).replace(".", ",")}–${String(c.p84).replace(".", ",")}),
+        in ${Math.round(c.abdeckung * 100)} % der Rechenläufe gesehen. Gezählt aus öffentlichen Videobildern, Polizei mitgezählt.</p>`,
+    }), { farbe: Cesium.Color.fromCssColorString(dichteFarbe(c.dichte)), alpha: 0.35 + 0.35 * c.abdeckung }));
+    return { ...z, s, von: von, bis: bis, zellen };
+  });
+  zeigeDichte(true);
+}).catch(() => {});
+function zeigeDichte(erzwingen) {
+  const t = sek(viewer.clock.currentTime);
+  let aktiv = dichteZeitpunkte.find((z) => t >= z.von && t <= z.bis) || null, blass = false;
+  if (!aktiv) {
+    const nah = dichteZeitpunkte.filter((z) => Math.abs(t - z.s) <= 1800).sort((a, b) => Math.abs(t - a.s) - Math.abs(t - b.s));
+    aktiv = nah[0] || null; blass = !!aktiv;
+  }
+  if (!dichteSichtbar) aktiv = null;
+  if (!erzwingen && aktiv === dichteAktiv && blass === dichteBlass) return;
+  for (const z of dichteZeitpunkte) for (const e of z.zellen) e.show = z === aktiv;
+  if (aktiv) for (const e of aktiv.zellen) e.rectangle.material = e.farbe.withAlpha(e.alpha * (blass ? 0.4 : 1));
+  dichteAktiv = aktiv; dichteBlass = blass;
+  const g = aktiv && aktiv.gesamt_sichtbereich;
+  $("jetzt-dichte").innerHTML = !dichteSichtbar ? "<i>ausgeblendet</i>" : aktiv
+    ? `${blass ? `Nächste Zählung: <b>${aktiv.zeit} Uhr</b> (blass). ` : ""}Videos ${uhr(aktiv.von)}–${uhr(aktiv.bis)} Uhr, ${aktiv.name}:
+       etwa <b>${zahl(g.median)}</b> Menschen (${zahl(g.p16)}–${zahl(g.p84)}) <b>im gefilmten Bereich</b> von ${zahl(aktiv.flaeche_sichtbereich_m2)} m²,
+       Polizei mitgezählt. Keine Gesamtzahl der Demo.`
+    : `<i>Zu dieser Uhrzeit keine Zählung.</i> Gezählt sind: ${dichteZeitpunkte.map((z) => z.zeit).join(", ")} Uhr.`;
+  viewer.scene.requestRender();
+}
+viewer.clock.onTick.addEventListener(() => zeigeDichte(false));
+$("dichte-knopf").onclick = () => {
+  dichteSichtbar = !dichteSichtbar;
+  $("dichte-knopf").textContent = dichteSichtbar ? "▦ Gezählte Dichte ausblenden" : "▦ Gezählte Dichte zeigen";
+  zeigeDichte(true);
 };
 aktualisiereJetzt();
 })();
