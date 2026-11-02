@@ -20,6 +20,8 @@ const ende = ortsZeit("23:00");
 const sek = (jd) => Cesium.JulianDate.toDate(jd).getTime() / 1000;   // Unix-Sekunden
 const startS = sek(start), endeS = sek(ende);
 
+// Handys und schwache Rechner: weniger Kantenglättung, weniger Bilder pro Sekunde, nur jede dritte simulierte Figur
+const SCHWACH = matchMedia("(pointer: coarse)").matches || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
 const viewer = new Cesium.Viewer("karte", {
   globe: false,                 // Google-Kacheln enthalten Gelände schon
   baseLayerPicker: false,
@@ -30,13 +32,18 @@ const viewer = new Cesium.Viewer("karte", {
   fullscreenButton: true,
   timeline: true,
   animation: true,
-  skyAtmosphere: new Cesium.SkyAtmosphere(),
+  skyAtmosphere: false, skyBox: false,   // Himmel, Sterne, Sonne, Mond kosten Grafikleistung und zeigen nichts
   // Nur zeichnen, wenn sich etwas ändert (Kamera, Zeit, nachgeladene Kacheln, Menge) – sonst läuft die Grafikkarte
-  // auch im Stillstand auf Volllast. Höchstens 30 Bilder pro Sekunde.
+  // auch im Stillstand auf Volllast. Höchstens 30 (schwache Geräte 20) Bilder pro Sekunde.
   requestRenderMode: true,
-  targetFrameRate: 30,
+  targetFrameRate: SCHWACH ? 20 : 30,
+  msaaSamples: SCHWACH ? 1 : 4,
 });
+viewer.scene.backgroundColor = Cesium.Color.fromCssColorString("#dfe8f0");
+if (viewer.scene.sun) viewer.scene.sun.show = false;
+if (viewer.scene.moon) viewer.scene.moon.show = false;
 
+window.viewer = viewer;  // zum Messen in der Browser-Konsole
 viewer.clock.startTime = start.clone();
 viewer.clock.stopTime = ende.clone();
 viewer.clock.currentTime = ortsZeit("16:30");
@@ -46,8 +53,8 @@ viewer.clock.shouldAnimate = false;
 viewer.timeline.zoomTo(start, ende);
 
 // Zeit in deutscher Ortszeit anzeigen (Standard wäre UTC)
-const uhr = (s) => new Date(s * 1000).toLocaleTimeString("de-DE",
-  { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" });
+const UHR_FORMAT = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" });
+const uhr = (s) => UHR_FORMAT.format(s * 1000);  // Formatierer einmal anlegen, toLocaleTimeString je Aufruf ist teuer
 viewer.animation.viewModel.timeFormatter = (jd) => uhr(sek(jd));
 viewer.animation.viewModel.dateFormatter = () => "31.10.2026";
 viewer.timeline.makeLabel = (jd) => uhr(sek(jd));
@@ -82,6 +89,7 @@ let osmGebaeude = null, osmKacheln = null, grundkarte = null, kartenstil = "schl
 async function ladeOsm(grund) {
   if (!viewer.scene.globe) {
     viewer.scene.globe = new Cesium.Globe();
+    viewer.scene.globe.showGroundAtmosphere = false;
     osmKacheln = viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
       // öffentlich über den eigenen Kachel-Cache, damit keine IP-Adressen an die OSM Foundation gehen
       url: OEFFENTLICH ? "/osm/" : "https://tile.openstreetmap.org/", credit: "© OpenStreetMap-Mitwirkende" }));
@@ -103,11 +111,13 @@ function baueGrundkarte() {
   const G = window.GRUNDKARTE;
   const hierarchie = ([aussen, loecher]) => new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aussen),
     loecher.map((l) => new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(l))));
-  const flaechen = (liste, farbe) => viewer.scene.primitives.add(new Cesium.GroundPrimitive({
+  // einfache Flächen knapp über dem flachen Boden (GroundPrimitive wäre auf Handys deutlich langsamer)
+  const flaechen = (liste, farbe, hoehe) => viewer.scene.primitives.add(new Cesium.Primitive({
     geometryInstances: liste.map((f) => new Cesium.GeometryInstance({
-      geometry: new Cesium.PolygonGeometry({ polygonHierarchy: hierarchie(f) }),
+      geometry: new Cesium.PolygonGeometry({ polygonHierarchy: hierarchie(f), height: GRUND + hoehe,
+        vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT }),
       attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString(farbe)) } })),
-    appearance: new Cesium.PerInstanceColorAppearance({ flat: true }), classificationType: Cesium.ClassificationType.TERRAIN }));
+    appearance: new Cesium.PerInstanceColorAppearance({ flat: true, translucent: false }) }));
   const bruecken = viewer.scene.primitives.add(new Cesium.Primitive({
     geometryInstances: G.bruecken.flatMap((b) => b.flaeche.map((f) => new Cesium.GeometryInstance({
       geometry: new Cesium.PolygonGeometry({ polygonHierarchy: hierarchie(f), height: GRUND + b.hoehe - 1.2,
@@ -118,7 +128,7 @@ function baueGrundkarte() {
   for (const [name, lat, lon] of G.namen) namen.add({ position: Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + 1), text: name,
     font: "500 22px system-ui, sans-serif", scale: 0.5, fillColor: Cesium.Color.fromCssColorString("#6b6f76"),
     distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1800), disableDepthTestDistance: 0 });
-  return [flaechen(G.wasser, "#bcd7ea"), flaechen(G.strassen, "#c8cace"), bruecken, namen];
+  return [flaechen(G.wasser, "#bcd7ea", 0.3), flaechen(G.strassen, "#c8cace", 0.6), bruecken, namen];
 }
 function setzeKartenstil(stil) {
   kartenstil = stil;
@@ -476,8 +486,38 @@ viewer.selectedEntityChanged.addEventListener((ent) => {
 // Zwischen Lücken wird linear interpoliert; Lücken > 10 min werden nicht überbrückt.
 const LUECKE = 10 * 60;
 
+// Liegt ein geschätzter Wegpunkt im Rhein, wird er an die nächste Uferstelle gesetzt (4 m landeinwärts). Die Orte der
+// Livestreams sind aus Bildern geschätzt; im Wasser stand niemand.
+const WASSER = (window.GRUNDKARTE?.wasser || []).map(([aussen]) => {
+  const xs = aussen.filter((_, i) => i % 2 === 0), ys = aussen.filter((_, i) => i % 2 === 1);
+  return { aussen, minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+});
+function anLand(lat, lon) {
+  const kx = Math.cos(lat * Math.PI / 180);
+  for (const w of WASSER) {
+    if (lon < w.minX || lon > w.maxX || lat < w.minY || lat > w.maxY) continue;
+    const r = w.aussen;
+    let drin = false;
+    for (let i = 0, j = r.length - 2; i < r.length; j = i, i += 2)
+      if ((r[i + 1] > lat) !== (r[j + 1] > lat) && lon < (r[j] - r[i]) * (lat - r[i + 1]) / (r[j + 1] - r[i + 1]) + r[i]) drin = !drin;
+    if (!drin) continue;
+    let best = null, bestD = Infinity;
+    for (let i = 0; i + 3 < r.length; i += 2) {  // nächster Punkt auf dem Uferrand (in lokalen Metern gerechnet)
+      const ax = r[i] * kx, ay = r[i + 1], bx = r[i + 2] * kx, by = r[i + 3], px = lon * kx, py = lat;
+      const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy;
+      const u = l ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / l)) : 0;
+      const qx = ax + u * dx, qy = ay + u * dy, d = (px - qx) ** 2 + (py - qy) ** 2;
+      if (d < bestD) { bestD = d; best = [qx, qy]; }
+    }
+    const [qx, qy] = best, laenge = Math.sqrt(bestD) || 1e-9, schritt = 4 / 111320;
+    return [qy + (qy - lat) / laenge * schritt, (qx + (qx - lon * kx) / laenge * schritt) / kx];
+  }
+  return [lat, lon];
+}
+
 function zeigeWege() {
   for (const w of window.WEGE || []) {
+    for (const p of w.punkte) [p.lat, p.lon] = anLand(p.lat, p.lon);
     if (w.punkte.length < 1) continue;
     const farbe = Cesium.Color.fromCssColorString(w.farbe);
     // Abschnitte ohne große Lücken
@@ -670,7 +710,7 @@ function aktualisiereMenge() {
   // höchstens ~10 Mal pro Sekunde, und nur wenn sich Zeit oder Kamera geändert haben
   const jetzt = performance.now();
   const t = sek(viewer.clock.currentTime);
-  if (jetzt - letzteAktualisierung < 100 || (t === letzteZeit && letzteZeit !== -2)) return;
+  if (jetzt - letzteAktualisierung < (SCHWACH ? 250 : 100) || (t === letzteZeit && letzteZeit !== -2)) return;
   letzteAktualisierung = jetzt; letzteZeit = t;
   const kamera = viewer.camera.positionWC;
   for (const p of populationen) {
@@ -684,7 +724,7 @@ function aktualisiereMenge() {
       const a = (i * K + k) * 2, b = a + 2;
       if (k < 0 || wege[a] === FEHLT || wege[b] === FEHLT) { pp.show = false; fig.show = false; continue; }
       n++;
-      if (!mengeSichtbar || (nurPolizei && p.gruppe !== "polizei" && p.gruppe !== "fahrzeug")) { pp.show = false; fig.show = false; continue; }
+      if ((SCHWACH && i % 3) || !mengeSichtbar || (nurPolizei && p.gruppe !== "polizei" && p.gruppe !== "fahrzeug")) { pp.show = false; fig.show = false; continue; }
       // leichte Eigenbewegung im Stand (±0,3 m), damit die Menge nicht wie eingefroren wirkt
       const wackeln = p.gruppe === "fahrzeug" ? 0 : 3 * Math.sin(t / 7 + i * 1.7);
       const x = wege[a] + (wege[b] - wege[a]) * f + wackeln;
@@ -1202,7 +1242,7 @@ function dichteEbene(z, blass) {
   const instanzen = z.flaechen.flatMap((f) => f.teile.map((teil) => new Cesium.GeometryInstance({
     geometry: new Cesium.PolygonGeometry({
       polygonHierarchy: new Cesium.PolygonHierarchy(ring(teil.aussen), teil.loecher.map((l) => new Cesium.PolygonHierarchy(ring(l)))),
-      height: GRUND + 0.4, vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
+      height: GRUND + 1, vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
     }),
     attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(
       Cesium.Color.fromCssColorString(dichteFarbe(f.d)).withAlpha((0.3 + 0.4 * f.a) * (blass ? 0.4 : 1))) },
