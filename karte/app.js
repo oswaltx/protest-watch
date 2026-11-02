@@ -11,7 +11,7 @@ const OEFFENTLICH = !!window.OEFFENTLICH;
 if (window.CESIUM_ION_TOKEN) Cesium.Ion.defaultAccessToken = window.CESIUM_ION_TOKEN;
 // Bodenhöhe über dem Ellipsoid: ion-Kacheln liegen auf echter Höhe (≈ 50 m NHN + 47 m Geoid),
 // die eigenen Gebäude auf dem flachen Globus bei 0
-const GRUND = OEFFENTLICH ? 0 : 97;
+const GRUND = 0;  // flache Karte auf dem Ellipsoid (lokal wie öffentlich); in der Google-Ansicht liegen Linien dadurch tiefer
 
 const TAG = "2026-10-31";
 const ortsZeit = (hhmm) => Cesium.JulianDate.fromIso8601(`${TAG}T${hhmm}:00+01:00`);
@@ -77,18 +77,19 @@ function setzeTonmodell(an) {
 
 // Standard: OSM-Gebäude auf OSM-Karte (lädt einmal, kein Google-Kontingent).
 // Per Knopf: fotorealistische Google-Kacheln über Cesium ion (begrenztes Kontingent).
-let osmGebaeude = null;
+let osmGebaeude = null, osmKacheln = null, grundkarte = null, kartenstil = "schlicht";
 
 async function ladeOsm(grund) {
   if (!viewer.scene.globe) {
     viewer.scene.globe = new Cesium.Globe();
-    viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#e8e4dc");
-    viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
+    osmKacheln = viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
       // öffentlich über den eigenen Kachel-Cache, damit keine IP-Adressen an die OSM Foundation gehen
       url: OEFFENTLICH ? "/osm/" : "https://tile.openstreetmap.org/", credit: "© OpenStreetMap-Mitwirkende" }));
+    viewer.creditDisplay.addStaticCredit(new Cesium.Credit("Karte: © OpenStreetMap-Mitwirkende"));
   }
   viewer.scene.globe.show = true;
-  if (!osmGebaeude) osmGebaeude = viewer.scene.primitives.add(OEFFENTLICH ? eigeneGebaeude() : await Cesium.createOsmBuildingsAsync());
+  setzeKartenstil(kartenstil);
+  if (!osmGebaeude) osmGebaeude = viewer.scene.primitives.add(window.GEBAEUDE ? eigeneGebaeude() : await Cesium.createOsmBuildingsAsync());
   osmGebaeude.show = true;
   if (stadt) stadt.show = false;
   status(grund ? `OSM-Ansicht (${grund})` : "OSM-Ansicht");
@@ -96,17 +97,58 @@ async function ladeOsm(grund) {
   setTimeout(messeUferHoehe, 4000);
 }
 
-// Gebäude aus gebaeude.js (OpenStreetMap, Höhe aus height bzw. Geschossen) als ein einziges Primitive
+// Schlichte Karte: weißer Grund, Rhein und Straßen aus grundkarte.js, Brücken als flache Körper, Straßennamen.
+// Bunt: die OSM-Kacheln wie bisher. Umschalten unter „Steuerung“.
+function baueGrundkarte() {
+  const G = window.GRUNDKARTE;
+  const hierarchie = ([aussen, loecher]) => new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aussen),
+    loecher.map((l) => new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(l))));
+  const flaechen = (liste, farbe) => viewer.scene.primitives.add(new Cesium.GroundPrimitive({
+    geometryInstances: liste.map((f) => new Cesium.GeometryInstance({
+      geometry: new Cesium.PolygonGeometry({ polygonHierarchy: hierarchie(f) }),
+      attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString(farbe)) } })),
+    appearance: new Cesium.PerInstanceColorAppearance({ flat: true }), classificationType: Cesium.ClassificationType.TERRAIN }));
+  const bruecken = viewer.scene.primitives.add(new Cesium.Primitive({
+    geometryInstances: G.bruecken.flatMap((b) => b.flaeche.map((f) => new Cesium.GeometryInstance({
+      geometry: new Cesium.PolygonGeometry({ polygonHierarchy: hierarchie(f), height: GRUND + b.hoehe - 1.2,
+        extrudedHeight: GRUND + b.hoehe, vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT }),
+      attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString("#8d929a")) } }))),
+    appearance: new Cesium.PerInstanceColorAppearance({ translucent: false }) }));
+  const namen = viewer.scene.primitives.add(new Cesium.LabelCollection());
+  for (const [name, lat, lon] of G.namen) namen.add({ position: Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + 1), text: name,
+    font: "500 22px system-ui, sans-serif", scale: 0.5, fillColor: Cesium.Color.fromCssColorString("#6b6f76"),
+    distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1800), disableDepthTestDistance: 0 });
+  return [flaechen(G.wasser, "#bcd7ea"), flaechen(G.strassen, "#c8cace"), bruecken, namen];
+}
+function setzeKartenstil(stil) {
+  kartenstil = stil;
+  const schlicht = stil === "schlicht";
+  if (schlicht && !grundkarte && window.GRUNDKARTE) grundkarte = baueGrundkarte();
+  if (osmKacheln) osmKacheln.show = !schlicht;
+  if (viewer.scene.globe) viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString(schlicht ? "#f7f6f3" : "#e8e4dc");
+  for (const g of grundkarte || []) g.show = schlicht;
+  $("stil-knopf").textContent = schlicht ? "🗺 Bunter Stadtplan statt schlichter Karte" : "⬜ Schlichte Karte statt Stadtplan";
+  viewer.scene.requestRender();
+}
+$("stil-knopf").onclick = () => setzeKartenstil(kartenstil === "schlicht" ? "bunt" : "schlicht");
+
+// Gebäude aus gebaeude.js (OpenStreetMap, Höhe aus height bzw. Geschossen): weiß mit schwarzen Kanten, ohne Schattierung,
+// damit sie wie eine gezeichnete Karte wirken; als je ein Primitive für Flächen und Kanten
 function eigeneGebaeude() {
-  const instanzen = window.GEBAEUDE.map(([hoehe, punkte], i) => new Cesium.GeometryInstance({
-    id: i,
-    geometry: new Cesium.PolygonGeometry({
-      polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte)),
-      height: 0, extrudedHeight: hoehe, vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
-    }),
-    attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString(hoehe > 60 ? "#b9b2a6" : "#dcd8cf")) },
-  }));
-  return new Cesium.Primitive({ geometryInstances: instanzen, appearance: new Cesium.PerInstanceColorAppearance({ translucent: false }) });
+  const sammlung = new Cesium.PrimitiveCollection();
+  const huelle = (punkte, hoehe) => ({ polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte)),
+    height: GRUND, extrudedHeight: GRUND + hoehe });
+  sammlung.add(new Cesium.Primitive({
+    geometryInstances: window.GEBAEUDE.map(([hoehe, punkte], i) => new Cesium.GeometryInstance({ id: i,
+      geometry: new Cesium.PolygonGeometry({ ...huelle(punkte, hoehe), vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT }),
+      attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.WHITE) } })),
+    appearance: new Cesium.PerInstanceColorAppearance({ flat: true, translucent: false }) }));
+  sammlung.add(new Cesium.Primitive({
+    geometryInstances: window.GEBAEUDE.map(([hoehe, punkte]) => new Cesium.GeometryInstance({
+      geometry: new Cesium.PolygonOutlineGeometry(huelle(punkte, hoehe)),
+      attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString("#1d1d1f")) } })),
+    appearance: new Cesium.PerInstanceColorAppearance({ flat: true, translucent: false }) }));
+  return sammlung;
 }
 
 async function ladeGoogle() {
