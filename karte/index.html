@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Protest-Watch">
 <meta property="og:locale" content="de_DE">
@@ -29,16 +30,30 @@
                  color: #eee; border: 0; border-radius: 3px; cursor: pointer; font-size: 12px; }
   .feld button:hover { background: #555; }
   .feld a { color: #ffcf66; }
-  #leiste { top: 10px; left: 10px; max-width: 240px; }
   #status { margin-top: 6px; color: #aaa; font-size: 11px; }
-  #jetzt { top: 10px; right: 10px; width: 320px; max-height: calc(100% - 260px); overflow-y: auto; }
+  /* Eine Leiste rechts mit Reitern; links bleibt die Karte frei */
+  #jetzt { top: 10px; right: 10px; width: 330px; max-height: calc(100% - 130px); overflow-y: auto; }
+  .reiter { display: flex; gap: 2px; margin: 8px 0 6px; border-bottom: 1px solid #444; position: sticky; top: -10px;
+    background: rgba(28,28,32,.97); z-index: 1; }
+  .feld .reiter button { flex: 1; width: auto; text-align: center; margin: 0; padding: 7px 2px; font-size: 13px;
+    background: transparent; color: #bbb; border-radius: 4px 4px 0 0; }
+  .feld .reiter button.an { background: #444; color: #fff; font-weight: 600; }
+  .knopfreihe { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+  .feld .knopfreihe button { width: auto; margin: 0; padding: 6px 9px; font-size: 13px; }
+  .feld section > button { padding: 6px 8px; font-size: 13px; }
+  ul.legende { list-style: none; padding: 0; margin: 0; }
+  ul.legende li { margin: 5px 0; line-height: 1.35; }
+  ul.legende i { display: inline-block; width: 12px; height: 9px; margin-right: 6px; vertical-align: middle; }
+  ul.legende i.rund { width: 10px; height: 10px; border-radius: 50%; }
+  ul.legende i.linie { width: 18px; height: 3px; }
+  ul.legende i.gestrichelt { width: 18px; height: 0; border-top: 2px dashed #ffcf66; }
+  ul.legende i.strich { width: 2px; height: 10px; margin-left: 4px; }
+  ul.legende i.dreieck { width: 0; height: 0; border: 5px solid transparent; border-bottom: 9px solid #ffb000; border-top: 0; }
   #jetzt-uhr { font-size: 22px; font-weight: 600; }
   .ev { margin: 6px 0; padding-left: 6px; border-left: 3px solid #ffb000; }
   .sicher { font-size: 10px; background: #444; padding: 0 4px; border-radius: 3px; }
   #jetzt-videos button.clip { background: #2a2a30; }
   #streifen { position: absolute; z-index: 4; cursor: pointer; background: rgba(20,20,24,.75); }
-  #legende { font-size: 11px; color: #aaa; margin-top: 8px; }
-  #legende i { display: inline-block; width: 10px; height: 8px; margin: 0 3px 0 8px; }
   #player { top: 10px; left: 50%; transform: translateX(-50%); width: min(560px, 50vw); }
   #player video { width: 100%; max-height: 55vh; background: #000; }
   #player-kopf { display: flex; gap: 8px; align-items: start; margin-bottom: 6px; }
@@ -59,12 +74,12 @@
   .feld .kopf button { width: auto; margin: 0; padding: 2px 8px; }
   .feld.zu .inhalt { display: none; }
   #hilfe { top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(520px, 92vw); z-index: 8; font-size: 13px; line-height: 1.45; }
-  #warnung { position: absolute; z-index: 6; top: 10px; left: 270px; right: 340px; margin: 0 auto; max-width: 560px;
+  #warnung { position: absolute; z-index: 6; top: 10px; left: 10px; right: 360px; margin: 0 auto; max-width: 560px;
     background: rgba(120, 60, 0, .92); color: #fff3e0; border: 1px solid #ffb347; border-radius: 6px; padding: 6px 10px;
     font-size: 12px; line-height: 1.35; text-align: center; pointer-events: none; }
-  #impressum-link { position: absolute; z-index: 6; right: 10px; bottom: 112px; font-size: 11px; color: #ddd;
+  #impressum-link { position: absolute; z-index: 6; right: 10px; bottom: 96px; font-size: 11px; color: #ddd;
     background: rgba(20,20,24,.8); padding: 2px 6px; border-radius: 4px; }
-  #zeichnen { top: 100px; left: 270px; width: 310px; max-height: calc(100% - 290px); overflow-y: auto; z-index: 7; }
+  #zeichnen { top: 100px; left: 10px; width: 310px; max-height: calc(100% - 290px); overflow-y: auto; z-index: 7; }
   #zeichnen label { display: block; margin: 2px 0; }
   #zeichnen input[type=time], #zeichnen input[type=number] { background: #2a2a30; color: #eee; border: 1px solid #555; border-radius: 3px; }
   #zeichnen input[type=number] { width: 90px; }
@@ -95,12 +110,22 @@
   .feld .tour-knoepfe button { width: auto; flex: 1; text-align: center; font-size: 15px; padding: 8px; }
   .feld .tour-knoepfe button.haupt { background: #ffcf66; color: #111; font-weight: 700; }
   #tour .kopf button { width: auto; }
-  #steuerung { right: 10px; bottom: 150px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 330px; padding: 6px; }
-  #steuerung button { width: auto; margin: 0; padding: 6px 9px; font-size: 13px; }
   #orte-liste summary { cursor: pointer; padding: 4px 6px; background: #333; border-radius: 3px; margin: 2px 0; }
   /* Cesiums Drehrad weg, die Zeitleiste geht über die ganze Breite (Abspielen über den eigenen Knopf) */
-  .cesium-viewer-animationContainer { display: none !important; }
-  .cesium-viewer-timelineContainer { left: 0 !important; }
+  .cesium-viewer-animationContainer, .cesium-viewer-timelineContainer { display: none !important; }
+  .cesium-viewer-bottom { bottom: 70px !important; }
+  /* Eigene Zeitleiste: Abschnitte des Tages, gemeldete Ereignisse, Stunden; ziehen oder klicken */
+  #zeitleiste { position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; height: 66px; display: flex;
+    background: rgba(20,20,24,.94); border-top: 1px solid #444; user-select: none; }
+  #zl-spielen { width: 56px; border: 0; background: #ffcf66; color: #111; font-size: 22px; cursor: pointer; }
+  #zl-spur { position: relative; flex: 1; margin: 0 14px; cursor: pointer; touch-action: none; }
+  #zl-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  #zl-svg text { font: 11px system-ui, sans-serif; fill: #eee; pointer-events: none; }
+  #zl-svg .stunde { fill: #aaa; }
+  #zl-griff { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; pointer-events: none;
+    box-shadow: 0 0 3px #000; }
+  #zl-uhr { position: absolute; top: -24px; left: 50%; transform: translateX(-50%); background: #fff; color: #111;
+    font-weight: 700; font-size: 13px; padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
   #melden { top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(460px, 92vw); z-index: 9; }
   #melden label { display: block; margin: 3px 0; }
   #melden textarea { width: 100%; box-sizing: border-box; margin: 6px 0; background: #2a2a30; color: #eee; border: 1px solid #555;
@@ -114,59 +139,95 @@
   #hilfe li { margin: 6px 0; }
   @media (max-width: 700px) {
     .feld { font-size: 12px; padding: 8px; }
-    #leiste { max-width: 46vw; max-height: 45vh; overflow-y: auto; }
-    #jetzt { width: 48vw; max-height: 45vh; }
+    #jetzt { width: auto; left: 3vw; right: 3vw; top: auto; bottom: 118px; max-height: 52vh; }
+    #jetzt.zu { left: auto; }
     #player { top: auto; bottom: 130px; width: 94vw; }
     #player video, #player-einbettung iframe.hochkant { max-height: 38vh; }
     #diagramm { width: 94vw; bottom: 130px; }
-    #legende { display: none; }
-    #warnung { top: auto; bottom: 150px; left: 4vw; right: 4vw; max-width: none; font-size: 11px; }
-    #steuerung { bottom: auto; top: 60px; max-width: 46vw; }
+    #warnung { top: 6px; left: 3vw; right: 3vw; max-width: none; font-size: 11px; }
     #tour { left: 3vw; bottom: 120px; font-size: 14px; }
     #zeichnen { left: 4vw; width: 92vw; top: 60px; max-height: 50vh; }
     .feld h1 { font-size: 12px; }
     #jetzt-uhr { font-size: 16px; }
-    #jetzt { width: 40vw; }
-    #leiste { max-width: 52vw; }
   }
 </style>
 </head>
 <body>
 <div id="karte"></div>
-<div id="leiste" class="feld">
-  <div class="kopf"><h1>Gen-Z-Demo Köln, 31.10.2026</h1><button class="einklappen" title="ein-/ausklappen">☰</button></div>
-  <div class="inhalt">
-  <details id="orte-liste"><summary>Orte anspringen</summary><div id="orte"></div></details>
-  <button id="uebersicht">↺ Übersicht</button>
-  <button id="google-knopf">📷 Google-Fotokacheln</button>
-  <button id="tonmodell">◻ Fotos aus (Tonmodell)</button>
-  <button id="menge-knopf">👥 Menge aus</button>
-  <button id="diagramm-knopf">📈 Diagramm</button>
-  <button id="link-knopf">🔗 Link zu diesem Moment</button>
-  <button id="melden-knopf">⚑ Melden: Info, Korrektur, Entfernen</button>
-  <button id="zeichnen-knopf">✎ Einzeichnen: Wagen, Gruppen, Zonen</button>
-  <button id="hilfe-knopf">❓ So funktioniert die Karte</button>
-  <div id="legende">Streifen unten:<br><i style="background:#3a8ee6"></i>Livestream
-    <i style="background:#ddd"></i>YouTube-Upload<br><i style="background:#e64a8b"></i>TikTok-Upload
-    <i style="background:#ffb000"></i>Ereignis<br>Karte: <i style="background:#ffcf66"></i>Menge
-    <i style="background:#4d8bff"></i>Polizei <i style="background:#ff3b3b"></i>Gewaltbereite <i style="background:#2d5fd6"></i>Fahrzeug</div>
-  <div id="status">lädt…</div>
-  <div id="hinweis" class="klein">Rekonstruktion aus öffentlichen Videos und Medienberichten.
-    Mengen, Wege und Polizeizahlen sind <b>Schätzungen</b>, keine Zählungen. Eingebettet sind nur öffentlich
-    gepostete Originalvideos; eingesandtes Material wird nicht gezeigt. Stand: 1.11.2026.<br>
-    <a href="https://github.com/oswaltx/protest-watch">Methodik und Daten</a> · <a href="https://protest-watch.org/einreichen/">Material einreichen</a> ·
-    <a href="/datenschutz.html">Impressum und Datenschutz</a> · <a href="/">Startseite</a></div>
-  </div>
-</div>
 <div id="jetzt" class="feld">
-  <div class="kopf"><div id="jetzt-uhr"></div><button class="einklappen" title="ein-/ausklappen">☰</button></div>
+  <div class="kopf"><div><div class="klein">Gen-Z-Demo Köln, 31.10.2026</div><div id="jetzt-uhr"></div></div>
+    <button class="einklappen" title="Leiste ein-/ausklappen">☰</button></div>
   <div class="inhalt">
-  <h2>Ereignisse (laut Medien)</h2>
-  <div id="jetzt-ereignisse"></div>
-  <h2>Menge (geschätzt)</h2>
-  <div id="jetzt-menge"></div>
-  <h2>Videos zu diesem Zeitpunkt</h2>
-  <div id="jetzt-videos"></div>
+  <nav class="reiter" role="tablist">
+    <button data-reiter="jetzt" class="an" role="tab">Jetzt</button>
+    <button data-reiter="steuerung" role="tab">Steuerung</button>
+    <button data-reiter="legende" role="tab">Legende</button>
+    <button data-reiter="mehr" role="tab">Mehr</button>
+  </nav>
+  <section id="reiter-jetzt">
+    <h2>Ereignisse (laut Medien)</h2>
+    <div id="jetzt-ereignisse"></div>
+    <h2>Menge (geschätzt)</h2>
+    <div id="jetzt-menge"></div>
+    <h2>Videos zu diesem Zeitpunkt</h2>
+    <div id="jetzt-videos"></div>
+  </section>
+  <section id="reiter-steuerung" hidden>
+    <h2>Zeit</h2>
+    <div class="knopfreihe"><button id="abspielen" title="Zeit laufen lassen">▶ Abspielen</button>
+      <button id="tour-wieder" title="Geführte Tour">▶ Geführte Tour</button></div>
+    <h2>Ansicht</h2>
+    <div class="knopfreihe">
+      <button id="zoom-rein" title="Näher heran">＋ Näher</button><button id="zoom-raus" title="Weiter weg">－ Weiter weg</button>
+      <button id="ansicht-oben" title="Wie ein Stadtplan von oben">Von oben</button>
+      <button id="ansicht-schraeg" title="Schräger 3D-Blick">Schräg</button>
+      <button id="ansicht-rhein" title="Blick vom Wasser auf das Ufer">Vom Rhein</button>
+      <button id="uebersicht">↺ Übersicht</button></div>
+    <details id="orte-liste"><summary>Orte anspringen</summary><div id="orte"></div></details>
+    <h2>Anzeigen</h2>
+    <button id="menge-knopf">👥 Menge aus</button>
+    <button id="diagramm-knopf">📈 Diagramm: Personen über den Tag</button>
+    <button id="streifen-knopf">▤ Übersichtsstreifen an der Zeitleiste zeigen</button>
+    <button id="google-knopf">📷 Google-Fotokacheln</button>
+    <button id="tonmodell">◻ Fotos aus (Tonmodell)</button>
+  </section>
+  <section id="reiter-legende" hidden>
+    <h2>Auf der Karte</h2>
+    <ul class="legende">
+      <li><i style="background:#ffcf66"></i>Menge (Demonstrierende) – <b>simuliert</b>, keine echten Personen</li>
+      <li><i style="background:#ff3b3b"></i>Gewaltbereite (Teil der Menge, geschätzt)</li>
+      <li><i style="background:#4d8bff"></i>Polizeikräfte (geschätzt)</li>
+      <li><i class="rund" style="background:#2d5fd6"></i>Fahrzeuge: Wasserwerfer K1/K2, Räumpanzer, Mannschaftswagen</li>
+      <li><i class="rund" style="background:#ffa500"></i>Benannte Orte; <span style="color:#ff6b6b">rot</span>, wenn dort gerade etwas gemeldet ist</li>
+      <li><i class="linie" style="background:#ff4d4d"></i>Weg eines Livestreams (letzte 15 Minuten), Punkt = Standort</li>
+      <li><i class="rund" style="background:#fff"></i>Kamera eines Videos mit Blickrichtung (Pfeil); Farbe = Sicherheit:
+        weiß hoch, gelb mittel, orange niedrig, grau unbekannt</li>
+      <li><i class="linie gestrichelt"></i>Angemeldete Kundgebungsfläche</li>
+      <li><i class="linie" style="background:#ff6b9a"></i>Tatsächlicher Weg des Demozugs</li>
+    </ul>
+    <h2>Übersichtsstreifen (optional, unter „Steuerung“)</h2>
+    <ul class="legende">
+      <li><i style="background:#3a8ee6"></i>Livestream läuft (je Zeile ein Stream)</li>
+      <li><i class="strich" style="background:#ddd"></i>YouTube-Video hochgeladen <i class="strich" style="background:#e64a8b"></i>TikTok</li>
+      <li><i class="dreieck"></i>Gemeldetes Ereignis (hell: genaue Uhrzeit, dunkel: ungefähr)</li>
+    </ul>
+    <p class="klein">Alle Zahlen und Positionen der Menge sind Schätzungen aus Videos und Berichten. Belegt ist nur, was
+      mit einer Quelle verlinkt ist.</p>
+  </section>
+  <section id="reiter-mehr" hidden>
+    <h2>Mitmachen</h2>
+    <button id="melden-knopf">⚑ Melden: Info, Korrektur, Entfernen</button>
+    <button id="zeichnen-knopf">✎ Einzeichnen: Wagen, Gruppen, Zonen</button>
+    <button id="link-knopf">🔗 Link zu diesem Moment kopieren</button>
+    <h2>Hilfe</h2>
+    <button id="hilfe-knopf">❓ So funktioniert die Karte</button>
+    <div id="status" class="klein">lädt…</div>
+    <div id="hinweis" class="klein">Rekonstruktion aus öffentlichen Videos und Medienberichten.
+      Mengen, Wege und Polizeizahlen sind <b>Schätzungen</b>, keine Zählungen. Eingebettet sind nur öffentlich
+      gepostete Originalvideos; eingesandtes Material wird nicht gezeigt. Stand: 1.11.2026.<br>
+      <a href="https://github.com/oswaltx/protest-watch">Methodik und Daten</a> · <a href="https://protest-watch.org/einreichen/">Material einreichen</a> ·
+      <a href="/datenschutz.html">Impressum und Datenschutz</a> · <a href="/">Startseite</a></div>
+  </section>
   </div>
 </div>
 <div id="zeichnen" class="feld" hidden>
@@ -230,21 +291,13 @@
   <p id="tour-text"></p>
   <div class="tour-knoepfe"><button id="tour-zurueck">◀ Zurück</button><button id="tour-weiter" class="haupt">Weiter ▶</button></div>
 </div>
-<div id="steuerung" class="feld">
-  <button id="abspielen" title="Zeit laufen lassen">▶ Abspielen</button>
-  <button id="zoom-rein" title="Näher heran">＋</button><button id="zoom-raus" title="Weiter weg">－</button>
-  <button id="ansicht-oben" title="Wie ein Stadtplan von oben">Von oben</button>
-  <button id="ansicht-schraeg" title="Schräger 3D-Blick">Schräg</button>
-  <button id="ansicht-rhein" title="Blick vom Wasser auf das Ufer">Vom Rhein</button>
-  <button id="tour-wieder" title="Geführte Tour">▶ Tour</button>
-</div>
 <div id="hilfe" class="feld">
   <div class="kopf"><h2>So funktioniert die Karte</h2><button id="hilfe-zu" title="schließen">✕</button></div>
   <ul>
-    <li><b>Zeit:</b> Unten an der Zeitleiste ziehen (12–23 Uhr) oder ▶ drücken. Der farbige Streifen darüber zeigt
-      Livestreams (blau), hochgeladene Videos (Striche) und gemeldete Ereignisse (Dreiecke); ein Klick springt hin.</li>
-    <li><b>Rechts</b> steht, was zur eingestellten Zeit laut Medien passiert, wie viele Menschen geschätzt da sind
-      und welche Videos es gibt. ▶ öffnet ein Video an der passenden Stelle.</li>
+    <li><b>Zeit:</b> Unten an der Zeitleiste ziehen (12–23 Uhr) oder unter „Steuerung“ ▶ Abspielen.</li>
+    <li><b>Rechts</b> in der Leiste: „Jetzt“ zeigt, was zur eingestellten Zeit laut Medien passiert, wie viele Menschen
+      geschätzt da sind und welche Videos es gibt (▶ öffnet ein Video an der passenden Stelle). „Steuerung“ hat
+      Abspielen, Zoom und Ansichten, „Legende“ erklärt Farben und Zeichen, „Mehr“ Melden, Einzeichnen und Teilen.</li>
     <li><b>Wichtig:</b> Die Menge ist eine <b>Simulation</b>, nicht die Wirklichkeit. Ein Punkt entspricht keiner
       echten Person und keiner echten Position; Zahlen und Abläufe sind Schätzungen und können falsch sein.
       Belegt ist nur, was mit einer Quelle verlinkt ist.</li>
@@ -272,6 +325,10 @@
     <button id="diagramm-zu">✕</button></div>
   <div id="diagramm-flaeche"></div>
   <div class="klein" id="diagramm-legende"></div>
+</div>
+<div id="zeitleiste">
+  <button id="zl-spielen" title="Zeit laufen lassen">▶</button>
+  <div id="zl-spur"><svg id="zl-svg"></svg><div id="zl-griff"><span id="zl-uhr"></span></div></div>
 </div>
 <div id="streifen"></div>
 <div id="warnung" role="note"><b>⚠ Simulation, keine Abbildung der Wirklichkeit.</b> Die Punkte und Figuren sind

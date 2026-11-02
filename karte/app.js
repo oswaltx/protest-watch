@@ -191,7 +191,7 @@ const streifen = $("streifen");
 const zeileH = 9;
 
 function zeichneStreifen() {
-  const tl = viewer.timeline.container.getBoundingClientRect();
+  const tl = $("zl-spur").getBoundingClientRect();
   streifen.style.left = tl.left + "px";
   streifen.style.width = tl.width + "px";
   streifen.style.bottom = (window.innerHeight - tl.top) + "px";
@@ -993,7 +993,7 @@ function zeigeTourSchritt(i) {
 }
 function starteTour() {
   $("start").hidden = true; $("hilfe").hidden = true; $("melden").hidden = true; $("zeichnen").hidden = true;
-  $("leiste").classList.add("zu"); $("jetzt").classList.add("zu");  // Platz für Karte und Tour, ☰ klappt wieder auf
+  $("jetzt").classList.add("zu");  // Platz für Karte und Tour, ☰ klappt wieder auf
   $("tour").hidden = false;
   zeigeTourSchritt(0);
 }
@@ -1007,6 +1007,7 @@ $("tour-weiter").onclick = () => (tourSchritt === (window.TOUR || []).length - 1
 
 function aktualisiereAbspielen() {
   $("abspielen").textContent = viewer.clock.shouldAnimate ? "⏸ Anhalten" : "▶ Abspielen";
+  $("zl-spielen").textContent = viewer.clock.shouldAnimate ? "⏸" : "▶";
 }
 $("abspielen").onclick = () => {
   if (sek(viewer.clock.currentTime) >= endeS - 60) viewer.clock.currentTime = start.clone();  // am Ende von vorn
@@ -1014,6 +1015,64 @@ $("abspielen").onclick = () => {
   aktualisiereAbspielen();
 };
 viewer.clock.onStop.addEventListener(aktualisiereAbspielen);
+$("zl-spielen").onclick = () => $("abspielen").onclick();
+
+// ---------- Zeitleiste ----------
+// Oben die Abschnitte des Tages (aus der Tour, Klick springt hin und fliegt zum Ort), darunter gemeldete Ereignisse
+// als Dreiecke, unten die Stunden. Ziehen oder Klicken stellt die Zeit.
+const PHASEN = (window.TOUR || []).filter((s) => s.phase);
+const PHASEN_FARBE = { "Wasserwerfer": "#8a3a2a", "Kessel": "#7a2f3f", "Domplatte": "#5a4a6a" };
+function zeichneZeitleiste() {
+  const spur = $("zl-spur"), w = spur.clientWidth, h = spur.clientHeight;
+  const x = (s) => ((s - startS) / (endeS - startS)) * w;
+  let svg = "";
+  PHASEN.forEach((p, i) => {
+    const a = x(sek(ortsZeit(p.zeit))), b = i + 1 < PHASEN.length ? x(sek(ortsZeit(PHASEN[i + 1].zeit))) : w;
+    const farbe = PHASEN_FARBE[p.phase] || (i % 2 ? "#3d5a6e" : "#46677c");
+    svg += `<g class="phase" data-i="${i}" style="cursor:pointer"><rect x="${a}" y="4" width="${b - a - 1}" height="20" rx="3" fill="${farbe}">
+      <title>${p.zeit} Uhr: ${p.titel}</title></rect>
+      <clipPath id="zl-c${i}"><rect x="${a}" y="4" width="${b - a - 4}" height="20"/></clipPath>
+      <text x="${a + 4}" y="18" clip-path="url(#zl-c${i})">${p.phase}</text></g>`;
+  });
+  for (const e of EREIGNISSE) {
+    if (e.s < startS || e.s > endeS) continue;
+    const farbe = e.zeit_sicher === "genau" ? "#ffb000" : "#a07020";
+    svg += `<polygon points="${x(e.s) - 4},36 ${x(e.s) + 4},36 ${x(e.s)},28" fill="${farbe}"><title>${uhr(e.s)} ${e.ort}: ${e.text}</title></polygon>`;
+  }
+  for (let s = startS; s <= endeS; s += 3600) {
+    svg += `<line x1="${x(s)}" x2="${x(s)}" y1="40" y2="46" stroke="#888"/>`;
+    if (w > 500 || (s - startS) % 7200 === 0) svg += `<text class="stunde" x="${x(s)}" y="${h - 4}" text-anchor="middle">${uhr(s).slice(0, 2)} Uhr</text>`;
+  }
+  $("zl-svg").innerHTML = svg;
+  zeigeZeitleistenZeit();
+}
+let zlLetzte = -1;
+function zeigeZeitleistenZeit() {
+  const s = sek(viewer.clock.currentTime), m = Math.floor(s / 60);
+  if (m === zlLetzte) return;
+  zlLetzte = m;
+  $("zl-griff").style.left = ((s - startS) / (endeS - startS)) * 100 + "%";
+  $("zl-uhr").textContent = uhr(s);
+}
+function zeitAusZeiger(ev) {
+  const r = $("zl-spur").getBoundingClientRect();
+  const anteil = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+  viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date((startS + anteil * (endeS - startS)) * 1000));
+  zlLetzte = -1; zeigeZeitleistenZeit(); viewer.scene.requestRender();
+}
+$("zl-spur").addEventListener("pointerdown", (ev) => {
+  const phase = ev.target.closest?.(".phase");
+  if (phase) {  // Abschnitt: an den Anfang springen und zum Ort fliegen
+    const p = PHASEN[+phase.dataset.i], o = ortNach[p.ort];
+    viewer.clock.currentTime = ortsZeit(p.zeit); zlLetzte = -1; zeigeZeitleistenZeit();
+    if (o) { normaleSicht(); fliegeZu(o.lat, o.lon, p.hoehe); }
+    return;
+  }
+  $("zl-spur").setPointerCapture(ev.pointerId);
+  zeitAusZeiger(ev);
+});
+$("zl-spur").addEventListener("pointermove", (ev) => { if ($("zl-spur").hasPointerCapture(ev.pointerId)) zeitAusZeiger(ev); });
+viewer.clock.onTick.addEventListener(zeigeZeitleistenZeit);
 
 // Zoom und feste Ansichten; „Von oben“ ohne Perspektive wie ein Stadtplan
 const hoeheJetzt = () => viewer.camera.positionCartographic.height;
@@ -1048,15 +1107,31 @@ $("hilfe-knopf").onclick = () => { $("hilfe").hidden = !$("hilfe").hidden; };
 document.querySelectorAll(".feld .einklappen").forEach((b) => {
   b.onclick = () => b.closest(".feld").classList.toggle("zu");
 });
-if (window.matchMedia("(max-width: 700px)").matches) { $("jetzt").classList.add("zu"); $("leiste").classList.add("zu"); }
+if (window.matchMedia("(max-width: 700px)").matches) $("jetzt").classList.add("zu");
+// Reiter der Leiste rechts
+function zeigeReiter(name) {
+  document.querySelectorAll(".reiter button").forEach((b) => b.classList.toggle("an", b.dataset.reiter === name));
+  document.querySelectorAll("#jetzt section").forEach((s) => { s.hidden = s.id !== "reiter-" + name; });
+  $("jetzt").classList.remove("zu");
+}
+document.querySelectorAll(".reiter button").forEach((b) => { b.onclick = () => zeigeReiter(b.dataset.reiter); });
+// Übersichtsstreifen über der Zeitleiste: standardmäßig aus, unter „Steuerung“ einschaltbar
+function setzeStreifen(an) {
+  streifen.hidden = !an;
+  $("streifen-knopf").textContent = an ? "▤ Übersichtsstreifen ausblenden" : "▤ Übersichtsstreifen an der Zeitleiste zeigen";
+  if (an) zeichneStreifen();
+}
+$("streifen-knopf").onclick = () => setzeStreifen(streifen.hidden);
+setzeStreifen(false);
 
 zeigeOrte();
 zeigeWege();
 zeigeKameras();
 ladeStadt();
 if (!momentAusAdresse()) uebersicht();
+zeichneZeitleiste();
 zeichneStreifen();
-window.addEventListener("resize", () => setTimeout(zeichneStreifen, 50));
+window.addEventListener("resize", () => setTimeout(() => { zeichneZeitleiste(); zeichneStreifen(); }, 50));
 viewer.clock.onTick.addEventListener(aktualisiereJetzt);
 viewer.clock.onTick.addEventListener(aktualisiereMenge);
 // Kamerabewegung ändert, welche Personen als Figur gezeigt werden
