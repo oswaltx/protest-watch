@@ -148,18 +148,46 @@ $("stil-knopf").onclick = () => setzeKartenstil(kartenstil === "schlicht" ? "bun
 // damit sie wie eine gezeichnete Karte wirken; als je ein Primitive für Flächen und Kanten
 function eigeneGebaeude() {
   const sammlung = new Cesium.PrimitiveCollection();
-  const huelle = (punkte, hoehe) => ({ polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte)),
-    height: GRUND, extrudedHeight: GRUND + hoehe });
-  sammlung.add(new Cesium.Primitive({
-    geometryInstances: window.GEBAEUDE.map(([hoehe, punkte], i) => new Cesium.GeometryInstance({ id: i,
-      geometry: new Cesium.PolygonGeometry({ ...huelle(punkte, hoehe), vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT }),
-      attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.WHITE) } })),
-    appearance: new Cesium.PerInstanceColorAppearance({ flat: true, translucent: false }) }));
-  sammlung.add(new Cesium.Primitive({
-    geometryInstances: window.GEBAEUDE.map(([hoehe, punkte]) => new Cesium.GeometryInstance({
-      geometry: new Cesium.PolygonOutlineGeometry(huelle(punkte, hoehe)),
-      attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString("#1d1d1f")) } })),
-    appearance: new Cesium.PerInstanceColorAppearance({ flat: true, translucent: false }) }));
+  const weiss = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.WHITE);
+  const schwarz = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString("#1d1d1f"));
+  // Wände; bei Gebäudeteilen (Dom) von der Mindesthöhe bis unter das Dach
+  const huelle = ([hoehe, punkte, unten = 0, dach = 0]) => ({
+    polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte)),
+    height: GRUND + unten, extrudedHeight: GRUND + hoehe - dach });
+  const flaechen = window.GEBAEUDE.map((g, i) => new Cesium.GeometryInstance({ id: i,
+    geometry: new Cesium.PolygonGeometry({ ...huelle(g), vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT }),
+    attributes: { color: weiss } }));
+  const kanten = window.GEBAEUDE.map((g) => new Cesium.GeometryInstance({
+    geometry: new Cesium.PolygonOutlineGeometry(huelle(g)), attributes: { color: schwarz } }));
+  // Spitze Dächer und Turmspitzen (Dom): Dreiecke von jeder Kante des Umrisses zur Spitze über der Mitte
+  for (const [hoehe, punkte, unten = 0, dach = 0] of window.GEBAEUDE) {
+    if (!dach) continue;
+    const ecken = Cesium.Cartesian3.fromDegreesArrayHeights(
+      punkte.flatMap((z, j) => (j % 2 ? [z, GRUND + hoehe - dach] : [z])));
+    const n = punkte.length / 2;
+    let lon = 0, lat = 0;
+    for (let j = 0; j < n; j++) { lon += punkte[2 * j] / n; lat += punkte[2 * j + 1] / n; }
+    const spitze = Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + hoehe);
+    const lage = new Float64Array((n + 1) * 3);
+    [...ecken, spitze].forEach((c, j) => { lage[3 * j] = c.x; lage[3 * j + 1] = c.y; lage[3 * j + 2] = c.z; });
+    const position = new Cesium.GeometryAttribute({ componentDatatype: Cesium.ComponentDatatype.DOUBLE,
+      componentsPerAttribute: 3, values: lage });
+    const kugel = Cesium.BoundingSphere.fromPoints([...ecken, spitze]);
+    const dreiecke = [], linien = [];
+    for (let j = 0; j < n; j++) {
+      dreiecke.push(j, (j + 1) % n, n);
+      linien.push(j, n);
+    }
+    flaechen.push(new Cesium.GeometryInstance({ attributes: { color: weiss },
+      geometry: new Cesium.Geometry({ attributes: { position }, indices: new Uint16Array(dreiecke),
+        primitiveType: Cesium.PrimitiveType.TRIANGLES, boundingSphere: kugel }) }));
+    kanten.push(new Cesium.GeometryInstance({ attributes: { color: schwarz },
+      geometry: new Cesium.Geometry({ attributes: { position }, indices: new Uint16Array(linien),
+        primitiveType: Cesium.PrimitiveType.LINES, boundingSphere: kugel }) }));
+  }
+  const darstellung = () => new Cesium.PerInstanceColorAppearance({ flat: true, translucent: false });
+  sammlung.add(new Cesium.Primitive({ geometryInstances: flaechen, appearance: darstellung() }));
+  sammlung.add(new Cesium.Primitive({ geometryInstances: kanten, appearance: darstellung() }));
   return sammlung;
 }
 
