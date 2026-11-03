@@ -881,7 +881,8 @@ function zeichneDiagramm() {
   const alle = [...Object.entries(reihen).map(([g, w]) => ({ name: GRUPPEN[g][0], farbe: GRUPPEN[g][1], werte: w })),
                 ...extra.map((r) => ({ name: r.name, farbe: r.farbe, werte: r.werte, quelle: r.quelle }))];
   const W = 540, H = 200, L = 40, U = 18;
-  const zaehlungen = dichteZeitpunkte.filter((z) => z.gesamt_sichtbereich);  // aus Videobildern gezählt
+  // aus Videobildern gezählt; zu kleine Ausschnitte (Domplatte abends) lässt das Diagramm weg
+  const zaehlungen = dichteZeitpunkte.filter((z) => z.gesamt_sichtbereich && z.flaeche_sichtbereich_m2 >= KLEIN_M2);
   const max = Math.max(100, ...alle.flatMap((r) => r.werte), ...zaehlungen.map((z) => z.gesamt_sichtbereich.p84));
   const x = (s) => L + (s - startS) / (endeS - startS) * (W - L - 6);
   const y = (n) => H - U - n / max * (H - U - 8);
@@ -1352,6 +1353,7 @@ fetch("dichte-flaechen.json").then((a) => a.json()).then((d) => {
 }).catch(() => {});
 // Eine Ebene (Primitive) je Zeitpunkt und Deckkraft, erst bei Bedarf gebaut: 5-m-Felder nur auf Straßen, Wegen und
 // Plätzen (skripte/dichte_zuschneiden.py). Kräftig = oft gesehen; „blass“ = nächste Zählung liegt zeitlich daneben.
+const KLEIN_M2 = 3000;  // darunter ist der gefilmte Ausschnitt zu klein für eine Aussage über die Menge (z. B. Domplatte abends)
 function dichteEbene(z, blass) {
   if (z.ebenen[blass]) return z.ebenen[blass];
   const ring = (r) => Cesium.Cartesian3.fromDegreesArray(r.flatMap(([lat, lon]) => [lon, lat]));
@@ -1382,7 +1384,8 @@ function zeigeDichte(erzwingen) {
   $("jetzt-dichte").innerHTML = aktiv
     ? `${blass ? `Nächste Zählung: <b>${aktiv.zeit} Uhr</b> (blass). ` : ""}Videos ${uhr(aktiv.von)}–${uhr(aktiv.bis)} Uhr, ${aktiv.name}:
        etwa <b>${zahl(g.median)}</b> Menschen (${zahl(g.p16)}–${zahl(g.p84)}) <b>im gefilmten Bereich</b> von ${zahl(aktiv.flaeche_sichtbereich_m2)} m²,
-       Polizei mitgezählt. Keine Gesamtzahl der Demo.`
+       Polizei mitgezählt. Keine Gesamtzahl der Demo.${aktiv.flaeche_sichtbereich_m2 < KLEIN_M2
+         ? " <b>Hier wurde nur ein kleiner Ausschnitt gefilmt, die Zahl sagt über die Menge kaum etwas.</b>" : ""}`
     : `<i>Zu dieser Uhrzeit keine Zählung.</i> Gezählt sind: ${dichteZeitpunkte.map((z) => z.zeit).join(", ")} Uhr.`;
   viewer.scene.requestRender();
 }
