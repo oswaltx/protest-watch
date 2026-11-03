@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Quellen – Protest-Watch, Gen-Z-Demo Köln 31.10.2026</title>
+<meta name="description" content="Alle Videos, Livestreams, Medienberichte und Polizeimeldungen, aus denen die Karte der Gen-Z-Demo Köln am 31.10.2026 zusammengesetzt ist, mit Zeit, Ort und Link.">
+<link rel="stylesheet" href="stil.css">
+</head>
+<body>
+<main>
+  <p class="zurueck"><a href="/">Protest-Watch</a> · <a id="zur-karte" href="/karte/">Karte</a></p>
+  <h1>Quellen</h1>
+  <p class="unterzeile">Alles Material, aus dem die Karte der Gen-Z-Demo in Köln am 31. Oktober 2026 zusammengesetzt ist:
+    Videos, Livestreams, TV, Radio, Medienberichte und Polizeimeldungen, jeweils mit Link zum Original und zum passenden Moment auf der Karte.</p>
+  <p class="hinweis" id="hinweis">Ich verlinke nur auf die Originale und speichere hier keine Kopien. Kanalnamen nenne ich
+    nur bei Medien, Organisationen und berichtenden Kanälen mit großer Reichweite. Videos von Privatpersonen heißen „Video (Plattform)“
+    und stehen hier nur mit Link, ohne Ort, Zeit und Inhalt. Wo und wann sie aufgenommen wurden, zeigt die Karte.
+    Livestreams stehen unter Pseudonym (A–D). Titel in Anführungszeichen sind Originaltitel der Kanäle. Orte und Zeiten habe ich
+    aus den Videos geschätzt, die Sicherheit steht jeweils daneben.</p>
+
+  <form id="filter" role="search">
+    <input id="suche" type="search" placeholder="Suchen: Titel, Ort, Inhalt …" aria-label="Suchen">
+    <div class="auswahl">
+      <label>Art <select id="f-art"></select></label>
+      <label>Plattform <select id="f-plattform"></select></label>
+      <label>Ort <select id="f-ort"></select></label>
+      <label>Zeitsicherheit <select id="f-sicher"></select></label>
+      <label>Aufnahme ab <input id="f-von" type="time" value="12:00"></label>
+      <label>bis <input id="f-bis" type="time" value="23:59"></label>
+      <label class="haken"><input id="f-karte" type="checkbox"> nur mit Ort auf der Karte</label>
+    </div>
+  </form>
+  <p id="anzahl" class="klein" aria-live="polite"></p>
+  <ol id="liste"></ol>
+
+  <footer>
+    <p><b>Entfernen lassen:</b> Du bist auf einem verlinkten Video zu sehen oder hast es hochgeladen und willst, dass ich es
+      entferne? Schreib an protest-watch@pm.me.</p>
+    <p>Fehlt etwas oder stimmt etwas nicht? <a href="/einreichen/">Material oder Hinweis einreichen</a>.</p>
+    <p class="klein">Stand der Daten: <span id="stand"></span>. Online-Status: bei YouTube und TikTok automatisch abgefragt,
+      Instagram von Hand geprüft. Gelöschte Videos von Privatpersonen entferne ich. <a href="/datenschutz.html">Datenschutz</a></p>
+  </footer>
+</main>
+<script src="daten.js"></script>
+<script src="quellen.js"></script>
+</body>
+</html>

@@ -225,7 +225,10 @@ def population(pop, pi):
         for k, pos in enumerate(w):
             if pos is not None:
                 feld[i, k] = np.clip(np.round(np.asarray(pos) * 10), -32767, 32767)  # Dezimeter
+    # zwischen: so viele Teilstücke bilden einen Weg von einem Zeitpunkt zum nächsten (die Karte lässt die Person
+    # den ganzen Weg in einem Zug gehen und dann stehen)
     return {"name": pop["name"], "gruppe": pop["gruppe"], "quelle": pop["quelle"], "T": T,
+            "zwischen": ZWISCHEN if pop["gruppe"] != "fahrzeug" else 1,
             "personen": len(wege), "wege": base64.b64encode(feld.tobytes()).decode()}
 
 

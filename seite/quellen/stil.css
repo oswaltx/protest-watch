@@ -1,0 +1,43 @@
+/* Quellenbibliothek, gleiche Farben wie die Startseite */
+:root { --text: #1d1d1f; --leise: #5c5c63; --grund: #fbfaf7; --karte: #ffffff; --linie: #e4e1da;
+        --akzent: #b4421f; --marke: #f3efe6; color-scheme: light dark; }
+@media (prefers-color-scheme: dark) {
+  :root { --text: #ecebe8; --leise: #a4a3a0; --grund: #151517; --karte: #1e1e21; --linie: #333338;
+          --akzent: #f08a63; --marke: #2a2925; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--grund); color: var(--text);
+       font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 60rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+h1 { font-size: 2rem; line-height: 1.15; margin: .3rem 0 .3rem; }
+a { color: var(--akzent); }
+.zurueck { margin: 0; font-size: .95rem; }
+.unterzeile { color: var(--leise); margin: 0 0 .8rem; font-size: 1.05rem; }
+.hinweis { font-size: .9rem; color: var(--leise); border-left: 4px solid var(--linie); padding-left: .8rem; }
+.klein { font-size: .88rem; color: var(--leise); }
+.intern { background: var(--marke); border: 1px dashed var(--akzent); border-radius: 8px; padding: .5rem .8rem; }
+
+#filter { position: sticky; top: 0; z-index: 2; background: var(--grund); padding: .7rem 0 .5rem;
+          border-bottom: 1px solid var(--linie); }
+#suche { width: 100%; font: inherit; padding: .55rem .75rem; border: 1px solid var(--linie); border-radius: 8px;
+         background: var(--karte); color: var(--text); }
+.auswahl { display: flex; flex-wrap: wrap; gap: .4rem .9rem; margin-top: .5rem; font-size: .88rem; color: var(--leise); }
+.auswahl label { display: flex; align-items: center; gap: .3rem; }
+.auswahl select, .auswahl input[type=time] { font: inherit; color: var(--text); background: var(--karte);
+                                              border: 1px solid var(--linie); border-radius: 6px; padding: .15rem .3rem; }
+
+#liste { list-style: none; padding: 0; margin: .6rem 0; display: grid; gap: .6rem; }
+.eintrag { scroll-margin-top: 10rem; background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: .75rem 1rem; }
+.kopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .6rem; }
+.kopf h2 { font-size: 1.02rem; margin: 0; flex: 1 1 18rem; overflow-wrap: anywhere; }
+.art { font-size: .78rem; font-weight: 650; text-transform: uppercase; letter-spacing: .04em; color: var(--akzent); }
+.meta { font-size: .88rem; color: var(--leise); margin: .2rem 0 0; }
+.meta b { color: var(--text); font-weight: 600; }
+.status-geloescht { text-decoration: line-through; }
+.links { display: flex; flex-wrap: wrap; gap: .3rem .9rem; margin-top: .35rem; font-size: .92rem; }
+details { margin-top: .4rem; font-size: .9rem; }
+summary { cursor: pointer; color: var(--leise); }
+details ul { margin: .3rem 0; padding-left: 1.1rem; }
+details li { margin: .25rem 0; }
+.sicher { font-size: .78rem; border: 1px solid var(--linie); border-radius: 4px; padding: 0 .3rem; white-space: nowrap; }
+footer { margin-top: 2rem; border-top: 1px solid var(--linie); padding-top: .8rem; font-size: .9rem; color: var(--leise); }
