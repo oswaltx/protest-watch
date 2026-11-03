@@ -48,31 +48,50 @@
   .karten div { background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: .8rem 1rem; }
   .karten b { display: block; margin-bottom: .2rem; }
   footer { margin-top: 2.6rem; border-top: 1px solid var(--linie); padding-top: .8rem; font-size: .9rem; color: var(--leise); }
+  .oben { display: grid; grid-template-columns: 1fr 1.15fr; gap: 1.6rem; align-items: center; margin-top: .4rem; }
+  .oben figure { margin: 0; }
+  @media (max-width: 760px) { .oben { grid-template-columns: 1fr; gap: 1rem; } .oben figure { order: -1; } h1 { font-size: 1.8rem; } }
+  main.breit { max-width: 64rem; }
+  .hinweis-kurz { font-size: .9rem; background: var(--warn-grund); border-left: 4px solid var(--warn-rand); padding: .5rem .8rem;
+                  border-radius: 6px; margin: 1rem 0 0; }
+  .wege { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .6rem; margin: 1.6rem 0 1rem; }
+  .wege a { display: block; background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: .7rem .9rem;
+            text-decoration: none; color: var(--text); }
+  .wege a:hover { border-color: var(--akzent); }
+  .wege b { display: block; color: var(--akzent); }
+  .wege span { font-size: .85rem; color: var(--leise); }
+  details { border-top: 1px solid var(--linie); padding: .5rem 0; }
+  details summary { cursor: pointer; font-weight: 600; padding: .3rem 0; }
+  details[open] summary { margin-bottom: .4rem; }
 </style>
 </head>
 <body>
-<main>
-  <h1>Protest-Watch</h1>
-  <p class="unterzeile">Die Gen-Z-Demo in Köln am 31. Oktober 2026 als begehbare 3D-Karte mit Zeitachse –
-    zusammengesetzt aus öffentlichen Videos, Livestreams, Medienberichten und Polizeimeldungen.</p>
-
-  <p><a class="los" href="/karte/">Zur Karte →</a></p>
-  <p class="klein">Die Karte braucht 3D-Grafik im Browser. Am besten am Computer; auf dem Handy geht es, ist aber eng.</p>
-
-  <div class="warnung" role="note">
-    <b>⚠ Simulation, keine Abbildung der Wirklichkeit</b>
-    Die Punkte auf der Karte sind <b>keine einzelnen Personen</b> und keine echten Positionen.
-    Personenzahlen, Wege und Abläufe sind <b>Schätzungen</b> aus Videos und Berichten und können falsch sein.
-    Belegt ist nur, was mit einer Quelle verlinkt ist.
+<main class="breit">
+  <div class="oben">
+    <div>
+      <h1>Gen-Z-Demo Köln, 31.10.2026</h1>
+      <p class="unterzeile">Der ganze Tag als begehbare 3D-Karte – aus öffentlichen Videos, Livestreams, Medien- und Polizeiberichten.</p>
+      <p><a class="los" href="/karte/">Zur Karte →</a></p>
+      <p class="hinweis-kurz"><b>Simulation:</b> Punkte sind keine echten Personen, Mengen und Wege sind geschätzt. Belegt ist, was verlinkt ist.</p>
+    </div>
+    <figure>
+      <a href="/karte/"><img src="vorschau.jpg" width="1200" height="654"
+        alt="Ausschnitt der Karte um 16:49 Uhr: weiße 3D-Gebäude am Rheinufer zwischen Bastei und Dagobertstraße, gelbe Punkte für die geschätzte Menge, blaue für Polizei und Fahrzeuge"></a>
+      <figcaption>Kartendaten © OpenStreetMap-Mitwirkende</figcaption>
+    </figure>
   </div>
 
-  <figure>
-    <a href="/karte/"><img src="vorschau.jpg" width="1200" height="654"
-      alt="Ausschnitt der Karte um 16:49 Uhr: weiße 3D-Gebäude am Rheinufer zwischen Bastei und Dagobertstraße, gelbe Punkte für die geschätzte Menge, blaue für Polizei und Fahrzeuge"></a>
-    <figcaption>Ausschnitt um 16:49 Uhr am Rheinufer. Kartendaten © OpenStreetMap-Mitwirkende.</figcaption>
-  </figure>
+  <nav class="wege" aria-label="Weitere Seiten">
+    <a href="/liveblog/"><b>Liveblog</b><span>Der Tag zum Nachlesen, mit Quellen</span></a>
+    
+    <a href="/berichterstattung/"><b>Wie wurde berichtet?</b><span>Gewalt oder Anliegen – Auswertung der Medien</span></a>
+    
+    <a href="/quellen/"><b>Quellen</b><span>Alle Videos, Berichte, Polizeimeldungen</span></a>
+    <a href="/einreichen/"><b>Material einreichen</b><span>Videos, Fotos, Beobachtungen – auch anonym</span></a>
+        <a href="/vorschlagen/"><b>Demo vorschlagen</b><span>Eine andere Demo rekonstruieren lassen</span></a>
+      </nav>
 
-  <h2>Was die Karte zeigt</h2>
+  <details><summary>Was die Karte zeigt</summary>
   <div class="karten">
     <div><b>Ereignisse</b>Was wann wo passiert ist, laut Medien und Polizei – jeweils mit Quelle und Datum.</div>
     <div><b>Videos am Ort</b>Wo eine Aufnahme entstand und wohin die Kamera zeigte. Das Original lädt erst nach einem Klick.</div>
@@ -80,7 +99,8 @@
     <div><b>Menge und Polizei</b>Geschätzte Zahlen als simulierte Punkte oder als Dichte, die in Videobildern gezählt wurde, und als Verlauf über den Tag.</div>
   </div>
 
-  <h2>Wie belastbar ist das?</h2>
+  </details>
+  <details><summary>Wie belastbar ist das?</summary>
   <ul>
     <li>Jede Angabe aus Medien oder von der Polizei ist verlinkt. Vorwürfe stehen nur mit Quelle da und sind als
       unbestätigt gekennzeichnet.</li>
@@ -92,13 +112,8 @@
     <li>Daten und Methode sind offen: <a href="https://github.com/oswaltx/protest-watch">Quellcode und Daten auf GitHub</a>.</li>
   </ul>
 
-  
-  <h2>Wie wurde berichtet?</h2>
-  <p>Gewalt oder Anliegen: eine Auswertung von rund 400 Überschriften und 200 Beiträgen zur Demo, vorher und
-    nachher. <a href="/berichterstattung/">Zur Auswertung →</a></p>
-  
-
-  <h2>Für Presse</h2>
+  </details>
+  <details><summary>Für Presse</summary>
   <ul>
     <li><b>Zitieren und Screenshots</b> gern, mit „Rekonstruktion: Protest-Watch, protest-watch.org;
       Kartendaten © OpenStreetMap-Mitwirkende“ und dem Hinweis, dass Mengen und Wege geschätzt sind.</li>
@@ -108,7 +123,8 @@
     <li>Rückfragen und Korrekturen: protest-watch@pm.me</li>
   </ul>
 
-  <h2>Mitmachen</h2>
+  </details>
+  <details><summary>Mitmachen und Korrekturen</summary>
   <ul>
     <li><b>Videos, Fotos, Beobachtungen</b> – auch anonym: <a href="https://protest-watch.org/einreichen/">Material einreichen</a>.</li>
     <li><b>Öffentliche Quellen und Korrekturen</b> mit GitHub-Konto:
@@ -118,15 +134,13 @@
       automatisch mit – oder per Mail an protest-watch@pm.me. Ich prüfe innerhalb von 3 Tagen.</li>
   </ul>
 
-    <h2>Weitere Demos</h2>
-  <p>Protest-Watch soll nicht bei Köln stehen bleiben. Kennst du eine Demo, die rekonstruiert werden sollte – eine
-    vergangene oder eine kommende? Kommende dokumentiere ich erst danach, nie live.</p>
-  <p><a class="los" href="/vorschlagen/">Demo vorschlagen →</a></p>
-  
-  <h2>Keine Identifizierung, kein Tracking</h2>
+  </details>
+  <details><summary>Keine Identifizierung, kein Tracking</summary>
   <p>Die Karte identifiziert niemanden, weder Demonstrierende noch Polizeikräfte. Livestreams erscheinen pseudonym,
     kleine private Konten ohne Namen, eingesandtes Material wird nicht gezeigt. Die Seite setzt keine Cookies,
     lädt nichts von fremden Servern, solange du kein Video anklickst, und zählt Besuche nur anonym als Tagessummen.</p>
+
+  </details>
 
   <footer>
     <a href="/datenschutz.html#impressum">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> ·
