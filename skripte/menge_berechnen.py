@@ -162,8 +162,8 @@ def population(pop, pi):
     frei = pop["gruppe"] != "fahrzeug"   # Fahrzeuge dürfen auf Brücken über Wasser
     stellen = []
     for si, s in enumerate(pop["schritte"]):
-        teile = [verteile(form(t), t["anzahl"], saat=pi * 1000 + si * 10 + ti, frei_lassen=frei)
-                 for ti, t in enumerate(s["teile"])]
+        teile = [verteile(form(t), t["anzahl"], saat=pi * 1000 + si * 10 + ti, frei_lassen=frei) if frei
+                 else auf_fahrspur(form(t), t["anzahl"]) for ti, t in enumerate(s["teile"])]
         stellen.append(np.vstack([t for t in teile if len(t)]) if any(len(t) for t in teile) else np.zeros((0, 2)))
     zeiten = [uhr(s["zeit"]) for s in pop["schritte"]]
     # Zeitachse: Vorlauf, alle Zeitpunkte, Nachlauf zum Weggehen
@@ -216,9 +216,8 @@ def population(pop, pi):
 
     # Zwischen zwei Zeitpunkten über begehbare Flächen laufen statt durch Häuser
     # (Fahrzeuge ausgenommen, die stehen z. B. auf der Brücke über dem Wasser)
-    if pop["gruppe"] != "fahrzeug":
-        T, wege = mit_umwegen(T, wege)
-        K = len(T)
+    T, wege = mit_umwegen(T, wege) if pop["gruppe"] != "fahrzeug" else mit_fahrwegen(T, wege)
+    K = len(T)
 
     feld = np.full((len(wege), K, 2), FEHLT, dtype=np.int16)
     for i, w in enumerate(wege):
@@ -228,7 +227,7 @@ def population(pop, pi):
     # zwischen: so viele Teilstücke bilden einen Weg von einem Zeitpunkt zum nächsten (die Karte lässt die Person
     # den ganzen Weg in einem Zug gehen und dann stehen)
     return {"name": pop["name"], "gruppe": pop["gruppe"], "quelle": pop["quelle"], "T": T,
-            "zwischen": ZWISCHEN if pop["gruppe"] != "fahrzeug" else 1,
+            "zwischen": ZWISCHEN,
             "personen": len(wege), "wege": base64.b64encode(feld.tobytes()).decode()}
 
 
@@ -358,6 +357,96 @@ def mit_umwegen(T, wege):
             for j, p in enumerate(auf_laenge(linie, ZWISCHEN)):
                 neu[i][k * ZWISCHEN + j] = p
     return [int(t) for t in T2], neu
+
+
+# ---------- Fahrzeuge: nur auf Fahrbahnen, Wege über das Straßennetz ----------
+# Statt frei über Wasser und Gehwege: Fahrzeuge stehen hintereinander auf Fahrbahnen (OpenStreetMap, strassen-gross.json)
+# und fahren zwischen zwei Zeitpunkten den kürzesten Weg über das Straßennetz, also über die Brücke und die Rampe.
+FAHRBAR = {"motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link",
+           "tertiary", "tertiary_link", "residential", "unclassified", "service", "living_street"}
+_netz = {}
+
+
+def fahrnetz():
+    if _netz:
+        return _netz
+    from scipy.sparse import coo_matrix
+    knoten, pos, z, s, l, linien = {}, [], [], [], [], []
+    for e in osm("strassen-gross.json"):
+        tags = e.get("tags", {})
+        if tags.get("highway") not in FAHRBAR or tags.get("tunnel") or tags.get("access") in ("no", "private") \
+                or len(e.get("geometry", [])) < 2:
+            continue
+        punkte = [lokal(p["lat"], p["lon"]) for p in e["geometry"]]
+        ids = []
+        for nid, pt in zip(e["nodes"], punkte):
+            if nid not in knoten:
+                knoten[nid] = len(pos)
+                pos.append(pt)
+            ids.append(knoten[nid])
+        for a, b in zip(ids, ids[1:]):
+            z.append(a); s.append(b); l.append(math.dist(pos[a], pos[b]) + 0.01)
+        if tags.get("highway") != "service":  # Parken nur auf richtigen Straßen, nicht in Hofeinfahrten
+            linien.append(LineString(punkte))
+    n = len(pos)
+    graph = coo_matrix((np.r_[l, l], (np.r_[z, s], np.r_[s, z])), shape=(n, n)).tocsr()
+    _netz.update(pos=np.array(pos), graph=graph, linien=unary_union(linien))
+    return _netz
+
+
+def auf_fahrspur(geo, anzahl):
+    """anzahl Fahrzeuge in gleichem Abstand auf den Fahrbahnen innerhalb der Fläche (bzw. entlang der Linie)."""
+    if anzahl <= 0:
+        return np.zeros((0, 2))
+    spur = fahrnetz()["linien"].intersection(geo.buffer(4))
+    teile = [g for g in getattr(spur, "geoms", [spur]) if g.geom_type == "LineString" and g.length > 1]
+    gesamt = sum(g.length for g in teile)
+    if gesamt < 5:
+        return verteile(geo, anzahl, saat=anzahl, frei_lassen=False)
+    abstand = gesamt / anzahl
+    punkte, rest = [], abstand / 2
+    for g in teile:
+        while rest <= g.length and len(punkte) < anzahl:
+            punkte.append(g.interpolate(rest).coords[0])
+            rest += abstand
+        rest -= g.length
+    while len(punkte) < anzahl:
+        punkte.append(teile[-1].interpolate(teile[-1].length).coords[0])
+    return np.array(punkte)
+
+
+def weg_ueber_fahrbahn(a, b):
+    from scipy.sparse.csgraph import dijkstra
+    netz = fahrnetz()
+    if math.dist(a, b) < 15:
+        return np.array([a, b])
+    na = int(np.argmin(np.linalg.norm(netz["pos"] - a, axis=1)))
+    nb = int(np.argmin(np.linalg.norm(netz["pos"] - b, axis=1)))
+    _, vorg = dijkstra(netz["graph"], directed=False, indices=nb, return_predecessors=True, limit=6000)
+    if na != nb and vorg[na] < 0:
+        return np.array([a, b])
+    kette, c = [np.asarray(a)], na
+    while c >= 0 and c != nb:
+        kette.append(netz["pos"][c])
+        c = vorg[c]
+    kette += [netz["pos"][nb], np.asarray(b)]
+    return np.array(kette)
+
+
+def mit_fahrwegen(T, wege):
+    K = len(T)
+    T2 = []
+    for k in range(K - 1):
+        T2 += list(np.linspace(T[k], T[k + 1], ZWISCHEN + 1)[:-1])
+    T2.append(T[-1])
+    neu = [[None] * len(T2) for _ in wege]
+    for i, w in enumerate(wege):
+        for k in range(K - 1):
+            if w[k] is None or w[k + 1] is None:
+                continue
+            for j, p in enumerate(auf_laenge(weg_ueber_fahrbahn(np.asarray(w[k]), np.asarray(w[k + 1])), ZWISCHEN)):
+                neu[i][k * ZWISCHEN + j] = p
+    return [int(x) for x in T2], neu
 
 
 def nach_grad(xy):

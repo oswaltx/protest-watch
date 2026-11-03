@@ -20,7 +20,7 @@ const ende = ortsZeit("23:00");
 const sek = (jd) => Cesium.JulianDate.toDate(jd).getTime() / 1000;   // Unix-Sekunden
 const startS = sek(start), endeS = sek(ende);
 
-// Handys und schwache Rechner: weniger Kantenglättung, weniger Bilder pro Sekunde, nur jede dritte simulierte Figur
+// Handys und schwache Rechner: weniger Kantenglättung, weniger Bilder pro Sekunde, nur jeder dritte simulierte Punkt
 const SCHWACH = matchMedia("(pointer: coarse)").matches || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
 const viewer = new Cesium.Viewer("karte", {
   globe: false,                 // Google-Kacheln enthalten Gelände schon
@@ -196,14 +196,18 @@ const AUF_KACHELN = Cesium.HeightReference.CLAMP_TO_3D_TILE ?? Cesium.HeightRefe
 
 // Beschriftungen: doppelt so groß gezeichnet und halb skaliert (scharf statt verwaschen), auf dunklem Hintergrund statt mit
 // dickem Umriss – der ließ kleine Schrift auf hellem Grund (Wasser, Straßen) zusammenlaufen.
-function schild(text, { farbe = Cesium.Color.WHITE, versatz = -14, amBoden = true } = {}) {
+function schild(text, { farbe = Cesium.Color.WHITE, versatz = -14, amBoden = true, bis = Infinity } = {}) {
   return { text, font: "600 26px system-ui, sans-serif", scale: 0.5, fillColor: farbe, style: Cesium.LabelStyle.FILL,
            showBackground: true, backgroundColor: new Cesium.Color(0.08, 0.08, 0.09, 0.8),
            backgroundPadding: new Cesium.Cartesian2(10, 6), pixelOffset: new Cesium.Cartesian2(0, versatz),
            heightReference: amBoden ? AUF_KACHELN : Cesium.HeightReference.NONE,
-           disableDepthTestDistance: Number.POSITIVE_INFINITY };
+           disableDepthTestDistance: Number.POSITIVE_INFINITY,
+           // nur bis zu dieser Entfernung (m) zeigen, damit sich in der Übersicht nicht alles überlagert
+           distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, bis) };
 }
 
+// in der Übersicht beschriftet; die übrigen Orte erst beim Heranzoomen (sie liegen dicht beieinander am Ufer)
+const HAUPTORTE = new Set(["Bastei", "Musical Dome", "Breslauer Platz", "Ebertplatz", "Domplatte", "Heumarkt", "Theodor-Heuss-Ring"]);
 function zeigeOrte() {
   const liste = $("orte");
   for (const o of window.ORTE) {
@@ -211,7 +215,7 @@ function zeigeOrte() {
       position: Cesium.Cartesian3.fromDegrees(o.lon, o.lat),
       point: { pixelSize: 9, color: Cesium.Color.ORANGE, outlineColor: Cesium.Color.BLACK, outlineWidth: 1,
                heightReference: AUF_KACHELN, disableDepthTestDistance: 50 },
-      label: schild(o.name, { versatz: -16 }),
+      label: schild(o.name, { versatz: -16, bis: HAUPTORTE.has(o.name) ? Infinity : 900 }),
       description: `<p>${o.info || ""}</p><p><small>Genauigkeit: ${o.genau}</small></p>`,
       name: o.name,
     });
@@ -544,7 +548,7 @@ function zeigeWege() {
         position: pos,
         point: { pixelSize: 12, color: farbe, outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
                  heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
-        label: schild(`📹 ${w.kanal}`, { farbe, versatz: 20 }),
+        label: schild(`📹 ${w.kanal}`, { farbe, versatz: 20, bis: 1500 }),
         path: { leadTime: 0, trailTime: 15 * 60, width: 3, resolution: 30,
                 material: new Cesium.PolylineGlowMaterialProperty({ color: farbe, glowPower: 0.15 }) },
         properties: { stream: w.id },
@@ -610,75 +614,28 @@ function zeigeKameras() {
 
 // ---------- Menge, Polizei, Fahrzeuge (geschätzt, aus mengen.json) ----------
 // Jede Person hat einen eigenen Weg über die Zeitpunkte ihrer Population (berechnet in
-// skripte/menge_berechnen.py). Fern: Punkte, nah (< NAH m): Männekin-Sprites in echter Größe.
+// skripte/menge_berechnen.py). Nur Punkte: Figuren am Boden haben beim Heranzoomen den Rechner überlastet.
 const MENGE = window.MENGE;
 const [LAT0, LON0] = MENGE.ursprung, [MX, MY] = MENGE.m_pro_grad;
 const FEHLT = MENGE.fehlt;
 const FARBE_GRUPPE = { menge: Cesium.Color.fromCssColorString("#ffcf66"), polizei: Cesium.Color.fromCssColorString("#4d8bff"),
                        fahrzeug: Cesium.Color.fromCssColorString("#2d5fd6"), krawall: Cesium.Color.fromCssColorString("#ff3b3b") };
-const NAH = 180;
 let bodenHoehe = GRUND;  // Ellipsoid-Höhe Uferstraße, nach Laden der Kacheln gemessen
 
-function maennekin(koerper, kopf, polizei, schritt = false) {
-  const c = document.createElement("canvas");
-  c.width = 40; c.height = 116;
-  const g = c.getContext("2d");
-  g.fillStyle = koerper;
-  g.beginPath(); g.roundRect(11, 22, 18, 44, 6); g.fill();               // Rumpf
-  if (schritt) {                                                          // Beine im Schritt, Arme pendeln mit
-    g.strokeStyle = koerper; g.lineWidth = 7; g.lineCap = "round";
-    g.beginPath(); g.moveTo(16, 64); g.lineTo(7, 111); g.moveTo(24, 64); g.lineTo(33, 111); g.stroke();
-  } else {
-    g.fillRect(12, 62, 7, 52); g.fillRect(21, 62, 7, 52);                // Beine
-  }
-  g.beginPath(); g.roundRect(4, 25, 6, 36, 3); g.roundRect(30, 25, 6, 36, 3); g.fill();  // Arme
-  g.fillStyle = kopf;
-  g.beginPath(); g.arc(20, 12, 10, 0, 2 * Math.PI); g.fill();           // Kopf
-  if (polizei) {
-    g.fillStyle = "#e8e8e8"; g.fillRect(11, 9, 18, 5);                   // Helmvisier
-    g.fillStyle = "rgba(200,220,255,0.55)"; g.fillRect(2, 30, 14, 40);   // Schild
-  }
-  return c;
-}
-function mannschaftswagen() {
-  const c = document.createElement("canvas");
-  c.width = 120; c.height = 60;
-  const g = c.getContext("2d");
-  g.fillStyle = "#e9edf2"; g.beginPath(); g.roundRect(2, 6, 116, 44, 6); g.fill();   // Aufbau
-  g.fillStyle = "#1f4fa8"; g.fillRect(2, 30, 116, 8);                                 // Streifen
-  g.fillStyle = "#3a4656"; g.fillRect(84, 12, 28, 14);                                // Frontscheibe
-  g.fillStyle = "#222"; g.beginPath(); g.arc(24, 52, 7, 0, 7); g.arc(92, 52, 7, 0, 7); g.fill();
-  g.fillStyle = "#3d7bff"; g.fillRect(50, 1, 20, 5);                                  // Blaulicht
-  return c;
-}
-// je Aussehen zwei Bilder: stehend und im Schritt (beim Gehen abwechselnd)
-const paar = (k, kopf, polizei) => [maennekin(k, kopf, polizei), maennekin(k, kopf, polizei, true)];
-const BILDER = {
-  menge: ["#3b3b42", "#5a4632", "#2f4a5e", "#6b2f2f", "#444f3a"].map((k) => paar(k, "#c9a58a", false)),
-  polizei: [paar("#1d2b4d", "#26324f", true)],
-  krawall: [paar("#151515", "#2a2a2a", false), paar("#1c1c1c", "#3a1414", false)],  // dunkel, vermummt
-  fahrzeug: [[mannschaftswagen(), mannschaftswagen()]],
-};
-
 const punkteSammlung = viewer.scene.primitives.add(new Cesium.PointPrimitiveCollection());
-// scene muss übergeben werden, sonst können Billboards nicht an Kacheln haften
-const figurenSammlung = viewer.scene.primitives.add(new Cesium.BillboardCollection({ scene: viewer.scene }));
 
 const populationen = MENGE.populationen.map((p) => {
   const roh = Uint8Array.from(atob(p.wege), (c) => c.charCodeAt(0));
   const wege = new Int16Array(roh.buffer);  // [person][zeitpunkt][x,y] in Dezimetern
-  const farbe = FARBE_GRUPPE[p.gruppe], bilder = BILDER[p.gruppe], fz = p.gruppe === "fahrzeug";
-  const punkte = [], figuren = [];
+  const farbe = FARBE_GRUPPE[p.gruppe], fz = p.gruppe === "fahrzeug";
+  const punkte = [];
   for (let i = 0; i < p.personen; i++) {
-    // schwache Geräte: nur jede dritte Person bekommt Punkt und Figur (spart Speicher und Rechenzeit; gezählt werden alle)
-    if (SCHWACH && i % 3 && !fz) { punkte.push(null); figuren.push(null); continue; }
+    // schwache Geräte: nur jede dritte Person bekommt einen Punkt (spart Speicher und Rechenzeit; gezählt werden alle)
+    if (SCHWACH && i % 3 && !fz) { punkte.push(null); continue; }
     punkte.push(punkteSammlung.add({ show: false, color: farbe, pixelSize: { polizei: 5, fahrzeug: 9, krawall: 5 }[p.gruppe] || 4,
       scaleByDistance: new Cesium.NearFarScalar(50, 2.0, 2000, 0.6) }));
-    figuren.push(figurenSammlung.add({ show: false, image: bilder[i % bilder.length][0], sizeInMeters: true,
-      width: fz ? 6 : 0.6, height: fz ? 2.8 : 1.75,
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM, heightReference: AUF_KACHELN }));
   }
-  return { ...p, wege, K: p.T.length, punkte, figuren, bilderZahl: bilder.length };
+  return { ...p, wege, K: p.T.length, punkte };
 });
 
 const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
@@ -692,7 +649,7 @@ const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
     position: pos,
     point: { pixelSize: 14, color: Cesium.Color.fromCssColorString("#2d5fd6"), outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
              heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
-    label: schild(f.name, { versatz: -18 }),
+    label: schild(f.name, { versatz: -18, bis: 700 }),
     description: `<p>Position geschätzt aus: ${f.quelle}</p>`,
   });
 });
@@ -710,9 +667,25 @@ for (const m of MENGE.markierungen) {
   });
 }
 
-const laengen = new Float64Array(64);  // Hilfsfeld: Längen der Teilstücke eines Weges
+const laengen = new Float64Array(64);
+// Höhe der Fahrbahn, wenn der Punkt auf einer Brücke liegt (Umriss aus grundkarte.js), sonst 0;
+// in den letzten 80 m vor der Brücke gleichmäßig ansteigend (Rampe)
+const BRUECKEN = (window.GRUNDKARTE?.bruecken || []).map((b) => ({ hoehe: b.hoehe, r: b.flaeche[0][0] }));
+function brueckenHoehe(lat, lon) {
+  const kx = Math.cos(lat * Math.PI / 180) * 111320, ky = 111320;
+  let best = 0;
+  for (const { hoehe, r } of BRUECKEN) {
+    let drin = false, d = Infinity;
+    for (let i = 0, j = r.length - 2; i < r.length; j = i, i += 2) {
+      if ((r[i + 1] > lat) !== (r[j + 1] > lat) && lon < (r[j] - r[i]) * (lat - r[i + 1]) / (r[j + 1] - r[i + 1]) + r[i]) drin = !drin;
+      d = Math.min(d, Math.hypot((r[i] - lon) * kx, (r[i + 1] - lat) * ky));
+    }
+    best = Math.max(best, drin ? hoehe : hoehe * Math.max(0, 1 - d / 80));
+  }
+  return best;
+}  // Hilfsfeld: Längen der Teilstücke eines Weges
 const zuGrad = (dx, dy) => [LON0 + dx / 10 / MX, LAT0 + dy / 10 / MY];
-let mengeSichtbar = true;  // umgeschaltet über setzeModus (Figuren / Dichte / Beides)
+let mengeSichtbar = true;  // umgeschaltet über setzeModus (Punkte / Dichte / Beides)
 let nurPolizei = false;     // Modus „Dichte“: Polizei und Fahrzeuge bleiben sichtbar (Kessel), Menge kommt aus der Dichte
 let letzteAktualisierung = 0, letzteZeit = -1;
 const mengeZahlen = {};
@@ -723,20 +696,19 @@ function aktualisiereMenge() {
   const t = sek(viewer.clock.currentTime);
   if (jetzt - letzteAktualisierung < (SCHWACH ? 250 : 100) || (t === letzteZeit && letzteZeit !== -2)) return;
   letzteAktualisierung = jetzt; letzteZeit = t;
-  const kamera = viewer.camera.positionWC;
   for (const p of populationen) {
-    const { T, K, wege, punkte, figuren } = p;
+    const { T, K, wege, punkte } = p;
     let k = -1;
     if (t >= T[0] && t < T[K - 1]) { k = 0; while (k < K - 2 && T[k + 1] <= t) k++; }
     const f = k >= 0 ? (t - T[k]) / (T[k + 1] - T[k]) : 0;
     let n = 0;
     for (let i = 0; i < punkte.length; i++) {
-      const pp = punkte[i], fig = figuren[i];
+      const pp = punkte[i];
       const a = (i * K + k) * 2, b = a + 2;
-      if (k < 0 || wege[a] === FEHLT || wege[b] === FEHLT) { if (pp) { pp.show = false; fig.show = false; } continue; }
+      if (k < 0 || wege[a] === FEHLT || wege[b] === FEHLT) { if (pp) pp.show = false; continue; }
       n++;
       if (!pp) continue;
-      if (!mengeSichtbar || (nurPolizei && p.gruppe !== "polizei" && p.gruppe !== "fahrzeug")) { pp.show = false; fig.show = false; continue; }
+      if (!mengeSichtbar || (nurPolizei && p.gruppe !== "polizei" && p.gruppe !== "fahrzeug")) { pp.show = false; continue; }
       // Wie echte Menschen: den ganzen Weg zum nächsten Platz (um Häuser herum, aus mehreren Teilstücken) in einem
       // Zug in normalem Tempo gehen, jede Person zu einer eigenen Zeit, dann dort stehen bleiben – statt eine halbe
       // Stunde lang gleichmäßig zu gleiten. Wege in Dezimetern.
@@ -758,22 +730,15 @@ function aktualisiereMenge() {
       const u = (i * K + m) * 2, anteil = laengen[m - von] > 0 ? rest / laengen[m - von] : 1;
       const x = wege[u] + (wege[u + 2] - wege[u]) * anteil, y = wege[u + 1] + (wege[u + 3] - wege[u + 1]) * anteil;
       const [lon, lat] = zuGrad(x, y);
-      const boden = Cesium.Cartesian3.fromDegrees(lon, lat, bodenHoehe);
-      const nah = Cesium.Cartesian3.distance(boden, kamera) < NAH;
-      if (nah) {
-        fig.position = boden;
-        const geht = roh > 0 && roh < 1 && strecke > 2 && p.gruppe !== "fahrzeug";
-        const schritt = geht ? Math.floor(g * strecke / 0.8) % 2 : 0;  // alle 0,8 m Bein wechseln
-        const bild = i % p.bilderZahl;
-        if (fig._schritt !== schritt) { fig.setImage(`${p.gruppe}-${bild}-${schritt}`, BILDER[p.gruppe][bild][schritt]); fig._schritt = schritt; }
-      } else pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, bodenHoehe + 1);
-      fig.show = nah;
-      pp.show = !nah;
+      // Fahrzeuge auf einer Brücke in Fahrbahnhöhe statt unten auf dem Wasser
+      const hoehe = bodenHoehe + 2 + (p.gruppe === "fahrzeug" ? 0.5 + brueckenHoehe(lat, lon) : 0);  // nicht halb im Boden
+      pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, hoehe);
+      pp.show = true;
     }
     mengeZahlen[p.name] = { n, gruppe: p.gruppe, quelle: p.quelle };
   }
   zeigeMengeZahlen();
-  viewer.scene.requestRender();  // Punkte und Figuren haben sich bewegt
+  viewer.scene.requestRender();  // Punkte haben sich bewegt
 }
 
 // Zahlen im "Jetzt"-Feld, direkt nach jeder Berechnung (nur neu schreiben, wenn sich etwas ändert)
@@ -1252,9 +1217,6 @@ zeichneStreifen();
 window.addEventListener("resize", () => setTimeout(() => { zeichneZeitleiste(); zeichneStreifen(); }, 50));
 viewer.clock.onTick.addEventListener(aktualisiereJetzt);
 viewer.clock.onTick.addEventListener(aktualisiereMenge);
-// Kamerabewegung ändert, welche Personen als Figur gezeigt werden
-viewer.camera.percentageChanged = 0.05;
-viewer.camera.changed.addEventListener(() => { letzteZeit = -2; });
 
 // ---------- Gezählte Dichte (aus Videobildern, dichte.json) ----------
 // Sieben Zeitpunkte auf einem 15-m-Raster. Gezeigt wird der Zeitpunkt, in dessen Fenster (von–bis) die Uhrzeit liegt,
@@ -1330,21 +1292,21 @@ fetch("objekte-verortet.json").then((a) => a.json()).then((d) => {
         outline: true, outlineColor: BLAU.withAlpha(0.6) },
       point: o.linie ? undefined : { pixelSize: 11, color: BLAU, outlineColor: Cesium.Color.WHITE, outlineWidth: 3,
         disableDepthTestDistance: Number.POSITIVE_INFINITY },
-      label: schildNoetig ? schild(`${o.art} (aus Video)`, { versatz: -20, amBoden: false }) : undefined });
+      label: schildNoetig ? schild(`${o.art} (aus Video)`, { versatz: -20, amBoden: false, bis: 700 }) : undefined });
   }
   viewer.scene.requestRender();
 }).catch(() => {});
 
-// ---------- Darstellung der Menschen: Figuren (simuliert), Dichte (gezählt) oder beides ----------
+// ---------- Darstellung der Menschen: Punkte (simuliert), Dichte (gezählt) oder beides ----------
 const WARNUNG = {
-  figuren: `<b>⚠ Simulation, keine Abbildung der Wirklichkeit.</b> Die Punkte und Figuren sind <b>keine einzelnen Personen</b>
+  figuren: `<b>⚠ Simulation, keine Abbildung der Wirklichkeit.</b> Die Punkte sind <b>keine einzelnen Personen</b>
     und keine echten Positionen. Personenzahlen, Wege und Abläufe sind <b>Schätzungen</b> aus Videos und Berichten und können
     falsch sein. Belegt sind nur die verlinkten Quellen.`,
   dichte: `<b>⚠ Rekonstruktion, keine Abbildung der Wirklichkeit.</b> Die farbigen Felder sind <b>aus Videobildern gezählt</b>,
     ungenau (Kameraorte oft nur grob bekannt) und nur dort, wo eine Kamera hinsah. Blaue Punkte (Polizei), Fahrzeuge,
     Wege und Abläufe sind <b>Schätzungen</b>. Belegt sind nur die verlinkten Quellen.`,
 };
-WARNUNG.beides = WARNUNG.figuren.replace("Die Punkte und Figuren sind", "Punkte und Figuren sind simuliert,")
+WARNUNG.beides = WARNUNG.figuren.replace("Die Punkte sind", "Die Punkte sind simuliert,")
   + " Die farbigen Felder sind aus Videobildern gezählt und ungenau.";
 function setzeModus(m) {
   nurPolizei = m === "dichte"; dichteSichtbar = m !== "figuren"; letzteZeit = -2;
