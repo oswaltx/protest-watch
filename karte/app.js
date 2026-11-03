@@ -22,6 +22,7 @@ const startS = sek(start), endeS = sek(ende);
 
 // Handys und schwache Rechner: weniger Kantenglättung, weniger Bilder pro Sekunde, nur jeder dritte simulierte Punkt
 const SCHWACH = matchMedia("(pointer: coarse)").matches || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+const SCHMAL = matchMedia("(max-width: 700px)");  // Handy-Layout (wie die CSS-Regel in index.html)
 const viewer = new Cesium.Viewer("karte", {
   globe: false,                 // Google-Kacheln enthalten Gelände schon
   baseLayerPicker: false,
@@ -196,7 +197,7 @@ const AUF_KACHELN = Cesium.HeightReference.CLAMP_TO_3D_TILE ?? Cesium.HeightRefe
 
 // Beschriftungen: doppelt so groß gezeichnet und halb skaliert (scharf statt verwaschen), auf dunklem Hintergrund statt mit
 // dickem Umriss – der ließ kleine Schrift auf hellem Grund (Wasser, Straßen) zusammenlaufen.
-function schild(text, { farbe = Cesium.Color.WHITE, versatz = -14, amBoden = true, bis = Infinity } = {}) {
+function schild(text, { farbe = Cesium.Color.WHITE, versatz = -14, amBoden = false, bis = Infinity } = {}) {
   return { text, font: "600 26px system-ui, sans-serif", scale: 0.5, fillColor: farbe, style: Cesium.LabelStyle.FILL,
            showBackground: true, backgroundColor: new Cesium.Color(0.08, 0.08, 0.09, 0.8),
            backgroundPadding: new Cesium.Cartesian2(10, 6), pixelOffset: new Cesium.Cartesian2(0, versatz),
@@ -211,11 +212,13 @@ const HAUPTORTE = new Set(["Bastei", "Musical Dome", "Breslauer Platz", "Ebertpl
 function zeigeOrte() {
   const liste = $("orte");
   for (const o of window.ORTE) {
+    const [lat, lon] = anLand(o.lat, o.lon);  // „ungefähr“ verortete Orte am Ufer nicht im Rhein zeigen
     ortEntity[o.name] = viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(o.lon, o.lat),
+      // feste Höhe knapp über Straßen- und Wasserflächen (am Boden „haftend“ lag der Punkt halb darunter)
+      position: Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + 2),
       point: { pixelSize: 9, color: Cesium.Color.ORANGE, outlineColor: Cesium.Color.BLACK, outlineWidth: 1,
-               heightReference: AUF_KACHELN, disableDepthTestDistance: 50 },
-      label: schild(o.name, { versatz: -16, bis: HAUPTORTE.has(o.name) ? Infinity : 900 }),
+               disableDepthTestDistance: 50 },
+      label: schild(o.name, { versatz: -16, amBoden: false, bis: HAUPTORTE.has(o.name) ? Infinity : 900 }),
       description: `<p>${o.info || ""}</p><p><small>Genauigkeit: ${o.genau}</small></p>`,
       name: o.name,
     });
@@ -547,7 +550,7 @@ function zeigeWege() {
         availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: von, stop: bis })]),
         position: pos,
         point: { pixelSize: 12, color: farbe, outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
-                 heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+                 disableDepthTestDistance: Number.POSITIVE_INFINITY },
         label: schild(`📹 ${w.kanal}`, { farbe, versatz: 20, bis: 1500 }),
         path: { leadTime: 0, trailTime: 15 * 60, width: 3, resolution: 30,
                 material: new Cesium.PolylineGlowMaterialProperty({ color: farbe, glowPower: 0.15 }) },
@@ -591,9 +594,9 @@ function zeigeKameras() {
     viewer.entities.add({
       name: `🎥 ${k.kanal}`,
       availability: zeit,
-      position: Cesium.Cartesian3.fromDegrees(k.lon, k.lat),
+      position: Cesium.Cartesian3.fromDegrees(k.lon, k.lat, GRUND + 2),
       point: { pixelSize: 8, color: farbe, outlineColor: Cesium.Color.BLACK, outlineWidth: 1,
-               heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+               disableDepthTestDistance: Number.POSITIVE_INFINITY },
       properties: { kamera: k },
       description: beschreibung,
     });
@@ -642,7 +645,7 @@ const populationen = MENGE.populationen.map((p) => {
 
 const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
   const pos = new Cesium.SampledPositionProperty();
-  for (const w of f.wege) pos.addSample(Cesium.JulianDate.fromDate(new Date(w.t * 1000)), Cesium.Cartesian3.fromDegrees(w.lon, w.lat));
+  for (const w of f.wege) pos.addSample(Cesium.JulianDate.fromDate(new Date(w.t * 1000)), Cesium.Cartesian3.fromDegrees(w.lon, w.lat, GRUND + 2.5));
   const von = Cesium.JulianDate.fromDate(new Date(f.wege[0].t * 1000));
   const bis = Cesium.JulianDate.fromDate(new Date(f.wege[f.wege.length - 1].t * 1000));
   return viewer.entities.add({
@@ -650,7 +653,7 @@ const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
     availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: von, stop: bis })]),
     position: pos,
     point: { pixelSize: 14, color: Cesium.Color.fromCssColorString("#2d5fd6"), outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
-             heightReference: AUF_KACHELN, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+             disableDepthTestDistance: Number.POSITIVE_INFINITY },
     label: schild(f.name, { versatz: -18, bis: 700 }),
     description: `<p>Position geschätzt aus: ${f.quelle}</p>`,
   });
@@ -846,9 +849,11 @@ async function messeUferHoehe() {
 // ---------- Start ----------
 // Übersicht: der ganze Demo-Bereich vom Dom bis zur Bastei, schräg von Süden, das Ufer etwas links der Mitte
 // (rechts liegt die Leiste über dem Rhein)
-const uebersicht = () => viewer.camera.flyTo({
-  destination: Cesium.Cartesian3.fromDegrees(6.9608, 50.9398, 560),
-  orientation: { heading: Cesium.Math.toRadians(16), pitch: Cesium.Math.toRadians(-36), roll: 0 }, duration: 1.5 });
+const uebersicht = () => viewer.camera.flyTo(SCHMAL.matches
+  ? { destination: Cesium.Cartesian3.fromDegrees(6.9636, 50.9418, 900),   // Handy hochkant: steiler von oben
+      orientation: { heading: Cesium.Math.toRadians(16), pitch: Cesium.Math.toRadians(-58), roll: 0 }, duration: 1.5 }
+  : { destination: Cesium.Cartesian3.fromDegrees(6.9608, 50.9398, 560),
+      orientation: { heading: Cesium.Math.toRadians(16), pitch: Cesium.Math.toRadians(-36), roll: 0 }, duration: 1.5 });
 $("uebersicht").onclick = uebersicht;
 $("tonmodell").onclick = () => setzeTonmodell(!stadt?.customShader);
 $("google-knopf").onclick = () => (stadt && stadt.show ? ladeOsm() : ladeGoogle());
@@ -1314,10 +1319,16 @@ const WARNUNG = {
 };
 WARNUNG.beides = WARNUNG.figuren.replace("Die Punkte sind", "Die Punkte sind simuliert,")
   + " Die farbigen Felder sind aus Videobildern gezählt und ungenau.";
+// auf dem Handy kürzer, sonst verdeckt der Hinweis ein Fünftel des Bildschirms (die lange Fassung steht in der Hilfe)
+const WARNUNG_KURZ = {
+  figuren: "<b>⚠ Simulation:</b> Punkte sind keine echten Personen, Zahlen und Wege sind Schätzungen.",
+  dichte: "<b>⚠ Rekonstruktion:</b> Felder aus Videos gezählt, ungenau; Wege und Abläufe geschätzt.",
+  beides: "<b>⚠ Simulation:</b> Punkte sind keine echten Personen; Felder aus Videos gezählt, ungenau.",
+};
 function setzeModus(m) {
   nurPolizei = m === "dichte"; dichteSichtbar = m !== "figuren"; letzteZeit = -2;
   document.querySelectorAll("#modus button").forEach((b) => b.classList.toggle("an", b.dataset.modus === m));
-  $("warnung").innerHTML = WARNUNG[m];
+  $("warnung").innerHTML = (SCHMAL.matches ? WARNUNG_KURZ : WARNUNG)[m];
   zeigeDichte(true);
 }
 document.querySelectorAll("#modus button").forEach((b) => { b.onclick = () => setzeModus(b.dataset.modus); });
