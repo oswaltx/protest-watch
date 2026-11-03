@@ -128,7 +128,8 @@ function baueGrundkarte() {
   for (const [name, lat, lon] of G.namen) namen.add({ position: Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + 1), text: name,
     font: "500 22px system-ui, sans-serif", scale: 0.5, fillColor: Cesium.Color.fromCssColorString("#6b6f76"),
     distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1800), disableDepthTestDistance: 0 });
-  return [flaechen(G.wasser, "#bcd7ea", 0.3), flaechen(G.strassen, "#c8cace", 0.6), bruecken, namen];
+  return [flaechen(G.wasser, "#bcd7ea", 0.3), flaechen(G.strassen, "#c8cace", 0.6), flaechen(G.gleise || [], "#8f949b", 0.8),
+    bruecken, namen];
 }
 function setzeKartenstil(stil) {
   kartenstil = stil;
@@ -1271,6 +1272,31 @@ function zeigeDichte(erzwingen) {
   viewer.scene.requestRender();
 }
 viewer.clock.onTick.addEventListener(() => zeigeDichte(false));
+
+// ---------- Aus Videos verortete Fahrzeuge und Polizeiketten (objekte-verortet.json) ----------
+// Genauer als die Schätzungen: Kamerastandort aus dem Bild bestimmt, Entfernung aus bekannten Größen. Kreis = Unsicherheit.
+fetch("objekte-verortet.json").then((a) => a.json()).then((d) => {
+  const BLAU = Cesium.Color.fromCssColorString("#2d5fd6");
+  for (const o of d.objekte) {
+    const zeitraum = new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: ortsZeit(o.zeit_von), stop: ortsZeit(o.zeit_bis) })]);
+    const u = o.unsicherheit_m || {}, radius = Math.max(u.laengs || 10, u.quer || 0);
+    const text = `<p><b>Aus einem öffentlichen Video verortet</b>, ${o.zeit_von}–${o.zeit_bis} Uhr (Zeitfenster des Videos).</p>
+      <p>${o.ort || ""}</p><p><small>Verfahren: ${o.verfahren || ""}. Unsicherheit etwa ±${u.laengs || "?"} m längs, ±${u.quer || "?"} m quer.
+      ${o.quelle ? "Quelle: " + o.quelle : ""}</small></p>`;
+    const name = o.name || o.art;
+    if (o.linie) viewer.entities.add({ availability: zeitraum, name, description: text,
+      polyline: { positions: Cesium.Cartesian3.fromDegreesArrayHeights(o.linie.flatMap(([la, lo]) => [lo, la, GRUND + 1.5])),
+        width: 6, material: BLAU } });
+    viewer.entities.add({ availability: zeitraum, name, description: text,
+      position: Cesium.Cartesian3.fromDegrees(o.lon, o.lat, GRUND + 1.2),
+      ellipse: { semiMajorAxis: radius, semiMinorAxis: radius, height: GRUND + 1.1, material: BLAU.withAlpha(0.15),
+        outline: true, outlineColor: BLAU.withAlpha(0.6) },
+      point: o.linie ? undefined : { pixelSize: 11, color: BLAU, outlineColor: Cesium.Color.WHITE, outlineWidth: 3,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY },
+      label: schild(`${o.art} (aus Video)`, { versatz: -20, amBoden: false }) });
+  }
+  viewer.scene.requestRender();
+}).catch(() => {});
 
 // ---------- Darstellung der Menschen: Figuren (simuliert), Dichte (gezählt) oder beides ----------
 const WARNUNG = {

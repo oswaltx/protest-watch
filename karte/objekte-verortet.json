@@ -1,0 +1,150 @@
+{
+ "objekte": [
+  {
+   "art": "Wasserwerfer",
+   "name": "Wasserwerfer (K1 oder K2, im Bild nicht lesbar)",
+   "zeit_von": "16:45",
+   "zeit_bis": "17:00",
+   "lat": 50.948744,
+   "lon": 6.965294,
+   "ausrichtung_grad": null,
+   "unsicherheit_m": {
+    "laengs": 7,
+    "quer": 3
+   },
+   "ort": "nördliche Fahrbahn KAU an der Einmündung Thürmchenswall",
+   "spritzt_richtung_grad": 265,
+   "verfahren": "Peilung aus Kamerapose + Entfernung aus Bildhöhe (3,6 m ≙ 126 px → 32 m)"
+  },
+  {
+   "art": "Polizeikette",
+   "zeit_von": "16:45",
+   "zeit_bis": "17:00",
+   "linie": [
+    [
+     50.948748,
+     6.965184
+    ],
+    [
+     50.948825,
+     6.96511
+    ]
+   ],
+   "lat": 50.948786,
+   "lon": 6.965147,
+   "ausrichtung_grad": 328,
+   "laenge_m": 11,
+   "unsicherheit_m": {
+    "laengs": 8,
+    "quer": 3
+   },
+   "ort": "quer über die südliche Fahrbahn vor St. Vincenz-Haus / Einmündung Thürmchenswall, Front nach SW zur Menge vor dem Portikus",
+   "verfahren": "Peilung + Entfernung aus Personenhöhe (1,8 m ≙ 55 px → 37 m)"
+  },
+  {
+   "art": "Polizeigruppe",
+   "zeit_von": "16:45",
+   "zeit_bis": "17:00",
+   "lat": 50.948756,
+   "lon": 6.965291,
+   "unsicherheit_m": {
+    "laengs": 7,
+    "quer": 3
+   },
+   "ort": "neben dem Wasserwerfer, nördliche Fahrbahn",
+   "verfahren": "Peilung + Personenhöhe (65 px → 31 m)"
+  },
+  {
+   "art": "Wasserwerfer",
+   "name": "Wasserwerfer K1",
+   "zeit_von": "16:38",
+   "zeit_bis": "16:55",
+   "lat": 50.94866,
+   "lon": 6.96531,
+   "ausrichtung_grad": 20,
+   "ausrichtung_unsicher_grad": 30,
+   "unsicherheit_m": {
+    "laengs": 15,
+    "quer": 4
+   },
+   "ort": "nördliche Fahrbahn KAU südlich der Einmündung Thürmchenswall, Front nach N/NW zur Menge",
+   "verfahren": "Tiefenpuffer der Google-Kacheln am Vorderrad (8 m von der Kamera), Fahrzeugmitte geschätzt"
+  },
+  {
+   "art": "Polizeikette",
+   "name": "Südsperre KAU an der Einmündung Dagobertstraße",
+   "zeit_von": "15:20",
+   "zeit_bis": "16:30",
+   "linie": [
+    [
+     50.947652,
+     6.964607
+    ],
+    [
+     50.947672,
+     6.964478
+    ]
+   ],
+   "lat": 50.947662,
+   "lon": 6.964543,
+   "ausrichtung_grad": 284,
+   "front_richtung_grad": 20,
+   "unsicherheit_m": {
+    "laengs": 15,
+    "quer": 4
+   },
+   "sicherheit": "mittel",
+   "ort": "quer über die südliche Fahrbahn des KAU an der Einmündung Dagobertstraße, Front nach N zur Menge",
+   "verfahren": "Render-Abgleich (Kamera auf der südwärtigen Fahrbahn, Blick 200°), Entfernung aus Personenhöhe (80 px → ~17 m)"
+  },
+  {
+   "art": "Wasserwerfer",
+   "name": "Wasserwerfer (Kennung nicht lesbar), steht in/hinter der Südsperre",
+   "zeit_von": "15:20",
+   "zeit_bis": "16:30",
+   "lat": 50.947604,
+   "lon": 6.96452,
+   "ausrichtung_grad": 20,
+   "ausrichtung_unsicher_grad": 30,
+   "unsicherheit_m": {
+    "laengs": 15,
+    "quer": 4
+   },
+   "sicherheit": "mittel",
+   "ort": "südwärtige Fahrbahn KAU, direkt südlich der Kette an der Dagobertstraße; Blaulicht an, Front nach N",
+   "verfahren": "Peilung + Fahrzeughöhe (3,6 m ≙ 115 px → ~23 m)"
+  },
+  {
+   "art": "Wasserwerfer",
+   "name": "Wasserwerfer K1 mit grünem Sonderwagen (Räumpanzer) dahinter",
+   "zeit_von": "15:20",
+   "zeit_bis": "16:30",
+   "lat": 50.947634,
+   "lon": 6.964715,
+   "ausrichtung_grad": null,
+   "unsicherheit_m": {
+    "laengs": 15,
+    "quer": 8
+   },
+   "sicherheit": "mittel",
+   "ort": "an der Südsperre Dagobertstraße, hinter der Kette am Grünstreifen; genaue Lage nicht eingepasst (Schwenk ohne Anker)",
+   "verfahren": "Zuordnung über den Schwenk von s14 zu s20, Lage geschätzt"
+  },
+  {
+   "art": "Polizeikette",
+   "name": "Kette am Rheinuferweg beim St. Vincenz-Haus",
+   "zeit_von": "15:38",
+   "zeit_bis": "15:53",
+   "lat": 50.94865,
+   "lon": 6.96535,
+   "ausrichtung_grad": null,
+   "unsicherheit_m": {
+    "laengs": 25,
+    "quer": 10
+   },
+   "sicherheit": "mittel",
+   "ort": "Rheinuferseite südlich der Haltestelle St. Vincenz-Haus, Kette in Schutzausrüstung auf dem Uferweg bzw. Rasen, um 15:52 quer über den Weg Richtung Süden",
+   "verfahren": "nur Sichtprüfung, Ort aus wege.js (Haltestellenschild), nicht eingepasst"
+  }
+ ]
+}
