@@ -12,6 +12,35 @@ if (window.CESIUM_ION_TOKEN) Cesium.Ion.defaultAccessToken = window.CESIUM_ION_T
 // Bodenhöhe über dem Ellipsoid: ion-Kacheln liegen auf echter Höhe (≈ 50 m NHN + 47 m Geoid),
 // die eigenen Gebäude auf dem flachen Globus bei 0
 const GRUND = 0;  // flache Karte auf dem Ellipsoid (lokal wie öffentlich); in der Google-Ansicht liegen Linien dadurch tiefer
+// Gelände (DGM1, 3d/gelaende.js, nur wenn mitgeladen; ?flach schaltet es ab): Bodenhöhe an einer Stelle, relativ zu GRUND
+// (0 = Fahrbahn Konrad-Adenauer-Ufer, Rhein −6 m, Domplatte +7 m). Ohne Gelände überall GRUND, also wie bisher.
+// gelaendeHoehe ist ein bilinearer Gitter-Lookup, billig genug für die Menge (5.000 Punkte, 10 Mal pro Sekunde).
+const GELAENDE = !!window.gelaendeHoehe && !new URLSearchParams(location.search).has("flach");
+const boden = GELAENDE ? (lon, lat) => GRUND + window.gelaendeHoehe(lon, lat) : () => GRUND;
+// tiefster (bzw. höchster) Geländepunkt eines Umrisses [lon, lat, …]: Sockel für Gebäude, damit nichts über dem Hang schwebt
+function sockel(punkte, hoechster = false) {
+  if (!GELAENDE) return GRUND;
+  let m = hoechster ? -Infinity : Infinity;
+  for (let i = 0; i < punkte.length; i += 2) {
+    const b = boden(punkte[i], punkte[i + 1]);
+    m = hoechster ? Math.max(m, b) : Math.min(m, b);
+  }
+  return m;
+}
+// Umriss [lon, lat, …] als Positionen auf dem Gelände (+ dz); lange Kanten auf höchstens 8 m verdichtet, damit
+// Flächen dem Hang folgen statt hindurchzuschneiden
+function amGelaende(punkte, dz) {
+  const o = [];
+  for (let i = 0; i < punkte.length; i += 2) {
+    const j = (i + 2) % punkte.length, lon = punkte[i], lat = punkte[i + 1];
+    const n = Math.max(1, Math.ceil(Math.hypot((punkte[j] - lon) * 70000, (punkte[j + 1] - lat) * 111000) / 8));
+    for (let k = 0; k < n; k++) {
+      const x = lon + (punkte[j] - lon) * k / n, y = lat + (punkte[j + 1] - lat) * k / n;
+      o.push(x, y, boden(x, y) + dz);
+    }
+  }
+  return Cesium.Cartesian3.fromDegreesArrayHeights(o);
+}
 
 const TAG = "2026-10-31";
 const ortsZeit = (hhmm) => Cesium.JulianDate.fromIso8601(`${TAG}T${hhmm}:00+01:00`);
@@ -93,9 +122,15 @@ async function ladeOsm(grund) {
   if (!viewer.scene.globe) {
     viewer.scene.globe = new Cesium.Globe();
     viewer.scene.globe.showGroundAtmosphere = false;
+    if (GELAENDE) {  // Gelände unter dem Globus; was dahinter liegt, verdeckt der Hang
+      viewer.scene.globe.terrainProvider = window.gelaendeTerrain();
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+    }
     osmKacheln = viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
       // öffentlich über den eigenen Kachel-Cache, damit keine IP-Adressen an die OSM Foundation gehen
       url: OEFFENTLICH ? "/osm/" : "https://tile.openstreetmap.org/", credit: "© OpenStreetMap-Mitwirkende" }));
+    // Schummerung: ohne sie wäre die Böschung auf der schlichten Karte unsichtbar (einfarbiger Globus)
+    if (GELAENDE) window.gelaendeSchatten(viewer).catch(() => {});
     viewer.creditDisplay.addStaticCredit(new Cesium.Credit("Karte: © OpenStreetMap-Mitwirkende"));
   }
   viewer.scene.globe.show = true;
@@ -117,7 +152,10 @@ function baueGrundkarte() {
   // einfache Flächen knapp über dem flachen Boden (GroundPrimitive wäre auf Handys deutlich langsamer)
   const flaechen = (liste, farbe, hoehe) => viewer.scene.primitives.add(new Cesium.Primitive({
     geometryInstances: liste.map((f) => new Cesium.GeometryInstance({
-      geometry: new Cesium.PolygonGeometry({ polygonHierarchy: hierarchie(f), height: GRUND + hoehe,
+      geometry: new Cesium.PolygonGeometry({ ...(GELAENDE
+        ? { polygonHierarchy: new Cesium.PolygonHierarchy(amGelaende(f[0], hoehe),
+            f[1].map((l) => new Cesium.PolygonHierarchy(amGelaende(l, hoehe)))), perPositionHeight: true }
+        : { polygonHierarchy: hierarchie(f), height: GRUND + hoehe }),
         vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT }),
       attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString(farbe)) } })),
     appearance: new Cesium.PerInstanceColorAppearance({ flat: true, translucent: false }) }));
@@ -128,7 +166,7 @@ function baueGrundkarte() {
       attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString("#8d929a")) } }))),
     appearance: new Cesium.PerInstanceColorAppearance({ translucent: false }) }));
   const namen = viewer.scene.primitives.add(new Cesium.LabelCollection());
-  for (const [name, lat, lon] of G.namen) namen.add({ position: Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + 1), text: name,
+  for (const [name, lat, lon] of G.namen) namen.add({ position: Cesium.Cartesian3.fromDegrees(lon, lat, boden(lon, lat) + 1), text: name,
     font: "500 22px system-ui, sans-serif", scale: 0.5, fillColor: Cesium.Color.fromCssColorString("#6b6f76"),
     distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1800), disableDepthTestDistance: 0 });
   return [flaechen(G.wasser, "#bcd7ea", 0.3), flaechen(G.strassen, "#c8cace", 0.6), flaechen(G.gleise || [], "#8f949b", 0.8),
@@ -190,9 +228,15 @@ function eigeneGebaeude() {
   const weiss = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.WHITE);
   const schwarz = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromCssColorString("#1d1d1f"));
   // Wände; bei Gebäudeteilen (Dom) von der Mindesthöhe bis unter das Dach
-  const huelle = ([hoehe, punkte, unten = 0, dach = 0]) => ({
-    polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte)),
-    height: GRUND + unten, extrudedHeight: GRUND + hoehe - dach });
+  // Sockel auf dem tiefsten Geländepunkt; Gebäudeteile (Dom, mit Mindest- oder Dachhöhe) auf einem gemeinsamen Sockel
+  const teile = window.GEBAEUDE.filter((g) => g.length > 2);
+  const teilSockel = teile.length ? Math.min(...teile.map((g) => sockel(g[1]))) : GRUND;
+  const sockelVon = (g) => (g.length > 2 ? teilSockel : sockel(g[1]));
+  const huelle = (g) => {
+    const [hoehe, punkte, unten = 0, dach = 0] = g, s = sockelVon(g);
+    return { polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte)),
+      height: s + unten, extrudedHeight: s + hoehe - dach };
+  };
   const flaechen = window.GEBAEUDE.map((g, i) => new Cesium.GeometryInstance({ id: i,
     geometry: new Cesium.PolygonGeometry({ ...huelle(g), vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT }),
     attributes: { color: weiss } }));
@@ -200,11 +244,13 @@ function eigeneGebaeude() {
     geometry: new Cesium.PolygonOutlineGeometry(huelle(g)), attributes: { color: schwarz } }));
   // Dächer der Gebäudeteile (Dom): Spitze über der Mitte (Turmspitzen, Zeltdächer) oder First (Satteldach,
   // nur bei vier Ecken: First zwischen den Mitten der beiden kürzeren Seiten)
-  for (const [hoehe, punkte, unten = 0, dach = 0, form] of window.GEBAEUDE) {
+  for (const g of window.GEBAEUDE) {
+    const [hoehe, punkte, unten = 0, dach = 0, form] = g;
     if (!dach) continue;
+    const s = sockelVon(g);
     const n = punkte.length / 2;
     const ecken = Cesium.Cartesian3.fromDegreesArrayHeights(
-      punkte.flatMap((z, j) => (j % 2 ? [z, GRUND + hoehe - dach] : [z])));
+      punkte.flatMap((z, j) => (j % 2 ? [z, s + hoehe - dach] : [z])));
     const oben = [];   // Spitze bzw. die zwei Firstpunkte
     const dreiecke = [], linien = [];
     const mitte = (a, b) => [(punkte[2 * a] + punkte[2 * b]) / 2, (punkte[2 * a + 1] + punkte[2 * b + 1]) / 2];
@@ -212,14 +258,14 @@ function eigeneGebaeude() {
       const laenge = (a, b) => Cesium.Cartesian3.distance(ecken[a], ecken[b]);
       const k = laenge(0, 1) + laenge(2, 3) < laenge(1, 2) + laenge(3, 0) ? 0 : 1;  // k: Beginn einer kurzen Seite
       const [a0, a1, b0, b1] = [k, k + 1, (k + 2) % 4, (k + 3) % 4];
-      for (const [x, y] of [mitte(a0, a1), mitte(b0, b1)]) oben.push(Cesium.Cartesian3.fromDegrees(x, y, GRUND + hoehe));
+      for (const [x, y] of [mitte(a0, a1), mitte(b0, b1)]) oben.push(Cesium.Cartesian3.fromDegrees(x, y, s + hoehe));
       const F1 = n, F2 = n + 1;   // F1 über der Seite a0–a1, F2 über b0–b1
       dreiecke.push(a0, a1, F1, b0, b1, F2, a1, b0, F2, a1, F2, F1, b1, a0, F1, b1, F1, F2);
       linien.push(F1, F2, a0, F1, a1, F1, b0, F2, b1, F2);
     } else {
       let lon = 0, lat = 0;
       for (let j = 0; j < n; j++) { lon += punkte[2 * j] / n; lat += punkte[2 * j + 1] / n; }
-      oben.push(Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + hoehe));
+      oben.push(Cesium.Cartesian3.fromDegrees(lon, lat, s + hoehe));
       for (let j = 0; j < n; j++) { dreiecke.push(j, (j + 1) % n, n); linien.push(j, n); }
     }
     const alle = [...ecken, ...oben];
@@ -293,7 +339,7 @@ function zeigeOrte() {
     const [lat, lon] = anLand(o.lat, o.lon);  // „ungefähr“ verortete Orte am Ufer nicht im Rhein zeigen
     ortEntity[o.name] = viewer.entities.add({
       // feste Höhe knapp über Straßen- und Wasserflächen (am Boden „haftend“ lag der Punkt halb darunter)
-      position: Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + 2),
+      position: Cesium.Cartesian3.fromDegrees(lon, lat, boden(lon, lat) + 2),
       point: { pixelSize: 9, color: Cesium.Color.ORANGE, outlineColor: Cesium.Color.BLACK, outlineWidth: 1,
                disableDepthTestDistance: 50 },
       label: schild(o.name, { versatz: -16, amBoden: false, bis: HAUPTORTE.has(o.name) ? Infinity : 900 }),
@@ -623,7 +669,7 @@ function zeigeWege() {
       const pos = new Cesium.SampledPositionProperty();
       for (const p of abschnitt) {
         // Spur kann nicht an Kacheln haften: feste Höhe Straßenniveau plus 2 m
-        pos.addSample(Cesium.JulianDate.fromDate(new Date(p.t * 1000)), Cesium.Cartesian3.fromDegrees(p.lon, p.lat, GRUND + 2));
+        pos.addSample(Cesium.JulianDate.fromDate(new Date(p.t * 1000)), Cesium.Cartesian3.fromDegrees(p.lon, p.lat, boden(p.lon, p.lat) + 2));
       }
       const von = Cesium.JulianDate.fromDate(new Date(abschnitt[0].t * 1000));
       const bis = Cesium.JulianDate.fromDate(new Date((abschnitt[abschnitt.length - 1].t + 59) * 1000));
@@ -648,9 +694,9 @@ function zeigeWege() {
             const p = naechsterPunkt({ punkte: abschnitt }, sek(zeit));
             if (!c || !(p.blick in RICHTUNG)) return undefined;
             const g = Cesium.Cartographic.fromCartesian(c);
-            return sichtfeld(Cesium.Math.toDegrees(g.latitude), Cesium.Math.toDegrees(g.longitude), RICHTUNG[p.blick], 60, 60);
+            return sichtfeld(Cesium.Math.toDegrees(g.latitude), Cesium.Math.toDegrees(g.longitude), RICHTUNG[p.blick], 60, 60, 1.6);
           }, false),
-          height: GRUND + 1.6, material: farbe.withAlpha(0.15), outline: true, outlineColor: farbe.withAlpha(0.6) },
+          height: GELAENDE ? undefined : GRUND + 1.6, perPositionHeight: GELAENDE, material: farbe.withAlpha(0.15), outline: true, outlineColor: farbe.withAlpha(0.6) },
         properties: { stream: w.id },
       }));
     });
@@ -675,13 +721,14 @@ function wegBeschreibung(w, s) {
 // Sichtfeld: bei eingepassten Posen genaue Richtung und Bildwinkel, sonst Himmelsrichtung ±30°; Reichweite grob
 // (am Boden 60 m, erhöht 120 m), weil Menschen und Gebäude den Blick meist früher begrenzen.
 const sichtfelder = [];  // zum Ein- und Ausblenden unter „Steuerung“
-function sichtfeld(lat, lon, kursGrad, winkelGrad, reichweite) {
+function sichtfeld(lat, lon, kursGrad, winkelGrad, reichweite, dz = 0) {
   const kx = 111320 * Math.cos(lat * Math.PI / 180), punkte = [lon, lat];
   for (let j = 0; j <= 8; j++) {
     const w = (kursGrad - winkelGrad / 2 + winkelGrad * j / 8) * Math.PI / 180;
     punkte.push(lon + reichweite * Math.sin(w) / kx, lat + reichweite * Math.cos(w) / 111320);
   }
-  return new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte));
+  // mit Gelände: Höhe je Ecke (Polygon mit perPositionHeight), sonst flach in der Höhe des Polygons
+  return new Cesium.PolygonHierarchy(GELAENDE ? amGelaende(punkte, dz) : Cesium.Cartesian3.fromDegreesArray(punkte));
 }
 const RICHTUNG = { N: 0, NO: 45, O: 90, SO: 135, S: 180, SW: 225, W: 270, NW: 315 };
 const SICHER_FARBE = { hoch: "#ffffff", mittel: "#ffd24d", niedrig: "#ff8c4d", unbekannt: "#999999" };
@@ -701,7 +748,7 @@ function zeigeKameras() {
     viewer.entities.add({
       name: `🎥 ${k.kanal}`,
       availability: zeit,
-      position: Cesium.Cartesian3.fromDegrees(k.lon, k.lat, GRUND + 2),
+      position: Cesium.Cartesian3.fromDegrees(k.lon, k.lat, boden(k.lon, k.lat) + 2),
       point: { pixelSize: 8, color: farbe, outlineColor: Cesium.Color.BLACK, outlineWidth: 1,
                disableDepthTestDistance: Number.POSITIVE_INFINITY },
       properties: { kamera: k },
@@ -711,8 +758,8 @@ function zeigeKameras() {
       const genau = k.kurs != null;  // eingepasste Pose: kräftiger, sonst nur angedeutet
       sichtfelder.push(viewer.entities.add({
         availability: zeit,
-        polygon: { hierarchy: sichtfeld(k.lat, k.lon, k.kurs ?? RICHTUNG[k.blick], k.sichtfeld ?? 60, k.hoehe === "erhöht" ? 120 : 60),
-          height: GRUND + 1.5, material: farbe.withAlpha(genau ? 0.2 : 0.07), outline: true,
+        polygon: { hierarchy: sichtfeld(k.lat, k.lon, k.kurs ?? RICHTUNG[k.blick], k.sichtfeld ?? 60, k.hoehe === "erhöht" ? 120 : 60, 1.5),
+          height: GELAENDE ? undefined : GRUND + 1.5, perPositionHeight: GELAENDE, material: farbe.withAlpha(genau ? 0.2 : 0.07), outline: true,
           outlineColor: farbe.withAlpha(genau ? 0.8 : 0.3) },
         properties: { kamera: k },
         description: beschreibung,
@@ -725,7 +772,8 @@ function zeigeKameras() {
       viewer.entities.add({
         availability: zeit,
         polyline: {
-          positions: Cesium.Cartesian3.fromDegreesArrayHeights([k.lon, k.lat, GRUND + 2, k.lon + dLon, k.lat + dLat, GRUND + 2]),
+          positions: Cesium.Cartesian3.fromDegreesArrayHeights([k.lon, k.lat, boden(k.lon, k.lat) + 2,
+            k.lon + dLon, k.lat + dLat, boden(k.lon + dLon, k.lat + dLat) + 2]),
           width: 6, material: new Cesium.PolylineArrowMaterialProperty(farbe.withAlpha(0.8)),
         },
         properties: { kamera: k },
@@ -763,7 +811,7 @@ const populationen = MENGE.populationen.map((p) => {
 
 const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
   const pos = new Cesium.SampledPositionProperty();
-  for (const w of f.wege) pos.addSample(Cesium.JulianDate.fromDate(new Date(w.t * 1000)), Cesium.Cartesian3.fromDegrees(w.lon, w.lat, GRUND + 2.5));
+  for (const w of f.wege) pos.addSample(Cesium.JulianDate.fromDate(new Date(w.t * 1000)), Cesium.Cartesian3.fromDegrees(w.lon, w.lat, boden(w.lon, w.lat) + 2.5));
   const von = Cesium.JulianDate.fromDate(new Date(f.wege[0].t * 1000));
   const bis = Cesium.JulianDate.fromDate(new Date(f.wege[f.wege.length - 1].t * 1000));
   return viewer.entities.add({
@@ -779,7 +827,7 @@ const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
 
 // Angemeldete Fläche (gestrichelt) und tatsächlicher Zug
 for (const m of MENGE.markierungen) {
-  const pos = Cesium.Cartesian3.fromDegreesArrayHeights(m.punkte.flatMap(([lat, lon]) => [lon, lat, GRUND + 2]));
+  const pos = Cesium.Cartesian3.fromDegreesArrayHeights(m.punkte.flatMap(([lat, lon]) => [lon, lat, boden(lon, lat) + 2]));
   viewer.entities.add({
     name: m.name,
     polyline: { positions: pos, width: m.art === "flaeche" ? 3 : 5, clampToGround: false,
@@ -853,8 +901,11 @@ function aktualisiereMenge() {
       const u = (i * K + m) * 2, anteil = laengen[m - von] > 0 ? rest / laengen[m - von] : 1;
       const x = wege[u] + (wege[u + 2] - wege[u]) * anteil, y = wege[u + 1] + (wege[u + 3] - wege[u + 1]) * anteil;
       const [lon, lat] = zuGrad(x, y);
-      // Fahrzeuge auf einer Brücke in Fahrbahnhöhe statt unten auf dem Wasser
-      const hoehe = bodenHoehe + 2 + (p.gruppe === "fahrzeug" ? 0.5 + brueckenHoehe(lat, lon) : 0);  // nicht halb im Boden
+      // Fahrzeuge auf einer Brücke in Fahrbahnhöhe statt unten auf dem Wasser; Boden aus dem Gelände (flache Karte)
+      // bzw. die gemessene Uferhöhe (Google-Kacheln)
+      const hier = bodenHoehe === GRUND ? boden(lon, lat) : bodenHoehe;
+      const bruecke = p.gruppe === "fahrzeug" ? brueckenHoehe(lat, lon) : 0;
+      const hoehe = (bruecke > 0 ? Math.max(hier, bodenHoehe + bruecke) : hier) + 2 + (p.gruppe === "fahrzeug" ? 0.5 : 0);  // nicht halb im Boden
       pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, hoehe);
       pp.show = true;
     }
@@ -947,7 +998,7 @@ function zeigeFluss() {
       const laenge = Math.min(weg, 120) / weg;  // höchstens 120 m lang zeichnen
       const [lon1, lat1] = zuGrad(x, y), [lon2, lat2] = zuGrad(x + dx * laenge, y + dy * laenge);
       q.entities.add({ polyline: {
-        positions: Cesium.Cartesian3.fromDegreesArrayHeights([lon1, lat1, GRUND + 4, lon2, lat2, GRUND + 4]),
+        positions: Cesium.Cartesian3.fromDegreesArrayHeights([lon1, lat1, boden(lon1, lat1) + 4, lon2, lat2, boden(lon2, lat2) + 4]),
         width: 10 + Math.min(z.n, 60) / 6,
         material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.fromCssColorString(z.art === "polizei" ? "#4d8bff" : "#ffb000").withAlpha(0.85)) } });
     }
@@ -1224,17 +1275,17 @@ function zeigeEintraege() {
     if (istZone(e.art)) {
       const mitte = e.punkte.reduce((a, p) => [a[0] + p[0] / e.punkte.length, a[1] + p[1] / e.punkte.length], [0, 0]);
       einzeichnungen.entities.add({ polygon: { hierarchy: Cesium.Cartesian3.fromDegreesArray(e.punkte.flatMap(([la, lo]) => [lo, la])),
-        material: c.withAlpha(0.35), outline: true, outlineColor: c, height: GRUND + 12 } });  // über niedrigen Dächern sichtbar
-      einzeichnungen.entities.add({ position: Cesium.Cartesian3.fromDegrees(mitte[1], mitte[0], GRUND + 14), label: beschriftung });
+        material: c.withAlpha(0.35), outline: true, outlineColor: c, height: boden(mitte[1], mitte[0]) + 12 } });  // über niedrigen Dächern sichtbar
+      einzeichnungen.entities.add({ position: Cesium.Cartesian3.fromDegrees(mitte[1], mitte[0], boden(mitte[1], mitte[0]) + 14), label: beschriftung });
     } else {
-      einzeichnungen.entities.add({ position: Cesium.Cartesian3.fromDegrees(e.punkte[0][1], e.punkte[0][0], GRUND + 2),
+      einzeichnungen.entities.add({ position: Cesium.Cartesian3.fromDegrees(e.punkte[0][1], e.punkte[0][0], boden(e.punkte[0][1], e.punkte[0][0]) + 2),
         point: { pixelSize: 14, color: c, outlineColor: Cesium.Color.WHITE, outlineWidth: 2,
                  disableDepthTestDistance: Number.POSITIVE_INFINITY }, label: beschriftung });
     }
   });
   if (zoneEcken.length) {
     einzeichnungen.entities.add({ polyline: { width: 3, material: Cesium.Color.WHITE,
-      positions: Cesium.Cartesian3.fromDegreesArrayHeights(zoneEcken.flatMap(([la, lo]) => [lo, la, GRUND + 1])) } });
+      positions: Cesium.Cartesian3.fromDegreesArrayHeights(zoneEcken.flatMap(([la, lo]) => [lo, la, boden(lo, la) + 1])) } });
   }
   $("z-liste").innerHTML = eintraege.map((e, i) => `<li>${ZEICHEN[e.art][0]} ${e.von}–${e.bis}`
     + `${e.anzahl != null ? ", ca. " + e.anzahl : ""}${e.notiz ? ": " + e.notiz.replace(/[<>&]/g, "") : ""}`
@@ -1535,10 +1586,17 @@ function dichteEbene(z, blass) {
   const schluessel = `${blass}-${dichteSaeulen}`;
   if (z.ebenen[schluessel]) return z.ebenen[schluessel];
   const ring = (r) => Cesium.Cartesian3.fromDegreesArray(r.flatMap(([lat, lon]) => [lon, lat]));
+  // mit Gelände: Felder folgen dem Hang (Höhe je Ecke), Säulen stehen auf dem höchsten Punkt ihres Umrisses
+  const lonLat = (r) => r.flatMap(([lat, lon]) => [lon, lat]);
+  const ebeneAmGelaende = GELAENDE && !dichteSaeulen;
   const instanzen = z.flaechen.flatMap((f) => f.teile.map((teil) => new Cesium.GeometryInstance({
     geometry: new Cesium.PolygonGeometry({
-      polygonHierarchy: new Cesium.PolygonHierarchy(ring(teil.aussen), teil.loecher.map((l) => new Cesium.PolygonHierarchy(ring(l)))),
-      height: GRUND + 1, extrudedHeight: dichteSaeulen ? GRUND + 1 + Math.max(0.5, f.d * 100) : undefined,
+      ...(ebeneAmGelaende
+        ? { polygonHierarchy: new Cesium.PolygonHierarchy(amGelaende(lonLat(teil.aussen), 1),
+            teil.loecher.map((l) => new Cesium.PolygonHierarchy(amGelaende(lonLat(l), 1)))), perPositionHeight: true }
+        : { polygonHierarchy: new Cesium.PolygonHierarchy(ring(teil.aussen), teil.loecher.map((l) => new Cesium.PolygonHierarchy(ring(l)))),
+            height: sockel(lonLat(teil.aussen), true) + 1,
+            extrudedHeight: dichteSaeulen ? sockel(lonLat(teil.aussen), true) + 1 + Math.max(0.5, f.d * 100) : undefined }),
       vertexFormat: dichteSaeulen ? Cesium.PerInstanceColorAppearance.VERTEX_FORMAT : Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
     }),
     attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(
@@ -1586,11 +1644,11 @@ fetch("objekte-verortet.json").then((a) => a.json()).then((d) => {
       ${o.quelle ? "Quelle: " + o.quelle : ""}</small></p>`;
     const name = o.name || o.art;
     if (o.linie) viewer.entities.add({ availability: zeitraum, name, description: text,
-      polyline: { positions: Cesium.Cartesian3.fromDegreesArrayHeights(o.linie.flatMap(([la, lo]) => [lo, la, GRUND + 1.5])),
+      polyline: { positions: Cesium.Cartesian3.fromDegreesArrayHeights(o.linie.flatMap(([la, lo]) => [lo, la, boden(lo, la) + 1.5])),
         width: 6, material: BLAU } });
     viewer.entities.add({ availability: zeitraum, name, description: text,
-      position: Cesium.Cartesian3.fromDegrees(o.lon, o.lat, GRUND + 1.2),
-      ellipse: { semiMajorAxis: radius, semiMinorAxis: radius, height: GRUND + 1.1, material: BLAU.withAlpha(0.15),
+      position: Cesium.Cartesian3.fromDegrees(o.lon, o.lat, boden(o.lon, o.lat) + 1.2),
+      ellipse: { semiMajorAxis: radius, semiMinorAxis: radius, height: boden(o.lon, o.lat) + 1.1, material: BLAU.withAlpha(0.15),
         outline: true, outlineColor: BLAU.withAlpha(0.6) },
       point: o.linie ? undefined : { pixelSize: 11, color: BLAU, outlineColor: Cesium.Color.WHITE, outlineWidth: 3,
         disableDepthTestDistance: Number.POSITIVE_INFINITY },

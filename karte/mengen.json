@@ -1314,7 +1314,7 @@
  "fahrzeuge": [
   {
    "name": "Wasserwerfer K1",
-   "quelle": "Livestream A, AP, WELT, t-online, YouTube-Video; Anfahrt von Süden laut Augenzeugenbericht; Positionen 16:30–16:55 aus Videos verortet (objekte-verortet.json)",
+   "quelle": "Livestream A, AP, WELT, t-online, YouTube-Video; Anfahrt von Süden laut Augenzeugenbericht; Positionen 16:30–16:55 aus Videos verortet (objekte-verortet.json, Abgleich mit Geobasis NRW)",
    "wege": [
     {
      "zeit": "16:30",
@@ -1323,13 +1323,13 @@
     },
     {
      "zeit": "16:38",
-     "lat": 50.94866,
-     "lon": 6.96531
+     "lat": 50.948705,
+     "lon": 6.965364
     },
     {
      "zeit": "16:55",
-     "lat": 50.94866,
-     "lon": 6.96531
+     "lat": 50.948705,
+     "lon": 6.965364
     },
     {
      "zeit": "17:15",

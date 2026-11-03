@@ -14,7 +14,8 @@
    },
    "ort": "nördliche Fahrbahn KAU an der Einmündung Thürmchenswall",
    "spritzt_richtung_grad": 265,
-   "verfahren": "Peilung aus Kamerapose + Entfernung aus Bildhöhe (3,6 m ≙ 126 px → 32 m)"
+   "verfahren": "Peilung aus Kamerapose + Entfernung aus Bildhöhe (3,6 m ≙ 126 px → 32 m); Kamerapose gegen NRW-Modell (LoD2 + DOP) geprüft",
+   "referenz": "lod2"
   },
   {
    "art": "Polizeikette",
@@ -39,7 +40,8 @@
     "quer": 3
    },
    "ort": "quer über die südliche Fahrbahn vor St. Vincenz-Haus / Einmündung Thürmchenswall, Front nach SW zur Menge vor dem Portikus",
-   "verfahren": "Peilung + Entfernung aus Personenhöhe (1,8 m ≙ 55 px → 37 m)"
+   "verfahren": "Peilung + Entfernung aus Personenhöhe (1,8 m ≙ 55 px → 37 m); Kamerapose gegen NRW-Modell (LoD2 + DOP) geprüft",
+   "referenz": "lod2"
   },
   {
    "art": "Polizeigruppe",
@@ -52,15 +54,16 @@
     "quer": 3
    },
    "ort": "neben dem Wasserwerfer, nördliche Fahrbahn",
-   "verfahren": "Peilung + Personenhöhe (65 px → 31 m)"
+   "verfahren": "Peilung + Personenhöhe (65 px → 31 m); Kamerapose gegen NRW-Modell (LoD2 + DOP) geprüft",
+   "referenz": "lod2"
   },
   {
    "art": "Wasserwerfer",
    "name": "Wasserwerfer K1",
    "zeit_von": "16:38",
    "zeit_bis": "16:55",
-   "lat": 50.94866,
-   "lon": 6.96531,
+   "lat": 50.948705,
+   "lon": 6.965364,
    "ausrichtung_grad": 20,
    "ausrichtung_unsicher_grad": 30,
    "unsicherheit_m": {
@@ -68,7 +71,8 @@
     "quer": 4
    },
    "ort": "nördliche Fahrbahn KAU südlich der Einmündung Thürmchenswall, Front nach N/NW zur Menge",
-   "verfahren": "Tiefenpuffer der Google-Kacheln am Vorderrad (8 m von der Kamera), Fahrzeugmitte geschätzt"
+   "verfahren": "Bodenpunkt am Vorderrad im NRW-Modell (LoD2 + DOP, ebener Boden; 14 m vor der Kamera), Fahrzeugmitte geschätzt",
+   "referenz": "lod2"
   },
   {
    "art": "Polizeikette",
@@ -95,7 +99,8 @@
    },
    "sicherheit": "mittel",
    "ort": "quer über die südliche Fahrbahn des KAU an der Einmündung Dagobertstraße, Front nach N zur Menge",
-   "verfahren": "Render-Abgleich (Kamera auf der südwärtigen Fahrbahn, Blick 200°), Entfernung aus Personenhöhe (80 px → ~17 m)"
+   "verfahren": "Render-Abgleich gegen NRW-Modell (LoD2 + DOP) (Kamera auf der südwärtigen Fahrbahn, Blick 200°), Entfernung aus Personenhöhe (80 px → ~17 m)",
+   "referenz": "lod2"
   },
   {
    "art": "Wasserwerfer",
@@ -112,7 +117,8 @@
    },
    "sicherheit": "mittel",
    "ort": "südwärtige Fahrbahn KAU, direkt südlich der Kette an der Dagobertstraße; Blaulicht an, Front nach N",
-   "verfahren": "Peilung + Fahrzeughöhe (3,6 m ≙ 115 px → ~23 m)"
+   "verfahren": "Peilung + Fahrzeughöhe (3,6 m ≙ 115 px → ~23 m); Kamerapose gegen NRW-Modell (LoD2 + DOP) geprüft",
+   "referenz": "lod2"
   },
   {
    "art": "Wasserwerfer",
@@ -128,7 +134,8 @@
    },
    "sicherheit": "mittel",
    "ort": "an der Südsperre Dagobertstraße, hinter der Kette am Grünstreifen; genaue Lage nicht eingepasst (Schwenk ohne Anker)",
-   "verfahren": "Zuordnung über den Schwenk von s14 zu s20, Lage geschätzt"
+   "verfahren": "Zuordnung über den Schwenk von s14 zu s20, Lage geschätzt; Kamerapose gegen NRW-Modell (LoD2 + DOP) geprüft",
+   "referenz": "lod2"
   },
   {
    "art": "Polizeikette",
@@ -144,7 +151,8 @@
    },
    "sicherheit": "mittel",
    "ort": "Rheinuferseite südlich der Haltestelle St. Vincenz-Haus, Kette in Schutzausrüstung auf dem Uferweg bzw. Rasen, um 15:52 quer über den Weg Richtung Süden",
-   "verfahren": "nur Sichtprüfung, Ort aus wege.js (Haltestellenschild), nicht eingepasst"
+   "verfahren": "nur Sichtprüfung, Ort aus wege.js (Haltestellenschild), nicht eingepasst",
+   "referenz": "osm"
   }
  ]
 }
