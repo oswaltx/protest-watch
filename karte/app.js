@@ -930,7 +930,7 @@ function aktualisiereMenge() {
       pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, hoehe);
       pp.show = true;
     }
-    mengeZahlen[p.name] = { n: n * STADT.figur_je, gruppe: p.gruppe, quelle: p.quelle };
+    mengeZahlen[p.name] = { n: p.gruppe === "fahrzeug" ? n : n * STADT.figur_je, gruppe: p.gruppe, quelle: p.quelle };  // Fahrzeuge einzeln
   }
   zeigeMengeZahlen();
   viewer.scene.requestRender();  // Punkte haben sich bewegt
@@ -1048,7 +1048,7 @@ function zeigeHundert() {
   for (const z of Object.values(mengeZahlen)) {
     if (z.gruppe === "menge") demo += z.n; else if (z.gruppe === "polizei") polizei += z.n; else if (z.gruppe === "krawall") krawall += z.n;
   }
-  const gesamt = demo + polizei;
+  const gesamt = demo + krawall + polizei;  // Gewaltbereite sind eigene Figuren (Frankfurt nachts: nur sie und Polizei)
   if (gesamt < 20) { if ($("jetzt-hundert").innerHTML) $("jetzt-hundert").innerHTML = ""; return; }
   const p = Math.round(polizei / gesamt * 100), k = Math.min(Math.round(krawall / gesamt * 100) || (krawall ? 1 : 0), 100 - p);
   const kaestchen = Array.from({ length: 100 }, (_, i) => (i < p ? "p" : i < p + k ? "k" : "d"));
@@ -1081,7 +1081,7 @@ function zaehleGruppen() {
         if (p.wege[(i * p.K + k) * 2] !== FEHLT) n0++;
         if (p.wege[(i * p.K + k + 1) * 2] !== FEHLT) n1++;
       }
-      reihen[p.gruppe][j] += Math.round(n0 + (n1 - n0) * f) * STADT.figur_je;
+      reihen[p.gruppe][j] += Math.round(n0 + (n1 - n0) * f) * STADT.figur_je;  // nur Personengruppen, Fahrzeuge zählen hier nicht
     });
   }
   return { raster, reihen };
