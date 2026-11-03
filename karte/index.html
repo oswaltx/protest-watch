@@ -51,6 +51,9 @@
   ul.legende i.dreieck { width: 0; height: 0; border: 5px solid transparent; border-bottom: 9px solid #ffb000; border-top: 0; }
   #jetzt-uhr { font-size: 22px; font-weight: 600; }
   .ev { margin: 6px 0; padding-left: 6px; border-left: 3px solid #ffb000; }
+  /* Dämmerung über der Karte (nicht über den Bedienelementen), Deckkraft setzt app.js nach der Uhrzeit */
+  #nacht { position: absolute; inset: 0; background: #0b1530; opacity: 0; pointer-events: none; z-index: 1; transition: opacity .4s; }
+  #jetzt-wetter { font-size: 12px; color: #ccc; margin-top: 2px; }
   .hundert-text { font-size: 12px; margin: 8px 0 4px; }
   .hundert { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; max-width: 260px; }
   .hundert i { aspect-ratio: 1; border-radius: 2px; background: #ffcf66; } .hundert i.p { background: #4d8bff; } .hundert i.k { background: #ff3b3b; }
@@ -166,8 +169,9 @@
 </head>
 <body>
 <div id="karte"></div>
+<div id="nacht" aria-hidden="true"></div>
 <div id="jetzt" class="feld">
-  <div class="kopf"><div><div class="klein">Gen-Z-Demo Köln, 31.10.2026</div><div id="jetzt-uhr"></div></div>
+  <div class="kopf"><div><div class="klein">Gen-Z-Demo Köln, 31.10.2026</div><div id="jetzt-uhr"></div><div id="jetzt-wetter"></div></div>
     <button class="einklappen" title="Leiste ein-/ausklappen">☰</button></div>
   <div class="inhalt">
   <nav class="reiter" role="tablist">
@@ -205,6 +209,7 @@
       <button data-modus="dichte" title="Menschen pro m², gezählt in Videobildern; Polizei bleibt als blaue Punkte sichtbar">▦ Dichte</button>
       <button data-modus="beides">Beides</button></div>
     <h2>Anzeigen</h2>
+    <button id="licht-knopf">🌙 Tageslicht nicht simulieren</button>
     <button id="sichtfeld-knopf">📷 Sichtfelder ausblenden</button>
     <button id="stil-knopf">🗺 Bunter Stadtplan statt schlichter Karte</button>
 
@@ -380,6 +385,6 @@
 <script src="menge.js?v=7a666416c1"></script>
 <script src="tour.js?v=759083d611"></script>
 <script src="grundkarte.js?v=0bb0fb78dc"></script>
-<script src="app.js?v=85c54ed09c"></script>
+<script src="app.js?v=130d9dec54"></script>
 </body>
 </html>

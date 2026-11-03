@@ -843,6 +843,26 @@ function zeigeMengeZahlen() {
   zeigeHundert();
 }
 
+// ---------- Licht und Wetter (aus öffentlichen Webcam-Bildern vom 31.10., dokumentation/webcams-auswertung.md) ----------
+// Die Karte wird ab 16:45 dämmrig und ist ab 17:45 dunkel; „Jetzt“ zeigt das Wetter. Abschaltbar unter „Steuerung“.
+const WETTER = [["12:00", "leicht bewölkt, 11–12 °C"], ["13:00", "bewölkt, 13 °C"], ["14:45", "kurz sonnig"],
+  ["15:20", "bewölkt, 12–13 °C"], ["16:45", "Dämmerung"], ["17:15", "Straßenbeleuchtung an"], ["17:45", "dunkel"]];
+let lichtAn = true;
+function zeigeLicht() {
+  const m = (sek(viewer.clock.currentTime) - startS) / 60 + 12 * 60;  // Minuten seit Mitternacht
+  const dunkel = m < 16 * 60 + 40 ? 0 : Math.min(1, (m - (16 * 60 + 40)) / 65);  // 16:40 → 17:45
+  $("nacht").style.opacity = lichtAn ? (dunkel * 0.42).toFixed(3) : 0;
+  const w = WETTER.filter(([z]) => m >= +z.slice(0, 2) * 60 + +z.slice(3)).pop();
+  const text = w ? `🌤 ${w[1]} <small>(laut öffentlichen Webcam-Bildern)</small>` : "";
+  if ($("jetzt-wetter").innerHTML !== text) $("jetzt-wetter").innerHTML = text;
+}
+viewer.clock.onTick.addEventListener(zeigeLicht);
+$("licht-knopf").onclick = () => {
+  lichtAn = !lichtAn;
+  $("licht-knopf").textContent = lichtAn ? "🌙 Tageslicht nicht simulieren" : "🌙 Tageslicht simulieren (Dämmerung ab 16:45)";
+  zeigeLicht();
+};
+
 // „Von 100 Menschen auf der Straße …“: 100 Kästchen, aufgeteilt nach den geschätzten Zahlen gerade jetzt.
 // Gewaltbereite sind ein Teil der Demonstrierenden (rot innerhalb von gelb), Fahrzeuge zählen nicht mit.
 function zeigeHundert() {
