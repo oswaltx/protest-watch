@@ -209,6 +209,7 @@
       <button data-modus="dichte" title="Menschen pro m², gezählt in Videobildern; Polizei bleibt als blaue Punkte sichtbar">▦ Dichte</button>
       <button data-modus="beides">Beides</button></div>
     <h2>Anzeigen</h2>
+    <button id="fluss-knopf">➜ Bewegungspfeile zeigen (nächste 10 Minuten)</button>
     <button id="licht-knopf">🌙 Tageslicht nicht simulieren</button>
     <button id="sichtfeld-knopf">📷 Sichtfelder ausblenden</button>
     <button id="stil-knopf">🗺 Bunter Stadtplan statt schlichter Karte</button>
@@ -239,6 +240,8 @@
         Polizeikette als blaue Linie): genauer als die Schätzungen, der blasse Kreis zeigt die Unsicherheit</li>
       <li><i class="linie gestrichelt"></i>Angemeldete Kundgebungsfläche</li>
       <li><i class="linie" style="background:#ff6b9a"></i>Tatsächlicher Weg des Demozugs</li>
+      <li>➜ <b>Bewegungspfeile</b> (unter „Steuerung“): wohin sich die geschätzte Menge (gelb) bzw. Polizei (blau) in den nächsten
+        10 Minuten bewegt, gemittelt über 40-m-Felder – aus der Simulation, nicht gemessen</li>
     </ul>
     <h2>Übersichtsstreifen (optional, unter „Steuerung“)</h2>
     <ul class="legende">
@@ -385,6 +388,6 @@
 <script src="menge.js?v=7a666416c1"></script>
 <script src="tour.js?v=759083d611"></script>
 <script src="grundkarte.js?v=0bb0fb78dc"></script>
-<script src="app.js?v=370e302008"></script>
+<script src="app.js?v=183e0799c0"></script>
 </body>
 </html>

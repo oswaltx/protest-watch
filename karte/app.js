@@ -865,6 +865,61 @@ $("licht-knopf").onclick = () => {
 
 // „Von 100 Menschen auf der Straße …“: 100 Kästchen, aufgeteilt nach den geschätzten Zahlen gerade jetzt.
 // Gewaltbereite sind ein Teil der Demonstrierenden (rot innerhalb von gelb), Fahrzeuge zählen nicht mit.
+// ---------- Bewegungspfeile: wohin sich die geschätzte Menge in den nächsten 10 Minuten bewegt ----------
+// Raster 40 m; je Zelle der mittlere Weg aller simulierten Personen, die gerade darin stehen. Gelb Demonstrierende,
+// blau Polizei. Nur Zellen mit mindestens 5 Personen und mehr als 15 m Weg. Abschaltbar unter „Steuerung“.
+const flussQuelle = viewer.dataSources.add(new Cesium.CustomDataSource("fluss"));
+let flussAn = false, flussMinute = -1;
+function ortZu(p, i, s) {  // lineare Lage einer Person zur Zeit s in Dezimetern (ohne Geh-Rhythmus), sonst null
+  const { T, K, wege } = p;
+  if (s < T[0] || s >= T[K - 1]) return null;
+  let k = 0; while (k < K - 2 && T[k + 1] <= s) k++;
+  const a = (i * K + k) * 2, b = a + 2;
+  if (wege[a] === FEHLT || wege[b] === FEHLT) return null;
+  const f = (s - T[k]) / (T[k + 1] - T[k]);
+  return [wege[a] + (wege[b] - wege[a]) * f, wege[a + 1] + (wege[b + 1] - wege[a + 1]) * f];
+}
+function zeigeFluss() {
+  const s = sek(viewer.clock.currentTime), minute = Math.floor(s / 60);
+  if (!flussAn) { if (flussMinute !== -2) { flussQuelle.then((q) => q.entities.removeAll()); flussMinute = -2; } return; }
+  if (minute === flussMinute) return;
+  flussMinute = minute;
+  const ZELLE = 400, zellen = new Map();  // Dezimeter
+  for (const p of populationen) {
+    if (p.gruppe === "fahrzeug") continue;
+    const art = p.gruppe === "polizei" ? "polizei" : "menge";
+    for (let i = 0; i < p.personen; i += 2) {  // jede zweite Person reicht für die Richtung
+      const a = ortZu(p, i, s), b = ortZu(p, i, s + 600);
+      if (!a || !b) continue;
+      const key = `${art}:${Math.floor(a[0] / ZELLE)}:${Math.floor(a[1] / ZELLE)}`;
+      const z = zellen.get(key) || { art, n: 0, x: 0, y: 0, dx: 0, dy: 0 };
+      z.n++; z.x += a[0]; z.y += a[1]; z.dx += b[0] - a[0]; z.dy += b[1] - a[1];
+      zellen.set(key, z);
+    }
+  }
+  flussQuelle.then((q) => {
+    q.entities.removeAll();
+    for (const z of zellen.values()) {
+      if (z.n < 3) continue;
+      const x = z.x / z.n, y = z.y / z.n, dx = z.dx / z.n, dy = z.dy / z.n, weg = Math.hypot(dx, dy) / 10;
+      if (weg < 15) continue;
+      const laenge = Math.min(weg, 120) / weg;  // höchstens 120 m lang zeichnen
+      const [lon1, lat1] = zuGrad(x, y), [lon2, lat2] = zuGrad(x + dx * laenge, y + dy * laenge);
+      q.entities.add({ polyline: {
+        positions: Cesium.Cartesian3.fromDegreesArrayHeights([lon1, lat1, GRUND + 4, lon2, lat2, GRUND + 4]),
+        width: 10 + Math.min(z.n, 60) / 6,
+        material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.fromCssColorString(z.art === "polizei" ? "#4d8bff" : "#ffb000").withAlpha(0.85)) } });
+    }
+    viewer.scene.requestRender();
+  });
+}
+viewer.clock.onTick.addEventListener(zeigeFluss);
+$("fluss-knopf").onclick = () => {
+  flussAn = !flussAn; flussMinute = -1;
+  $("fluss-knopf").textContent = flussAn ? "➜ Bewegungspfeile ausblenden" : "➜ Bewegungspfeile zeigen (nächste 10 Minuten)";
+  zeigeFluss();
+};
+
 function zeigeHundert() {
   let demo = 0, polizei = 0, krawall = 0;
   for (const z of Object.values(mengeZahlen)) {
