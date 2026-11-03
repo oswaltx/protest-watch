@@ -876,13 +876,18 @@ function momentAlsAdresse() {
   const c = viewer.camera.positionCartographic;
   const k = [Cesium.Math.toDegrees(c.longitude).toFixed(5), Cesium.Math.toDegrees(c.latitude).toFixed(5), Math.round(c.height),
              Math.round(Cesium.Math.toDegrees(viewer.camera.heading)), Math.round(Cesium.Math.toDegrees(viewer.camera.pitch))];
-  return `${location.origin}${location.pathname}#t=${uhr(sek(viewer.clock.currentTime))}&k=${k.join(",")}`;
+  // m = Darstellung der Menschen, s = Kartenstil, damit ein geteilter Link genauso aussieht
+  return `${location.origin}${location.pathname}#t=${uhr(sek(viewer.clock.currentTime))}&k=${k.join(",")}&m=${modus}&s=${kartenstil}`;
 }
 $("link-knopf").onclick = async () => {
   const url = momentAlsAdresse();
   history.replaceState(null, "", url);
-  try { await navigator.clipboard.writeText(url); status("Link kopiert: " + url.split("#")[1]); }
-  catch { status("Link steht jetzt in der Adresszeile"); }
+  let text;
+  try { await navigator.clipboard.writeText(url); text = "✓ Link kopiert"; }
+  catch { text = "✓ Link steht jetzt in der Adresszeile"; }
+  const knopf = $("link-knopf"), vorher = knopf.textContent;
+  knopf.textContent = text;
+  setTimeout(() => { knopf.textContent = vorher; }, 2500);
 };
 // ---------- Melden ----------
 // Ergänzung, Korrektur oder Entfernen-Wunsch mit Uhrzeit, Kartenmitte und ausgewähltem Element: per Mail (eigenes
@@ -1325,14 +1330,21 @@ const WARNUNG_KURZ = {
   dichte: "<b>⚠ Rekonstruktion:</b> Felder aus Videos gezählt, ungenau; Wege und Abläufe geschätzt.",
   beides: "<b>⚠ Simulation:</b> Punkte sind keine echten Personen; Felder aus Videos gezählt, ungenau.",
 };
+let modus = "figuren";
 function setzeModus(m) {
+  modus = m;
   nurPolizei = m === "dichte"; dichteSichtbar = m !== "figuren"; letzteZeit = -2;
   document.querySelectorAll("#modus button").forEach((b) => b.classList.toggle("an", b.dataset.modus === m));
   $("warnung").innerHTML = (SCHMAL.matches ? WARNUNG_KURZ : WARNUNG)[m];
   zeigeDichte(true);
 }
 document.querySelectorAll("#modus button").forEach((b) => { b.onclick = () => setzeModus(b.dataset.modus); });
-setzeModus("figuren");
+// Darstellung und Kartenstil aus einem geteilten Link übernehmen (#…&m=dichte&s=bunt)
+{
+  const a = new URLSearchParams(location.hash.slice(1));
+  setzeModus(WARNUNG[a.get("m")] ? a.get("m") : "figuren");
+  if (a.get("s") === "bunt" || a.get("s") === "schlicht") setzeKartenstil(a.get("s"));
+}
 
 // Tempo der Wiedergabe (Cesium-Multiplikator: 60 = eine Minute pro Sekunde)
 $("zl-tempo").value = String(viewer.clock.multiplier);
