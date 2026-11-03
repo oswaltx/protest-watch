@@ -964,7 +964,8 @@ function zeichneDiagramm() {
     `<span title="${r.quelle || "aus den geschätzten Mengen (mengen.json)"}"><i style="background:${r.farbe}"></i>${r.name}</span>`).join("") +
     (zaehlungen.length ? `<span><i style="background:#fff;width:7px;height:7px;border-radius:50%"></i>gezählt in Videobildern
       (nur gefilmter Bereich, mit Polizei)</span>` : "") +
-    "<br>Linien geschätzt, weiße Punkte mit Spanne in Videobildern gezählt. Gewaltbereite sind eine Teilmenge der " +
+    "<br>Linien geschätzt, weiße Punkte mit Spanne in Videobildern gezählt – jeweils nur im gefilmten Ausschnitt, der sich " +
+    "von Punkt zu Punkt ändert, also kein Verlauf der Teilnehmerzahl. Gewaltbereite sind eine Teilmenge der " +
     "Demonstrierenden. Klick setzt die Uhrzeit.";
   $("diagramm-svg").addEventListener("click", (ev) => {
     const r = ev.currentTarget.getBoundingClientRect();
