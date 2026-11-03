@@ -64,6 +64,9 @@ if os.path.exists(verfeinert):
                 k.update(lat=e["lat"], lon=e["lon"], ort_sicher="hoch")
                 if e.get("kurs_grad") is not None:
                     k["blick"] = RICHTUNGEN[round(e["kurs_grad"] / 45) % 8]
+                    k["kurs"] = round(e["kurs_grad"], 1)          # genaue Blickrichtung für das Sichtfeld
+                if e.get("hfov_grad"):
+                    k["sichtfeld"] = round(e["hfov_grad"], 1)     # horizontaler Bildwinkel
                 u = e.get("unsicherheit_m", {})
                 k["ort_grund"] += (f" Kamerapose im Rendering eingepasst (Sekunde {e['sek']}, ±{u.get('laengs', '?')} m längs,"
                                    f" ±{u.get('quer', '?')} m quer).")

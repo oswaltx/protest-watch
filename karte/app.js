@@ -145,6 +145,12 @@ function setzeKartenstil(stil) {
   viewer.scene.requestRender();
 }
 $("stil-knopf").onclick = () => setzeKartenstil(kartenstil === "schlicht" ? "bunt" : "schlicht");
+$("sichtfeld-knopf").onclick = () => {
+  const an = !(sichtfelder[0]?.show ?? true);
+  for (const e of sichtfelder) e.show = an;
+  $("sichtfeld-knopf").textContent = an ? "📷 Sichtfelder ausblenden" : "📷 Sichtfelder der Kameras zeigen";
+  viewer.scene.requestRender();
+};
 
 // Gebäude aus gebaeude.js (OpenStreetMap, Höhe aus height bzw. Geschossen): weiß mit schwarzen Kanten, ohne Schattierung,
 // damit sie wie eine gezeichnete Karte wirken; als je ein Primitive für Flächen und Kanten
@@ -599,6 +605,20 @@ function zeigeWege() {
         properties: { stream: w.id },
         description: new Cesium.CallbackProperty((zeit) => wegBeschreibung(w, sek(zeit)), false),
       });
+      // Sichtfeld des Streams, wandert mit; Richtung aus dem zeitlich nächsten verorteten Bild
+      if (abschnitt.some((p) => p.blick in RICHTUNG)) sichtfelder.push(viewer.entities.add({
+        availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: von, stop: bis })]),
+        polygon: {
+          hierarchy: new Cesium.CallbackProperty((zeit) => {
+            const c = pos.getValue(zeit);
+            const p = naechsterPunkt({ punkte: abschnitt }, sek(zeit));
+            if (!c || !(p.blick in RICHTUNG)) return undefined;
+            const g = Cesium.Cartographic.fromCartesian(c);
+            return sichtfeld(Cesium.Math.toDegrees(g.latitude), Cesium.Math.toDegrees(g.longitude), RICHTUNG[p.blick], 60, 60);
+          }, false),
+          height: GRUND + 1.6, material: farbe.withAlpha(0.15), outline: true, outlineColor: farbe.withAlpha(0.6) },
+        properties: { stream: w.id },
+      }));
     });
   }
 }
@@ -617,7 +637,18 @@ function wegBeschreibung(w, s) {
 }
 
 // ---------- Kameras der Clips ----------
-// Kamera-Symbol mit Blickpfeil (30 m), sichtbar nur im Zeitfenster der Szene.
+// Kamera-Symbol mit Blickpfeil (30 m) und Sichtfeld, sichtbar nur im Zeitfenster der Szene.
+// Sichtfeld: bei eingepassten Posen genaue Richtung und Bildwinkel, sonst Himmelsrichtung ±30°; Reichweite grob
+// (am Boden 60 m, erhöht 120 m), weil Menschen und Gebäude den Blick meist früher begrenzen.
+const sichtfelder = [];  // zum Ein- und Ausblenden unter „Steuerung“
+function sichtfeld(lat, lon, kursGrad, winkelGrad, reichweite) {
+  const kx = 111320 * Math.cos(lat * Math.PI / 180), punkte = [lon, lat];
+  for (let j = 0; j <= 8; j++) {
+    const w = (kursGrad - winkelGrad / 2 + winkelGrad * j / 8) * Math.PI / 180;
+    punkte.push(lon + reichweite * Math.sin(w) / kx, lat + reichweite * Math.cos(w) / 111320);
+  }
+  return new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(punkte));
+}
 const RICHTUNG = { N: 0, NO: 45, O: 90, SO: 135, S: 180, SW: 225, W: 270, NW: 315 };
 const SICHER_FARBE = { hoch: "#ffffff", mittel: "#ffd24d", niedrig: "#ff8c4d", unbekannt: "#999999" };
 
@@ -642,8 +673,19 @@ function zeigeKameras() {
       properties: { kamera: k },
       description: beschreibung,
     });
+    if (k.blick in RICHTUNG || k.kurs != null) {
+      const genau = k.kurs != null;  // eingepasste Pose: kräftiger, sonst nur angedeutet
+      sichtfelder.push(viewer.entities.add({
+        availability: zeit,
+        polygon: { hierarchy: sichtfeld(k.lat, k.lon, k.kurs ?? RICHTUNG[k.blick], k.sichtfeld ?? 60, k.hoehe === "erhöht" ? 120 : 60),
+          height: GRUND + 1.5, material: farbe.withAlpha(genau ? 0.2 : 0.07), outline: true,
+          outlineColor: farbe.withAlpha(genau ? 0.8 : 0.3) },
+        properties: { kamera: k },
+        description: beschreibung,
+      }));
+    }
     if (k.blick in RICHTUNG) {
-      const w = Cesium.Math.toRadians(RICHTUNG[k.blick]);
+      const w = Cesium.Math.toRadians(k.kurs ?? RICHTUNG[k.blick]);
       const dLat = (30 * Math.cos(w)) / 111320;
       const dLon = (30 * Math.sin(w)) / (111320 * Math.cos(Cesium.Math.toRadians(k.lat)));
       viewer.entities.add({
