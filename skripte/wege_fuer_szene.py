@@ -38,6 +38,20 @@ for i, (vid, eintraege) in enumerate(sorted(teile.items())):
                  "farbe": FARBEN[i % len(FARBEN)], "bilder": len(eintraege), "punkte": punkte})
     print(f"{vid} {info['kanal']}: {len(punkte)}/{len(eintraege)} Bilder verortet")
 
+# Korrekturen der Sitzung Verortung (szene/kameras-korrektur.json): Wegpunkte, die im Rhein oder in Gebäuden lagen
+korrektur = os.path.join(basis, "szene/kameras-korrektur.json")
+if os.path.exists(korrektur):
+    neu = {(w["id"], w["t"]): w for w in json.load(open(korrektur))["wege"]}
+    n = 0
+    for w in wege:
+        for p in w["punkte"]:
+            c = neu.get((w["id"], p["t"]))
+            if c and abs(p["lat"] - c["alt"]["lat"]) < 1e-6 and abs(p["lon"] - c["alt"]["lon"]) < 1e-6:
+                p.update(lat=c["neu"]["lat"], lon=c["neu"]["lon"], sicher=c["neu"]["sicher"])
+                p["grund"] += f" Korrigiert ({c['regel']}): lag im {c['lag_in']}, um {c['verschiebung_m']} m verschoben."
+                n += 1
+    print(f"{n} Wegpunkte korrigiert")
+
 with open(os.path.join(basis, "szene/wege.js"), "w") as fh:
     fh.write("// Automatisch erzeugt von skripte/wege_fuer_szene.py, nicht von Hand ändern.\n")
     fh.write("window.WEGE = " + json.dumps(wege, ensure_ascii=False) + ";\n")

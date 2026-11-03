@@ -11,7 +11,7 @@ const POLIZEI = a("https://www.presseportal.de/blaulicht/pm/12415/6381520", "Pol
               + a("https://www.presseportal.de/blaulicht/pm/12415/6381831", "PM 261101-2-K, 1.11.");
 const BILD = a("https://www.youtube.com/watch?v=K4kQf-2JuDw", "BILD-Video, 31.10.");
 window.ORTE = [
-  { name: "Kundgebung Konrad-Adenauer-Ufer", lat: 50.94900, lon: 6.96730, genau: "ungefähr: Uferpromenade südlich der Bastei",
+  { name: "Kundgebung Konrad-Adenauer-Ufer", lat: 50.94967, lon: 6.96578, genau: "ungefähr: Kundgebungsfläche auf dem KAU südlich der Bastei (eingepasst 3.11., vorher im Rhein)",
     info: "Kundgebung ab ca. 14–15 Uhr, Wasserwerfer ca. 16:30, Kessel bis nach 19 Uhr" },
   { name: "Bastei", lat: 50.95007, lon: 6.96673, genau: "Gebäude",
     info: "Ursprünglich genannter Treffpunkt „nahe der Bastei“" },

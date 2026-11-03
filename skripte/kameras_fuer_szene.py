@@ -39,6 +39,19 @@ for f in sorted(glob.glob(os.path.join(basis, "szene/clips/*.json"))):
             "inhalt": s.get("inhalt", ""), "ort_grund": s.get("ort_grund", ""), "zeit_grund": s.get("zeit_grund", ""),
         })
 
+# Korrekturen der Sitzung Verortung (szene/kameras-korrektur.json): Orte, die im Rhein oder in Gebäuden lagen
+korrektur = os.path.join(basis, "szene/kameras-korrektur.json")
+if os.path.exists(korrektur):
+    neu = {(k["id"], k["sek_von"], k["sek_bis"]): k for k in json.load(open(korrektur))["kameras"]}
+    n = 0
+    for k in kameras:
+        c = neu.get((k["id"], k["sek_von"], k["sek_bis"]))
+        if c and abs(k["lat"] - c["alt"]["lat"]) < 1e-6 and abs(k["lon"] - c["alt"]["lon"]) < 1e-6:
+            k.update(lat=c["neu"]["lat"], lon=c["neu"]["lon"], ort_sicher=c["neu"]["ort_sicher"])
+            k["ort_grund"] += f" Korrigiert ({c['regel']}): lag im {c['lag_in']}, um {c['verschiebung_m']} m verschoben."
+            n += 1
+    print(f"{n} Kameraorte korrigiert")
+
 with open(os.path.join(basis, "szene/kameras.js"), "w") as fh:
     fh.write("// Automatisch erzeugt von skripte/kameras_fuer_szene.py, nicht von Hand ändern.\n")
     fh.write("window.KAMERAS = " + json.dumps(kameras, ensure_ascii=False) + ";\n")
