@@ -19,6 +19,8 @@ const BILD = a("https://www.youtube.com/watch?v=K4kQf-2JuDw", "BILD-Video, 31.10
 const AUF1 = a("https://t.me/auf1tv/22148", "Video, veröffentlicht von AUF1 (Telegram), 31.10.");
 const ZDFHEUTE = a("https://www.tiktok.com/@zdfheute/video/7703163964519173398", "ZDFheute-Video auf TikTok, 1.11.");
 window.EREIGNISSE = [
+  { von: "17:37", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A (Ton teils unverständlich, automatische Abschrift)",
+    text: "Ein Polizist begründet auf Nachfrage im Livestream, warum die Menschen nicht nach Hause gehen können: Wenn aus dieser Personengruppe Straftaten begangen worden seien, sei die Polizei „verpflichtet, die Straftaten aufzuklären“" },
   { von: "13:00", ort: "Bastei", zeit_sicher: "ca.", quelle: TONLINE,
     text: "Etwa 30 Menschen an der Bastei, starke Polizeipräsenz zwischen Hbf und Kundgebungsort" },
   { von: "13:20", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: TAZ(),
