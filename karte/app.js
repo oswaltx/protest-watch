@@ -232,7 +232,8 @@ function zeigeOrte() {
 function fliegeZu(lat, lon, hoehe) {
   // Blick schräg von Süden auf den Punkt
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(lon, lat - hoehe / 111000 * 1.3, hoehe + 40),
+    // Kamera so weit südlich, dass der Punkt etwas über der Bildmitte liegt (unten links steht oft die Tour)
+    destination: Cesium.Cartesian3.fromDegrees(lon, lat - hoehe / 111000 * 1.65, hoehe + 40),
     orientation: { heading: 0, pitch: Cesium.Math.toRadians(-35), roll: 0 },
     duration: 1.5,
   });
@@ -1197,10 +1198,19 @@ function mitteOderUfer() {
 }
 $("ansicht-oben").onclick = () => {
   const [lat, lon] = mitteOderUfer();
-  viewer.camera.switchToOrthographicFrustum();
+  normaleSicht();
+  // erst senkrecht nach unten fliegen, dann ohne Perspektive zeichnen (wie ein Stadtplan)
   viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1600),
-    orientation: { heading: 0, pitch: Cesium.Math.toRadians(-90), roll: 0 }, duration: 1.2 });
+    orientation: { heading: 0, pitch: Cesium.Math.toRadians(-90), roll: 0 }, duration: 1.2,
+    complete: () => { viewer.camera.switchToOrthographicFrustum(); viewer.scene.requestRender(); } });
 };
+// Ohne Perspektive sieht ein schräger Blick verzerrt aus: sobald jemand aus „Von oben“ heraus kippt, zurück zur Perspektive
+viewer.scene.postRender.addEventListener(() => {
+  if (viewer.camera.frustum instanceof Cesium.OrthographicFrustum && viewer.camera.pitch > Cesium.Math.toRadians(-80)) {
+    normaleSicht();
+    viewer.scene.requestRender();
+  }
+});
 $("ansicht-schraeg").onclick = () => { const [lat, lon] = mitteOderUfer(); normaleSicht(); fliegeZu(lat, lon, 700); };
 $("ansicht-rhein").onclick = () => {
   normaleSicht();

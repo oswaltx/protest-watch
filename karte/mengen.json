@@ -1159,7 +1159,7 @@
   {
    "name": "Mannschaftswagen Zoobrücke",
    "gruppe": "fahrzeug",
-   "quelle": "Augenzeugenbericht: viele wartende Mannschaftswagen auf der Zoobrücke, Hundertschaften fahren vor der Kesselbildung von dort an; Zeitpunkt (16:10–16:30) und Anzahl geschätzt; 16:41 laut Livestream auf der Brücke weiter „alles voll“",
+   "quelle": "Augenzeugenbericht: viele wartende Mannschaftswagen auf der Zoobrücke, Hundertschaften fahren vor der Kesselbildung von dort zur Bastei; Zeitpunkt (16:10–16:30) und Anzahl geschätzt; 16:41 laut Livestream auf der Brücke weiter „alles voll“",
    "zugaenge": [
     [
      50.9476,
@@ -1213,8 +1213,8 @@
       {
        "anzahl": 18,
        "korridor": [
-        50.9512,
-        50.9532,
+        50.9499,
+        50.9514,
         -8,
         4
        ]
@@ -1237,8 +1237,8 @@
       {
        "anzahl": 18,
        "korridor": [
-        50.9512,
-        50.9532,
+        50.9499,
+        50.9514,
         -8,
         4
        ]
