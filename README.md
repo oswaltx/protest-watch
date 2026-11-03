@@ -4,7 +4,8 @@ Eine begehbare 3D-Karte der Demonstration am 31. Oktober 2026 in Köln, mit Zeit
 Sie führt öffentlich zugängliche Videos, Livestreams und Medienberichte an einem Ort zusammen:
 Was ist wann wo passiert, und welche Aufnahme zeigt es?
 
-**Karte:** https://protest-watch.org/karte/ · **Material einreichen:** https://protest-watch.org/einreichen/
+**Karte:** https://protest-watch.org/karte/ · **Quellen:** https://protest-watch.org/quellen/ ·
+**Material einreichen:** https://protest-watch.org/einreichen/ · **Kontakt (auch Presse):** protest-watch@pm.me
 
 ## Was die Karte zeigt
 
@@ -13,7 +14,17 @@ Was ist wann wo passiert, und welche Aufnahme zeigt es?
   Demo-Gebiet und im Zeitfenster des jeweiligen Streams; die Orte sind aus den Videos geschätzt (Genauigkeit je Punkt angegeben). Klick auf den Punkt öffnet den Stream an der passenden Stelle;
   Stream und Zeitachse laufen gekoppelt.
 - **Verortete Clips**: Kamerastandort und Blickrichtung je Szene, mit Zeitfenster.
-- **Menge, Polizei und Fahrzeuge** als simulierte Punkte (nah als Figuren) und als Diagramm über den Tag.
+- **Menge, Polizei und Fahrzeuge** wahlweise als simulierte Punkte, als **gezählte Dichte** oder beides,
+  dazu ein Diagramm über den Tag.
+  - *Punkte*: geschätzte Zahlen, auf die Flächen verteilt, auf denen Videos und Berichte Menschen zeigen. Die Leute
+    gehen in normalem Tempo über Straßen und Plätze von Ort zu Ort; Fahrzeuge fahren nur auf Fahrbahnen.
+  - *Dichte*: Menschen pro m², in öffentlichen Videobildern gezählt (Zählmodell ZIP, Tiefenschätzung
+    Depth Anything V2), zu sieben Zeitpunkten auf einem 15-m-Raster, mit 68-%-Intervall. Wo kein Feld ist, hat
+    keine Kamera hingesehen. Methode: `dokumentation/dichte-methode.md` (im Arbeitsrepo, auf Anfrage).
+- **Aus Videos verortet**: Wasserwerfer und Polizeiketten, deren Lage aus Kamerastandort und bekannten Größen im
+  Bild bestimmt wurde, mit Unsicherheitskreis (±3 bis 25 m).
+- **Schlichte Karte**: weißer Grund, Rhein, Straßen, Gleise und die beiden Brücken aus OpenStreetMap; der bunte
+  Stadtplan lässt sich zuschalten.
 
 ## Wie belastbar ist das?
 
@@ -26,7 +37,20 @@ Die Karte ist eine **Rekonstruktion**, kein Messergebnis.
 - Jede Angabe aus Medien oder von der Polizei ist mit Link und Datum belegt.
 - Jede Verortung und jede Uhrzeit hat eine Sicherheitsangabe (hoch, mittel, niedrig). Die Begründung steht
   jeweils dabei.
-- Stand der Daten: 1.11.2026.
+- Die gezählte Dichte ist eine zweite, unabhängige Schätzung. In den gefilmten Bereichen zählt sie meist mehr
+  Menschen als die Simulation (etwa um 14:20 rund 2.650, Spanne 2.460–3.050, nur im gefilmten Ausschnitt).
+- Stand der Daten: 3.11.2026.
+
+## Für Journalistinnen und Journalisten
+
+- **Zitieren und Screenshots** sind ausdrücklich erwünscht, mit Nennung „Rekonstruktion: Protest-Watch,
+  protest-watch.org; Kartendaten © OpenStreetMap-Mitwirkende“. Bitte die Kennzeichnung als Rekonstruktion bzw.
+  Simulation mitnehmen.
+- **Belegt** ist, was in der Karte mit Quelle verlinkt ist (Medien, Polizei, Innenministerium) und was aus Videos
+  verortet ist (mit Unsicherheit). **Geschätzt** sind Mengen, Polizeistärken, Wege und Fahrzeuge ohne Video-Beleg.
+- Einen bestimmten Moment teilen: in der Karte unter „Mehr“ → „🔗 Link zu diesem Moment“.
+- Alle verwendeten Quellen: https://protest-watch.org/quellen/.
+- Rückfragen, Korrekturen, Hinweise: protest-watch@pm.me.
 
 ## Mitmachen
 
@@ -57,7 +81,7 @@ Vorwürfe stehen nur mit benannter Medienquelle auf der Karte und sind als unbes
 ## Aufbau
 
 ```
-seite/            Startseite und Impressum/Datenschutz (protest-watch.org/)
+seite/            Startseite, Quellenliste (quellen/), Impressum/Datenschutz (protest-watch.org/)
 karte/            die Karte (statisch, CesiumJS; protest-watch.org/karte/)
   index.html, app.js
   ereignisse.js   Ereignisse aus Medienberichten
@@ -67,6 +91,9 @@ karte/            die Karte (statisch, CesiumJS; protest-watch.org/karte/)
   wege.js         Laufwege der Livestreamer
   mengen.json     Eingabe der Mengensimulation (Zahlen, Flächen, Zeitpunkte, Quellen)
   menge.js        berechnete Wege der simulierten Personen
+  dichte-flaechen.json  gezählte Dichte, auf Straßen und Plätze zugeschnitten
+  objekte-verortet.json aus Videos verortete Fahrzeuge und Polizeiketten
+  grundkarte.js   schlichte Karte: Wasser, Straßen, Gleise, Brücken (OpenStreetMap)
   gebaeude.js     Gebäude aus OpenStreetMap
 skripte/          Erzeugung der Daten (brauchen die nicht veröffentlichten Rohdaten,
                   außer menge_berechnen.py, das nur mengen.json und OSM-Daten liest)
@@ -93,6 +120,6 @@ Dann http://localhost:8000 öffnen. Die Karte braucht einen Browser mit WebGL.
 - Code: MIT, siehe `LICENSE`.
 - Daten (Ereignisse, Orte, Verortungen, Mengen): CC BY 4.0, Namensnennung „Protest-Watch, protest-watch.org“.
   Zitate aus Medien und Streams sind von der CC-Lizenz ausgenommen.
-- `gebaeude.js` und die Kartenkacheln: © OpenStreetMap-Mitwirkende, ODbL.
+- `gebaeude.js`, `grundkarte.js` und die Kartenkacheln: © OpenStreetMap-Mitwirkende, ODbL.
 - CesiumJS: Apache 2.0, wird mit `skripte/cesium_holen.sh` geladen (mit eigener LICENSE).
 - Die eingebetteten Videos gehören ihren Urheberinnen und Urhebern und stehen unter den Bedingungen der jeweiligen Plattform.
