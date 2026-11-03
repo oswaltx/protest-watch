@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Der 31. Oktober zum Nachlesen – Gen-Z-Demo Köln | Protest-Watch</title>
+<meta name="description" content="Rekonstruierter Liveblog der Gen-Z-Demo in Köln am 31.10.2026: alle gemeldeten Ereignisse von 13 bis 23 Uhr, mit Quellen aus Medien, Polizei und öffentlichen Livestreams.">
+<link rel="stylesheet" href="/einreichen/stil.css">
+<style>
+  #filter { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+  #filter button { font: inherit; font-size: .9rem; padding: .35rem .8rem; border-radius: 999px; border: 1px solid var(--linie);
+    background: var(--karte); color: var(--text); cursor: pointer; }
+  #filter button[aria-pressed="true"] { background: #ffcf66; color: #111; border-color: #ffcf66; font-weight: 600; }
+  .stunde { margin: 1.6rem 0 .4rem; font-size: 1.05rem; color: var(--leise, #888); border-bottom: 1px solid var(--linie); padding-bottom: .2rem; }
+  .eintrag { display: grid; grid-template-columns: 4.2rem 1fr; gap: .2rem .8rem; padding: .7rem 0; border-bottom: 1px dashed var(--linie); }
+  .zeit { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .zeit small { display: block; font-weight: 400; font-size: .72rem; color: var(--leise, #888); }
+  .ort { font-size: .85rem; color: var(--leise, #888); }
+  .ort a { color: inherit; }
+  .quelle { font-size: .8rem; color: var(--leise, #888); margin-top: .25rem; }
+  .art { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; padding: 0 .35rem; border-radius: 4px; margin-right: .35rem;
+    background: var(--linie); }
+  .art.polizei { background: #1d3a7a; color: #fff; } .art.medien { background: #5a4a1a; color: #fff; } .art.video { background: #2f5a3a; color: #fff; }
+</style>
+</head>
+<body>
+<main>
+  <p class="klein"><a href="/">← Protest-Watch</a> · <a href="/karte/">Zur Karte</a></p>
+  <h1>Der 31. Oktober zum Nachlesen</h1>
+  <p class="unterzeile">Ein nachträglich zusammengestellter Liveblog der Gen-Z-Demo in Köln: was Medien, Polizei und öffentliche
+    Livestreams für den Tag gemeldet haben und was bisher zusammengetragen ist, in zeitlicher Reihenfolge.</p>
+
+  <div class="karte">
+    <b>So ist er entstanden:</b> Jeder Eintrag stammt aus einer genannten Quelle. Kurze Zitate stehen in Anführungszeichen
+    und gehören den jeweiligen Quellen. Aussagen von Polizei und Innenministerium sind Angaben der Behörden, keine
+    festgestellten Tatsachen; Vorwürfe sind als solche gekennzeichnet. „ca.“ heißt, die Uhrzeit ist nur ungefähr bekannt,
+    „Reihenfolge“, dass sie nur aus der Abfolge in einem Newsblog geschätzt ist. Fehlt etwas oder stimmt etwas nicht:
+    protest-watch@pm.me
+  </div>
+
+  <div id="filter" role="group" aria-label="Quellen filtern">
+    <button data-art="alle" aria-pressed="true">Alle</button>
+    <button data-art="medien" aria-pressed="false">Medien</button>
+    <button data-art="polizei" aria-pressed="false">Polizei und Behörden</button>
+    <button data-art="video" aria-pressed="false">Livestreams und Videos</button>
+  </div>
+  <div id="blog"><p>Lädt …</p></div>
+  <noscript><p>Der Liveblog braucht JavaScript. Dieselben Einträge stehen auf der <a href="/karte/">Karte</a> im Reiter „Jetzt“.</p></noscript>
+
+  <footer>
+    <a href="/datenschutz.html#impressum">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> ·
+    <a href="/quellen/">Quellen</a> · <a href="/">protest-watch.org</a>
+  </footer>
+</main>
+<script src="/karte/orte.js"></script>
+<script src="/karte/ereignisse.js"></script>
+<script src="liveblog.js"></script>
+</body>
+</html>
