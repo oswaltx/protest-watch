@@ -17,8 +17,19 @@ const POLIZEI_1 = a("https://www.presseportal.de/blaulicht/pm/12415/6381520", "P
 const POLIZEI_2 = a("https://www.presseportal.de/blaulicht/pm/12415/6381831", "PM 261101-2-K, 1.11.");
 const BILD = a("https://www.youtube.com/watch?v=K4kQf-2JuDw", "BILD-Video, 31.10.");
 const AUF1 = a("https://t.me/auf1tv/22148", "Video, veröffentlicht von AUF1 (Telegram), 31.10.");
+const TAZ_BERICHT = a("https://taz.de/Gen-Z-regelt-Protest/!6226457/", "taz, 1.11.");
+const SZ_DPA = a("https://www.sueddeutsche.de/politik/gen-z-demo-in-koeln-demonstranten-werfen-pyrotechnik-und-steine-auf-beamte-dpa.urn-newsml-dpa-com-20090101-261031-930-924424", "dpa via SZ, 31.10.");
+const DERWESTEN = a("https://www.derwesten.de/staedte/essen/gen-z-demo-nrw-essen-duesseldorf-koeln-ausschreitungen-polizei-id302190122.html", "DerWesten-Ticker, 31.10.");
 const ZDFHEUTE = a("https://www.tiktok.com/@zdfheute/video/7703163964519173398", "ZDFheute-Video auf TikTok, 1.11.");
 window.EREIGNISSE = [
+  { von: "14:06", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: TAZ("14.06 Uhr"),
+    text: "Etwa 20 Minuten vor Beginn sind erst „wenige hundert“ Menschen da" },
+  { von: "15:30", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: TAZ("15.30 Uhr"),
+    text: "Polizeisprecherin: Die Teilnehmerzahl liegt „deutlich“ unter den angemeldeten 15.000" },
+  { von: "19:00", ort: "Thürmchenswall", zeit_sicher: "Reihenfolge", quelle: `${SZ_DPA}; ${TAZ_BERICHT}`,
+    text: "Laut Polizeisprecherin am Abend zwei Umschließungen: rund 600 Personen in einem Abschnitt am Rheinufer, weitere 100 in einem anderen; Personalien werden aufgenommen (Uhrzeit nur „am Abend“)" },
+  { von: "20:11", ort: "Thürmchenswall", zeit_sicher: "genau", quelle: DERWESTEN,
+    text: "Laut Polizei „bis zu 700“ Menschen am Rheinufer festgesetzt, Personalien werden aufgenommen" },
   { von: "17:37", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A (Ton teils unverständlich, automatische Abschrift)",
     text: "Ein Polizist begründet auf Nachfrage im Livestream, warum die Menschen nicht nach Hause gehen können: Wenn aus dieser Personengruppe Straftaten begangen worden seien, sei die Polizei „verpflichtet, die Straftaten aufzuklären“" },
   { von: "13:00", ort: "Bastei", zeit_sicher: "ca.", quelle: TONLINE,
@@ -51,8 +62,8 @@ window.EREIGNISSE = [
     text: "Rauch über der Menge; viele Einsatzkräfte an der Straße. Über die kleine Seitenstraße am Vincenz-Haus werden Leute noch hinausgelassen" },
   { von: "16:00", ort: "St. Vincenz-Haus", zeit_sicher: "ca.", quelle: "Augenzeugenbericht",
     text: "Kessel wird geschlossen – die kleine Seitenstraße am Vincenz-Haus ist danach zu (früher als in anderen Quellen sichtbar)" },
-  { ansage: "leitung", von: "16:00", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "ca.", quelle: `${TONLINE}; ${TAZ()}`,
-    text: "Versammlungsleiterin beendet die Kundgebung (laut taz nach Druck der Polizei)" },
+  { ansage: "leitung", von: "16:00", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "ca.", quelle: `${TONLINE}; ${TAZ()}; ${TAZ_BERICHT}`,
+    text: "Versammlungsleiterin beendet die Kundgebung. Strittig: laut Versammlungsleiterin auf Druck der Polizei (Haftung für Gewalttaten), laut Polizeisprecher allein auf ihre Initiative" },
   { von: "16:30", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: `${TAZ()}; ${TONLINE}; ${WZ}`,
     text: "Wasserwerfer gegen Gruppen am Ufer, laut taz in die Menge; Polizei beginnt einzukesseln; mind. eine Festnahme" },
   { von: "15:24", ort: "Musical Dome", zeit_sicher: "genau", quelle: "Einsendung per Mail (Video, Handy-Zeitstempel), Blick von der Hohenzollernbrücke",
@@ -92,7 +103,7 @@ window.EREIGNISSE = [
   { von: "17:24", ort: "Hohe Straße", zeit_sicher: "genau", quelle: TAZ("17:24"),
     text: "Teil der Demo zieht in die Hohe Straße, entkommt teils durch eine Seitengasse" },
   { von: "17:15", ort: "Thürmchenswall", zeit_sicher: "ca.", quelle: `${POLIZEI_1}; ${POLIZEI_2}`,
-    text: "Polizei: „polizeiliche Umschließung“ am Konrad-Adenauer-Ufer auf Höhe Thürmchenswall; Personalien von „knapp 1000 Personen“ festgestellt (Maßnahmen bis in die Nacht). 23 verletzte Polizisten in der gesamten Nacht; sichergestellt u. a. Molotow-Cocktails, Stichwaffen, Pyrotechnik" },
+    text: "Polizei: „polizeiliche Umschließung“ am Konrad-Adenauer-Ufer auf Höhe Thürmchenswall; Personalien von „knapp 1000 Personen einer Gruppe“ festgestellt, bis etwa 1.30 Uhr. 23 verletzte Polizisten in der gesamten Nacht; sichergestellt u. a. Molotow-Cocktails, Stichwaffen, Pyrotechnik" },
   { von: "17:20", ort: "Kreuzung KAU/Theodor-Heuss-Ring", zeit_sicher: "ca.", quelle: "Augenzeugenbericht",
     text: "Während ca. 400 Menschen eingekesselt sind, wird verbal eine 2. Kundgebung angekündigt (ohne echte Kooperation mit der Polizei). Sie steht beim 2. Kessel an der Kreuzung und geht fließend in eine Solidaritätskundgebung über, u. a. mit einer pro-palästinensischen Gruppe" },
   { ansage: "polizei", von: "17:29", ort: "Kreuzung KAU/Theodor-Heuss-Ring", zeit_sicher: "genau", quelle: `Livestream A; ${TAZ("17:40")}`,
