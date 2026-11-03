@@ -878,19 +878,29 @@ function zeigeMengeZahlen() {
 // Die Karte wird ab 16:45 dämmrig und ist ab 17:45 dunkel; „Jetzt“ zeigt das Wetter. Abschaltbar unter „Steuerung“.
 const WETTER = [["12:00", "leicht bewölkt, 11–12 °C"], ["13:00", "bewölkt, 13 °C"], ["14:45", "kurz sonnig"],
   ["15:20", "bewölkt, 12–13 °C"], ["16:45", "Dämmerung"], ["17:15", "Straßenbeleuchtung an"], ["17:45", "dunkel"]];
-let lichtAn = true;
+// Stundenwerte des DWD, Station Köln/Bonn (02667, Flughafen, ca. 15 km südöstlich), in MEZ umgerechnet:
+// [Stunde, Temperatur °C, relative Feuchte %, Niederschlag mm, Wind m/s]. Quelle: DWD Open Data (GeoNutzV).
+const DWD = [[13, 9.5, 76, 0, 4.5], [14, 10.1, 73, 0, 3.7], [15, 10.8, 69, 0, 3.3], [16, 10.5, 71, 0, 2.9], [17, 9.8, 77, 0, 1.3],
+  [18, 9.0, 82, 0, 0.7], [19, 8.3, 88, 0, 0.5], [20, 8.1, 89, 0, 0.6], [21, 7.5, 92, 0, 1.2], [22, 7.7, 93, 0, 1.2], [23, 7.8, 91, 0, 1.4]];
+const komma = (x) => String(x).replace(".", ",");
+let lichtAn = false;  // Dämmerung nur auf Wunsch; Sonnenuntergang steht immer auf der Zeitleiste
 function zeigeLicht() {
   const m = (sek(viewer.clock.currentTime) - startS) / 60 + 12 * 60;  // Minuten seit Mitternacht
   const dunkel = m < 16 * 60 + 40 ? 0 : Math.min(1, (m - (16 * 60 + 40)) / 65);  // 16:40 → 17:45
   $("nacht").style.opacity = lichtAn ? (dunkel * 0.42).toFixed(3) : 0;
   const w = WETTER.filter(([z]) => m >= +z.slice(0, 2) * 60 + +z.slice(3)).pop();
-  const text = w ? `🌤 ${w[1]} <small>(laut öffentlichen Webcam-Bildern)</small>` : "";
+  // Messwert der nächsten vollen Stunde (DWD), dazu der Himmel laut Webcams
+  const stunde = Math.min(23, Math.max(13, Math.round(m / 60)));
+  const d = DWD.find((x) => x[0] === stunde);
+  const text = (d ? `🌡 <b>${komma(d[1])} °C</b>, Luftfeuchte <b>${d[2]} %</b>, ${d[3] ? komma(d[3]) + " mm Regen" : "kein Regen"},
+      Wind ${komma(d[4])} m/s <small title="DWD-Station Köln/Bonn, Stundenwert ${stunde}:00 MEZ">(DWD, ${stunde} Uhr)</small><br>` : "")
+    + (w ? `🌤 ${w[1].replace(/, \d.*°C/, "")} <small>(Himmel laut öffentlichen Webcam-Bildern)</small>` : "");
   if ($("jetzt-wetter").innerHTML !== text) $("jetzt-wetter").innerHTML = text;
 }
 viewer.clock.onTick.addEventListener(zeigeLicht);
 $("licht-knopf").onclick = () => {
   lichtAn = !lichtAn;
-  $("licht-knopf").textContent = lichtAn ? "🌙 Tageslicht nicht simulieren" : "🌙 Tageslicht simulieren (Dämmerung ab 16:45)";
+  $("licht-knopf").textContent = lichtAn ? "🌙 Dämmerung wieder ausblenden" : "🌙 Dämmerung auf der Karte zeigen";
   zeigeLicht();
 };
 
@@ -1386,6 +1396,14 @@ function zeichneZeitleiste() {
       <circle cx="${x(e.s)}" cy="32" r="7.5" fill="${ANSAGE_FARBE[e.ansage]}" stroke="#111" stroke-width="1"/>
       <text x="${x(e.s)}" y="35.5" text-anchor="middle" style="font-size:9px">📢</text></g>`;
   }
+  // Sonnenuntergang 17:08 und Ende der bürgerlichen Dämmerung 17:43 (MEZ, Köln): dunkler Verlauf auf der Stundenleiste
+  const su = sek(ortsZeit("17:08")), dunkel = sek(ortsZeit("17:43"));
+  svg += `<defs><linearGradient id="zl-nacht" x1="0" x2="1"><stop offset="0" stop-color="#1a2a55" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1a2a55" stop-opacity=".85"/></linearGradient></defs>
+    <rect x="${x(su)}" y="38" width="${x(dunkel) - x(su)}" height="${h - 38}" fill="url(#zl-nacht)"/>
+    <rect x="${x(dunkel)}" y="38" width="${w - x(dunkel)}" height="${h - 38}" fill="#1a2a55" opacity=".85"/>
+    <g><title>Sonnenuntergang 17:08 Uhr, dunkel ab etwa 17:43 Uhr</title>
+      <text x="${x(su)}" y="35" text-anchor="middle" style="font-size:11px">🌇</text></g>`;
   for (let s = startS; s <= endeS; s += 3600) {
     svg += `<line x1="${x(s)}" x2="${x(s)}" y1="40" y2="46" stroke="#888"/>`;
     if (w > 500 || (s - startS) % 7200 === 0) svg += `<text class="stunde" x="${x(s)}" y="${h - 4}" text-anchor="middle">${uhr(s).slice(0, 2)} Uhr</text>`;
