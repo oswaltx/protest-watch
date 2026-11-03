@@ -578,6 +578,8 @@ const SICHER_FARBE = { hoch: "#ffffff", mittel: "#ffd24d", niedrig: "#ff8c4d", u
 
 function zeigeKameras() {
   for (const k of window.KAMERAS || []) {
+    // grob geschätzte Orte landen manchmal im Rhein, obwohl „Ufer“, „Rasen“ oder „Gehweg“ dasteht: ans Ufer setzen
+    if (!/brücke|schiff|boot/i.test(k.ort)) [k.lat, k.lon] = anLand(k.lat, k.lon);
     const farbe = Cesium.Color.fromCssColorString(SICHER_FARBE[k.ort_sicher] || "#999999");
     const zeit = new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
       start: Cesium.JulianDate.fromDate(new Date(k.von * 1000)),
@@ -842,7 +844,11 @@ async function messeUferHoehe() {
 }
 
 // ---------- Start ----------
-const uebersicht = () => fliegeZu(50.9445, 6.9620, 1100);
+// Übersicht: der ganze Demo-Bereich vom Dom bis zur Bastei, schräg von Süden, das Ufer etwas links der Mitte
+// (rechts liegt die Leiste über dem Rhein)
+const uebersicht = () => viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(6.9608, 50.9398, 560),
+  orientation: { heading: Cesium.Math.toRadians(16), pitch: Cesium.Math.toRadians(-36), roll: 0 }, duration: 1.5 });
 $("uebersicht").onclick = uebersicht;
 $("tonmodell").onclick = () => setzeTonmodell(!stadt?.customShader);
 $("google-knopf").onclick = () => (stadt && stadt.show ? ladeOsm() : ladeGoogle());
