@@ -159,25 +159,36 @@ function eigeneGebaeude() {
     attributes: { color: weiss } }));
   const kanten = window.GEBAEUDE.map((g) => new Cesium.GeometryInstance({
     geometry: new Cesium.PolygonOutlineGeometry(huelle(g)), attributes: { color: schwarz } }));
-  // Spitze Dächer und Turmspitzen (Dom): Dreiecke von jeder Kante des Umrisses zur Spitze über der Mitte
-  for (const [hoehe, punkte, unten = 0, dach = 0] of window.GEBAEUDE) {
+  // Dächer der Gebäudeteile (Dom): Spitze über der Mitte (Turmspitzen, Zeltdächer) oder First (Satteldach,
+  // nur bei vier Ecken: First zwischen den Mitten der beiden kürzeren Seiten)
+  for (const [hoehe, punkte, unten = 0, dach = 0, form] of window.GEBAEUDE) {
     if (!dach) continue;
+    const n = punkte.length / 2;
     const ecken = Cesium.Cartesian3.fromDegreesArrayHeights(
       punkte.flatMap((z, j) => (j % 2 ? [z, GRUND + hoehe - dach] : [z])));
-    const n = punkte.length / 2;
-    let lon = 0, lat = 0;
-    for (let j = 0; j < n; j++) { lon += punkte[2 * j] / n; lat += punkte[2 * j + 1] / n; }
-    const spitze = Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + hoehe);
-    const lage = new Float64Array((n + 1) * 3);
-    [...ecken, spitze].forEach((c, j) => { lage[3 * j] = c.x; lage[3 * j + 1] = c.y; lage[3 * j + 2] = c.z; });
+    const oben = [];   // Spitze bzw. die zwei Firstpunkte
+    const dreiecke = [], linien = [];
+    const mitte = (a, b) => [(punkte[2 * a] + punkte[2 * b]) / 2, (punkte[2 * a + 1] + punkte[2 * b + 1]) / 2];
+    if (form === "first") {
+      const laenge = (a, b) => Cesium.Cartesian3.distance(ecken[a], ecken[b]);
+      const k = laenge(0, 1) + laenge(2, 3) < laenge(1, 2) + laenge(3, 0) ? 0 : 1;  // k: Beginn einer kurzen Seite
+      const [a0, a1, b0, b1] = [k, k + 1, (k + 2) % 4, (k + 3) % 4];
+      for (const [x, y] of [mitte(a0, a1), mitte(b0, b1)]) oben.push(Cesium.Cartesian3.fromDegrees(x, y, GRUND + hoehe));
+      const F1 = n, F2 = n + 1;   // F1 über der Seite a0–a1, F2 über b0–b1
+      dreiecke.push(a0, a1, F1, b0, b1, F2, a1, b0, F2, a1, F2, F1, b1, a0, F1, b1, F1, F2);
+      linien.push(F1, F2, a0, F1, a1, F1, b0, F2, b1, F2);
+    } else {
+      let lon = 0, lat = 0;
+      for (let j = 0; j < n; j++) { lon += punkte[2 * j] / n; lat += punkte[2 * j + 1] / n; }
+      oben.push(Cesium.Cartesian3.fromDegrees(lon, lat, GRUND + hoehe));
+      for (let j = 0; j < n; j++) { dreiecke.push(j, (j + 1) % n, n); linien.push(j, n); }
+    }
+    const alle = [...ecken, ...oben];
+    const lage = new Float64Array(alle.length * 3);
+    alle.forEach((c, j) => { lage[3 * j] = c.x; lage[3 * j + 1] = c.y; lage[3 * j + 2] = c.z; });
     const position = new Cesium.GeometryAttribute({ componentDatatype: Cesium.ComponentDatatype.DOUBLE,
       componentsPerAttribute: 3, values: lage });
-    const kugel = Cesium.BoundingSphere.fromPoints([...ecken, spitze]);
-    const dreiecke = [], linien = [];
-    for (let j = 0; j < n; j++) {
-      dreiecke.push(j, (j + 1) % n, n);
-      linien.push(j, n);
-    }
+    const kugel = Cesium.BoundingSphere.fromPoints(alle);
     flaechen.push(new Cesium.GeometryInstance({ attributes: { color: weiss },
       geometry: new Cesium.Geometry({ attributes: { position }, indices: new Uint16Array(dreiecke),
         primitiveType: Cesium.PrimitiveType.TRIANGLES, boundingSphere: kugel }) }));
