@@ -619,13 +619,18 @@ const FARBE_GRUPPE = { menge: Cesium.Color.fromCssColorString("#ffcf66"), polize
 const NAH = 180;
 let bodenHoehe = GRUND;  // Ellipsoid-Höhe Uferstraße, nach Laden der Kacheln gemessen
 
-function maennekin(koerper, kopf, polizei) {
+function maennekin(koerper, kopf, polizei, schritt = false) {
   const c = document.createElement("canvas");
   c.width = 40; c.height = 116;
   const g = c.getContext("2d");
   g.fillStyle = koerper;
   g.beginPath(); g.roundRect(11, 22, 18, 44, 6); g.fill();               // Rumpf
-  g.fillRect(12, 62, 7, 52); g.fillRect(21, 62, 7, 52);                  // Beine
+  if (schritt) {                                                          // Beine im Schritt, Arme pendeln mit
+    g.strokeStyle = koerper; g.lineWidth = 7; g.lineCap = "round";
+    g.beginPath(); g.moveTo(16, 64); g.lineTo(7, 111); g.moveTo(24, 64); g.lineTo(33, 111); g.stroke();
+  } else {
+    g.fillRect(12, 62, 7, 52); g.fillRect(21, 62, 7, 52);                // Beine
+  }
   g.beginPath(); g.roundRect(4, 25, 6, 36, 3); g.roundRect(30, 25, 6, 36, 3); g.fill();  // Arme
   g.fillStyle = kopf;
   g.beginPath(); g.arc(20, 12, 10, 0, 2 * Math.PI); g.fill();           // Kopf
@@ -646,11 +651,13 @@ function mannschaftswagen() {
   g.fillStyle = "#3d7bff"; g.fillRect(50, 1, 20, 5);                                  // Blaulicht
   return c;
 }
+// je Aussehen zwei Bilder: stehend und im Schritt (beim Gehen abwechselnd)
+const paar = (k, kopf, polizei) => [maennekin(k, kopf, polizei), maennekin(k, kopf, polizei, true)];
 const BILDER = {
-  menge: ["#3b3b42", "#5a4632", "#2f4a5e", "#6b2f2f", "#444f3a"].map((k) => maennekin(k, "#c9a58a", false)),
-  polizei: [maennekin("#1d2b4d", "#26324f", true)],
-  krawall: [maennekin("#151515", "#2a2a2a", false), maennekin("#1c1c1c", "#3a1414", false)],  // dunkel, vermummt
-  fahrzeug: [mannschaftswagen()],
+  menge: ["#3b3b42", "#5a4632", "#2f4a5e", "#6b2f2f", "#444f3a"].map((k) => paar(k, "#c9a58a", false)),
+  polizei: [paar("#1d2b4d", "#26324f", true)],
+  krawall: [paar("#151515", "#2a2a2a", false), paar("#1c1c1c", "#3a1414", false)],  // dunkel, vermummt
+  fahrzeug: [[mannschaftswagen(), mannschaftswagen()]],
 };
 
 const punkteSammlung = viewer.scene.primitives.add(new Cesium.PointPrimitiveCollection());
@@ -667,11 +674,11 @@ const populationen = MENGE.populationen.map((p) => {
     if (SCHWACH && i % 3 && !fz) { punkte.push(null); figuren.push(null); continue; }
     punkte.push(punkteSammlung.add({ show: false, color: farbe, pixelSize: { polizei: 5, fahrzeug: 9, krawall: 5 }[p.gruppe] || 4,
       scaleByDistance: new Cesium.NearFarScalar(50, 2.0, 2000, 0.6) }));
-    figuren.push(figurenSammlung.add({ show: false, image: bilder[i % bilder.length], sizeInMeters: true,
+    figuren.push(figurenSammlung.add({ show: false, image: bilder[i % bilder.length][0], sizeInMeters: true,
       width: fz ? 6 : 0.6, height: fz ? 2.8 : 1.75,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM, heightReference: AUF_KACHELN }));
   }
-  return { ...p, wege, K: p.T.length, punkte, figuren };
+  return { ...p, wege, K: p.T.length, punkte, figuren, bilderZahl: bilder.length };
 });
 
 const fahrzeugEntities = MENGE.fahrzeuge.map((f) => {
@@ -703,6 +710,7 @@ for (const m of MENGE.markierungen) {
   });
 }
 
+const laengen = new Float64Array(64);  // Hilfsfeld: Längen der Teilstücke eines Weges
 const zuGrad = (dx, dy) => [LON0 + dx / 10 / MX, LAT0 + dy / 10 / MY];
 let mengeSichtbar = true;  // umgeschaltet über setzeModus (Figuren / Dichte / Beides)
 let nurPolizei = false;     // Modus „Dichte“: Polizei und Fahrzeuge bleiben sichtbar (Kessel), Menge kommt aus der Dichte
@@ -729,14 +737,36 @@ function aktualisiereMenge() {
       n++;
       if (!pp) continue;
       if (!mengeSichtbar || (nurPolizei && p.gruppe !== "polizei" && p.gruppe !== "fahrzeug")) { pp.show = false; fig.show = false; continue; }
-      // leichte Eigenbewegung im Stand (±0,3 m), damit die Menge nicht wie eingefroren wirkt
-      const wackeln = p.gruppe === "fahrzeug" ? 0 : 3 * Math.sin(t / 7 + i * 1.7);
-      const x = wege[a] + (wege[b] - wege[a]) * f + wackeln;
-      const y = wege[a + 1] + (wege[b + 1] - wege[a + 1]) * f + wackeln * 0.6;
+      // Wie echte Menschen: den ganzen Weg zum nächsten Platz (um Häuser herum, aus mehreren Teilstücken) in einem
+      // Zug in normalem Tempo gehen, jede Person zu einer eigenen Zeit, dann dort stehen bleiben – statt eine halbe
+      // Stunde lang gleichmäßig zu gleiten. Wege in Dezimetern.
+      const Z = p.zwischen || 1, m0 = Math.floor(k / Z) * Z, m1 = Math.min(m0 + Z, K - 1);
+      let von = m0, bis = m1;
+      for (let m = m0; m <= m1; m++) if (wege[(i * K + m) * 2] === FEHLT) { von = k; bis = k + 1; break; }
+      let strecke = 0;
+      for (let m = von; m < bis; m++) {
+        const u = (i * K + m) * 2;
+        laengen[m - von] = Math.hypot(wege[u + 2] - wege[u], wege[u + 3] - wege[u + 1]) / 10;
+        strecke += laengen[m - von];
+      }
+      const dauer = T[bis] - T[von], gehzeit = Math.min(dauer, strecke / (p.gruppe === "fahrzeug" ? 4 : 1.3));
+      const versatz = ((Math.sin(i * 12.9898 + von * 78.233) * 43758.5453) % 1 + 1) % 1 * (dauer - gehzeit);
+      const roh = gehzeit > 0 ? Math.max(0, Math.min(1, (t - T[von] - versatz) / gehzeit)) : 1;
+      const g = roh * roh * (3 - 2 * roh);  // sanft anlaufen und abbremsen
+      let rest = g * strecke, m = von;
+      while (m < bis - 1 && rest > laengen[m - von]) { rest -= laengen[m - von]; m++; }
+      const u = (i * K + m) * 2, anteil = laengen[m - von] > 0 ? rest / laengen[m - von] : 1;
+      const x = wege[u] + (wege[u + 2] - wege[u]) * anteil, y = wege[u + 1] + (wege[u + 3] - wege[u + 1]) * anteil;
       const [lon, lat] = zuGrad(x, y);
       const boden = Cesium.Cartesian3.fromDegrees(lon, lat, bodenHoehe);
       const nah = Cesium.Cartesian3.distance(boden, kamera) < NAH;
-      if (nah) fig.position = boden; else pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, bodenHoehe + 1);
+      if (nah) {
+        fig.position = boden;
+        const geht = roh > 0 && roh < 1 && strecke > 2 && p.gruppe !== "fahrzeug";
+        const schritt = geht ? Math.floor(g * strecke / 0.8) % 2 : 0;  // alle 0,8 m Bein wechseln
+        const bild = i % p.bilderZahl;
+        if (fig._schritt !== schritt) { fig.setImage(`${p.gruppe}-${bild}-${schritt}`, BILDER[p.gruppe][bild][schritt]); fig._schritt = schritt; }
+      } else pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, bodenHoehe + 1);
       fig.show = nah;
       pp.show = !nah;
     }
