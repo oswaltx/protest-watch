@@ -52,6 +52,24 @@ if os.path.exists(korrektur):
             n += 1
     print(f"{n} Kameraorte korrigiert")
 
+# Im Rendering eingepasste Kameraposen (szene/kameras-verfeinert.json) gehen vor: Ort und Blickrichtung der Szene,
+# in der die eingepasste Sekunde liegt
+verfeinert = os.path.join(basis, "szene/kameras-verfeinert.json")
+if os.path.exists(verfeinert):
+    RICHTUNGEN = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"]
+    n = 0
+    for e in json.load(open(verfeinert))["kameras"]:
+        for k in kameras:
+            if k["id"] == e["id"] and k["sek_von"] <= e["sek"] <= (k["sek_bis"] if k["sek_bis"] is not None else k["sek_von"]):
+                k.update(lat=e["lat"], lon=e["lon"], ort_sicher="hoch")
+                if e.get("kurs_grad") is not None:
+                    k["blick"] = RICHTUNGEN[round(e["kurs_grad"] / 45) % 8]
+                u = e.get("unsicherheit_m", {})
+                k["ort_grund"] += (f" Kamerapose im Rendering eingepasst (Sekunde {e['sek']}, ±{u.get('laengs', '?')} m längs,"
+                                   f" ±{u.get('quer', '?')} m quer).")
+                n += 1
+    print(f"{n} eingepasste Kameraposen übernommen")
+
 with open(os.path.join(basis, "szene/kameras.js"), "w") as fh:
     fh.write("// Automatisch erzeugt von skripte/kameras_fuer_szene.py, nicht von Hand ändern.\n")
     fh.write("window.KAMERAS = " + json.dumps(kameras, ensure_ascii=False) + ";\n")
