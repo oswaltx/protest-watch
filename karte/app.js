@@ -17,6 +17,7 @@ const GRUND = 0;  // flache Karte auf dem Ellipsoid (lokal wie öffentlich); in 
 // gelaendeHoehe ist ein bilinearer Gitter-Lookup, billig genug für die Menge (5.000 Punkte, 10 Mal pro Sekunde).
 const GELAENDE = !!window.gelaendeHoehe && !new URLSearchParams(location.search).has("flach");
 const boden = GELAENDE ? (lon, lat) => GRUND + window.gelaendeHoehe(lon, lat) : () => GRUND;
+window.boden = boden;  // für Ebenen, die nach app.js laden (pyro_ebene.js)
 // tiefster (bzw. höchster) Geländepunkt eines Umrisses [lon, lat, …]: Sockel für Gebäude, damit nichts über dem Hang schwebt
 function sockel(punkte, hoechster = false) {
   if (!GELAENDE) return GRUND;
@@ -201,7 +202,7 @@ if ($("kulisse-knopf") && window.kulisseLaden) $("kulisse-knopf").onclick = asyn
     knopf.disabled = true;
     knopf.textContent = "🏙 3D-Kulisse lädt …";
     try {
-      kulisse = await window.kulisseLaden(viewer, { klein: SCHWACH || SCHMAL.matches });
+      kulisse = await window.kulisseLaden(viewer, { klein: SCHWACH || SCHMAL.matches, boden: GELAENDE ? boden : null });
     } catch (e) {
       knopf.disabled = false;
       knopf.textContent = "🏙 3D-Kulisse (Laden fehlgeschlagen)";
@@ -209,7 +210,7 @@ if ($("kulisse-knopf") && window.kulisseLaden) $("kulisse-knopf").onclick = asyn
     }
     knopf.disabled = false;
     // Start erhöht und seitlich versetzt über der Fahrbahn, nicht auf dem Weg der Aufnahme (Auflage recht-b0 3.11.)
-    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(6.964843, 50.948396, 10),
+    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(6.964843, 50.948396, boden(6.964843, 50.948396) + 10),
       orientation: { heading: Cesium.Math.toRadians(230), pitch: Cesium.Math.toRadians(-18), roll: 0 } });
   } else kulisse.show = !kulisse.show;
   if (osmGebaeude) {

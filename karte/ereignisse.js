@@ -24,8 +24,6 @@ const ZDFHEUTE = a("https://www.tiktok.com/@zdfheute/video/7703163964519173398",
 window.EREIGNISSE = [
   { von: "14:06", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: TAZ("14.06 Uhr"),
     text: "Etwa 20 Minuten vor Beginn sind erst „wenige hundert“ Menschen da" },
-  { von: "15:30", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: TAZ("15.30 Uhr"),
-    text: "Polizeisprecherin: Die Teilnehmerzahl liegt „deutlich“ unter den angemeldeten 15.000" },
   { von: "19:00", ort: "Thürmchenswall", zeit_sicher: "Reihenfolge", quelle: `${SZ_DPA}; ${TAZ_BERICHT}`,
     text: "Laut Polizeisprecherin am Abend zwei Umschließungen: rund 600 Personen in einem Abschnitt am Rheinufer, weitere 100 in einem anderen; Personalien werden aufgenommen (Uhrzeit nur „am Abend“)" },
   { von: "20:11", ort: "Thürmchenswall", zeit_sicher: "genau", quelle: DERWESTEN,
