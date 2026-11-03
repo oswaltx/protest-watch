@@ -101,9 +101,9 @@ async function ladeOsm(grund) {
   if (!osmGebaeude) osmGebaeude = viewer.scene.primitives.add(window.GEBAEUDE ? eigeneGebaeude() : await Cesium.createOsmBuildingsAsync());
   osmGebaeude.show = true;
   if (stadt) stadt.show = false;
-  status(grund ? `OSM-Ansicht (${grund})` : "OSM-Ansicht");
+  status(grund ? `Hinweis: ${grund}` : "");
+  bodenHoehe = GRUND; letzteZeit = -2;  // flache Karte: Boden ist GRUND (die Höhenmessung gilt nur für Google-Kacheln)
   $("google-knopf").textContent = "📷 Google-Fotokacheln";
-  setTimeout(messeUferHoehe, 4000);
 }
 
 // Schlichte Karte: weißer Grund, Rhein und Straßen aus grundkarte.js, Brücken als flache Körper, Straßennamen.
@@ -797,7 +797,8 @@ function zeichneDiagramm() {
   const alle = [...Object.entries(reihen).map(([g, w]) => ({ name: GRUPPEN[g][0], farbe: GRUPPEN[g][1], werte: w })),
                 ...extra.map((r) => ({ name: r.name, farbe: r.farbe, werte: r.werte, quelle: r.quelle }))];
   const W = 540, H = 200, L = 40, U = 18;
-  const max = Math.max(100, ...alle.flatMap((r) => r.werte));
+  const zaehlungen = dichteZeitpunkte.filter((z) => z.gesamt_sichtbereich);  // aus Videobildern gezählt
+  const max = Math.max(100, ...alle.flatMap((r) => r.werte), ...zaehlungen.map((z) => z.gesamt_sichtbereich.p84));
   const x = (s) => L + (s - startS) / (endeS - startS) * (W - L - 6);
   const y = (n) => H - U - n / max * (H - U - 8);
   let svg = `<svg viewBox="0 0 ${W} ${H}" id="diagramm-svg">`;
@@ -812,11 +813,21 @@ function zeichneDiagramm() {
     const pfad = r.werte.map((n, j) => `${j ? "L" : "M"}${x(raster[j]).toFixed(1)},${y(n).toFixed(1)}`).join("");
     svg += `<path d="${pfad}" fill="none" stroke="${r.farbe}" stroke-width="2"><title>${r.name}</title></path>`;
   }
+  for (const z of zaehlungen) {  // Median mit 68-%-Spanne; nur der gefilmte Ausschnitt, Polizei mitgezählt
+    const g = z.gesamt_sichtbereich, px = x(z.s).toFixed(1);
+    svg += `<g><title>${z.zeit} Uhr, ${z.name}: etwa ${g.median} Menschen (${g.p16}–${g.p84}) im gefilmten Bereich
+      (${z.flaeche_sichtbereich_m2} m²), in Videobildern gezählt</title>
+      <line x1="${px}" x2="${px}" y1="${y(g.p84)}" y2="${y(g.p16)}" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="${px}" cy="${y(g.median)}" r="3.5" fill="#fff" stroke="#111"/></g>`;
+  }
   svg += `<line id="diagramm-jetzt" x1="0" x2="0" y1="6" y2="${H - U}" stroke="#fff" stroke-width="1" stroke-dasharray="3 2"/></svg>`;
   $("diagramm-flaeche").innerHTML = svg;
   $("diagramm-legende").innerHTML = alle.map((r) =>
     `<span title="${r.quelle || "aus den geschätzten Mengen (mengen.json)"}"><i style="background:${r.farbe}"></i>${r.name}</span>`).join("") +
-    "<br>Alle Zahlen geschätzt; Gewaltbereite sind eine Teilmenge der Demonstrierenden. Klick setzt die Uhrzeit.";
+    (zaehlungen.length ? `<span><i style="background:#fff;width:7px;height:7px;border-radius:50%"></i>gezählt in Videobildern
+      (nur gefilmter Bereich, mit Polizei)</span>` : "") +
+    "<br>Linien geschätzt, weiße Punkte mit Spanne in Videobildern gezählt. Gewaltbereite sind eine Teilmenge der " +
+    "Demonstrierenden. Klick setzt die Uhrzeit.";
   $("diagramm-svg").addEventListener("click", (ev) => {
     const r = ev.currentTarget.getBoundingClientRect();
     const s = startS + ((ev.clientX - r.left) / r.width * W - L) / (W - L - 6) * (endeS - startS);
