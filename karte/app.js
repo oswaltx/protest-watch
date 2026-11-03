@@ -133,6 +133,7 @@ async function ladeOsm(grund) {
     // Schummerung: ohne sie wäre die Böschung auf der schlichten Karte unsichtbar (einfarbiger Globus)
     if (GELAENDE) window.gelaendeSchatten(viewer).catch(() => {});
     viewer.creditDisplay.addStaticCredit(new Cesium.Credit("Karte: © OpenStreetMap-Mitwirkende"));
+    if (GELAENDE) viewer.creditDisplay.addStaticCredit(new Cesium.Credit("Gelände: Geobasis NRW (DGM1, dl-de/zero-2.0)"));
   }
   viewer.scene.globe.show = true;
   setzeKartenstil(kartenstil);
