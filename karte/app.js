@@ -840,6 +840,24 @@ function zeigeMengeZahlen() {
     ? zonen.map(([name, z]) => `<div title="${z.quelle}">${{ polizei: "🔵", krawall: "🔴", fahrzeug: "🚐" }[z.gruppe] || "🟡"} ${name}: ~${z.n}</div>`).join("")
     : "<i>keine geschätzte Menge</i>";
   if ($("jetzt-menge").innerHTML !== html) $("jetzt-menge").innerHTML = html;
+  zeigeHundert();
+}
+
+// „Von 100 Menschen auf der Straße …“: 100 Kästchen, aufgeteilt nach den geschätzten Zahlen gerade jetzt.
+// Gewaltbereite sind ein Teil der Demonstrierenden (rot innerhalb von gelb), Fahrzeuge zählen nicht mit.
+function zeigeHundert() {
+  let demo = 0, polizei = 0, krawall = 0;
+  for (const z of Object.values(mengeZahlen)) {
+    if (z.gruppe === "menge") demo += z.n; else if (z.gruppe === "polizei") polizei += z.n; else if (z.gruppe === "krawall") krawall += z.n;
+  }
+  const gesamt = demo + polizei;
+  if (gesamt < 20) { if ($("jetzt-hundert").innerHTML) $("jetzt-hundert").innerHTML = ""; return; }
+  const p = Math.round(polizei / gesamt * 100), k = Math.min(Math.round(krawall / gesamt * 100) || (krawall ? 1 : 0), 100 - p);
+  const kaestchen = Array.from({ length: 100 }, (_, i) => (i < p ? "p" : i < p + k ? "k" : "d"));
+  const html = `<div class="hundert-text">Von 100 Menschen auf der Straße sind gerade etwa <b>${100 - p}</b> Demonstrierende
+      (davon ${k} gewaltbereit) und <b>${p}</b> Polizei – geschätzt.</div>
+    <div class="hundert">${kaestchen.map((c) => `<i class="${c}"></i>`).join("")}</div>`;
+  if ($("jetzt-hundert").innerHTML !== html) $("jetzt-hundert").innerHTML = html;
 }
 
 // ---------- Diagramm: Personen je Gruppe über den Tag ----------
@@ -909,6 +927,18 @@ function zeichneDiagramm() {
       <circle cx="${px}" cy="${y(g.median)}" r="3.5" fill="#fff" stroke="#111"/></g>`;
   }
   svg += `<line id="diagramm-jetzt" x1="0" x2="0" y1="6" y2="${H - U}" stroke="#fff" stroke-width="1" stroke-dasharray="3 2"/></svg>`;
+  // Verhältnis: Polizei je 100 Demonstrierende (nur wo mindestens 200 Demonstrierende geschätzt sind)
+  const H2 = 70, verh = raster.map((_, j) => (reihen.menge[j] >= 200 ? reihen.polizei[j] / reihen.menge[j] * 100 : null));
+  const vmax = Math.max(10, ...verh.filter((v) => v != null));
+  const y2 = (v) => H2 - 14 - v / vmax * (H2 - 24);
+  let pfad2 = "", an = false;
+  verh.forEach((v, j) => { if (v == null) { an = false; return; } pfad2 += `${an ? "L" : "M"}${x(raster[j]).toFixed(1)},${y2(v).toFixed(1)}`; an = true; });
+  svg += `<svg viewBox="0 0 ${W} ${H2}" id="diagramm-verhaeltnis">
+    <text x="${L}" y="10" fill="#ccc" font-size="10">Polizei je 100 Demonstrierende (geschätzt)</text>
+    <line x1="${L}" x2="${W}" y1="${y2(0)}" y2="${y2(0)}" stroke="#444" stroke-width=".5"/>
+    <text x="${L - 4}" y="${y2(vmax) + 3}" fill="#aaa" font-size="9" text-anchor="end">${Math.round(vmax)}</text>
+    <text x="${L - 4}" y="${y2(0) + 3}" fill="#aaa" font-size="9" text-anchor="end">0</text>
+    <path d="${pfad2}" fill="none" stroke="#9fb8ff" stroke-width="2"/></svg>`;
   $("diagramm-flaeche").innerHTML = svg;
   $("diagramm-legende").innerHTML = alle.map((r) =>
     `<span title="${r.quelle || "aus den geschätzten Mengen (mengen.json)"}"><i style="background:${r.farbe}"></i>${r.name}</span>`).join("") +

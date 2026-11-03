@@ -51,6 +51,9 @@
   ul.legende i.dreieck { width: 0; height: 0; border: 5px solid transparent; border-bottom: 9px solid #ffb000; border-top: 0; }
   #jetzt-uhr { font-size: 22px; font-weight: 600; }
   .ev { margin: 6px 0; padding-left: 6px; border-left: 3px solid #ffb000; }
+  .hundert-text { font-size: 12px; margin: 8px 0 4px; }
+  .hundert { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; max-width: 260px; }
+  .hundert i { aspect-ratio: 1; border-radius: 2px; background: #ffcf66; } .hundert i.p { background: #4d8bff; } .hundert i.k { background: #ff3b3b; }
   .ev.ansage { border-left-width: 5px; background: rgba(255,255,255,.05); padding: 4px 6px; border-radius: 0 4px 4px 0; }
   .ev.ansage.polizei { border-left-color: #4d8bff; } .ev.ansage.leitung { border-left-color: #3ecf8e; }
   .ansage-kopf { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #ddd; }
@@ -180,6 +183,7 @@
     <div id="jetzt-dichte" class="klein">lädt…</div>
     <h2>Menge (geschätzt, Simulation)</h2>
     <div id="jetzt-menge"></div>
+    <div id="jetzt-hundert"></div>
     <h2>Videos zu diesem Zeitpunkt</h2>
     <div id="jetzt-videos"></div>
   </section>
@@ -376,6 +380,6 @@
 <script src="menge.js?v=7a666416c1"></script>
 <script src="tour.js?v=759083d611"></script>
 <script src="grundkarte.js?v=0bb0fb78dc"></script>
-<script src="app.js?v=86268a9eeb"></script>
+<script src="app.js?v=85c54ed09c"></script>
 </body>
 </html>
