@@ -38,7 +38,7 @@ Die Karte ist eine **Rekonstruktion**, kein Messergebnis.
 - Jede Verortung und jede Uhrzeit hat eine Sicherheitsangabe (hoch, mittel, niedrig). Die Begründung steht
   jeweils dabei.
 - Die gezählte Dichte ist eine zweite, unabhängige Schätzung. In den gefilmten Bereichen zählt sie meist mehr
-  Menschen als die Simulation (etwa um 14:20 rund 3.360, Spanne 3.110–3.800, nur im gefilmten Ausschnitt).
+  Menschen als die Simulation (etwa um 14:20 rund 3.520, Spanne 3.230–3.910, nur im gefilmten Ausschnitt).
 - Stand der Daten: 3.11.2026.
 
 ## Für Journalistinnen und Journalisten

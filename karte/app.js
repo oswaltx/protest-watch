@@ -145,6 +145,29 @@ function setzeKartenstil(stil) {
   viewer.scene.requestRender();
 }
 $("stil-knopf").onclick = () => setzeKartenstil(kartenstil === "schlicht" ? "bunt" : "schlicht");
+// 3D-Kulisse Weckschnapp (Gaussian Splats aus einem Livestream vor der Demo, Personen und Fahrzeuge entfernt;
+// szene/3d/kulisse.js). Knopf und Skript stehen in index.html zwischen <!-- kulisse -->-Markierungen und fehlen im
+// Export, solange KULISSE_FREIGEGEBEN = False. Lädt erst beim ersten Klick; Handys bekommen die kleine Fassung.
+let kulisse = null;
+if ($("kulisse-knopf") && window.kulisseLaden) $("kulisse-knopf").onclick = async () => {
+  const knopf = $("kulisse-knopf");
+  if (!kulisse) {
+    knopf.disabled = true;
+    knopf.textContent = "🏙 3D-Kulisse lädt …";
+    try {
+      kulisse = await window.kulisseLaden(viewer, { klein: SCHWACH || SCHMAL.matches });
+    } catch (e) {
+      knopf.disabled = false;
+      knopf.textContent = "🏙 3D-Kulisse Weckschnapp (Laden fehlgeschlagen)";
+      return;
+    }
+    knopf.disabled = false;
+    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(6.9651, 50.9474, 22),
+      orientation: { heading: Cesium.Math.toRadians(25), pitch: Cesium.Math.toRadians(-12), roll: 0 } });
+  } else kulisse.show = !kulisse.show;
+  knopf.textContent = kulisse.show ? "🏙 3D-Kulisse Weckschnapp ausblenden" : "🏙 3D-Kulisse Weckschnapp zeigen";
+  viewer.scene.requestRender();
+};
 $("sichtfeld-knopf").onclick = () => {
   const an = !(sichtfelder[0]?.show ?? true);
   for (const e of sichtfelder) e.show = an;
