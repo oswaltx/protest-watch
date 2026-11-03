@@ -43,10 +43,29 @@ function amGelaende(punkte, dz) {
   return Cesium.Cartesian3.fromDegreesArrayHeights(o);
 }
 
-const TAG = "2026-10-31";
-const ortsZeit = (hhmm) => Cesium.JulianDate.fromIso8601(`${TAG}T${hhmm}:00+01:00`);
-const start = ortsZeit("12:00");
-const ende = ortsZeit("23:00");
+// Stadt: ohne stadt.js gilt Köln. Weitere Städte (staedte/<name>/, Karte aus skripte/stadt_karte.py) bringen
+// window.STADT mit: Zeitraum, Startansichten, Hauptorte, Wetter, Dämmerung, vorhandene Ebenen.
+const STADT = Object.assign({
+  tag: "2026-10-31", start: "12:00", ende: "23:00", jetzt: "16:30",
+  nacht_bis: 0,   // Uhrzeiten vor dieser Stunde gehören zum Folgetag (Nacht nach der Demo)
+  figur_je: 1,    // eine simulierte Figur steht für so viele Personen (menge.js)
+  uebersicht: { handy: [6.9636, 50.9418, 900, 16, -58], breit: [6.9608, 50.9398, 560, 16, -36] },  // lon, lat, Höhe, Richtung, Neigung
+  wasserblick: [6.9722, 50.9472, 140, 282, -14],
+  mitte: [50.9475, 6.9640],
+  hauptorte: ["Bastei", "Musical Dome", "Breslauer Platz", "Ebertplatz", "Domplatte", "Heumarkt", "Theodor-Heuss-Ring"],
+  sonne: ["17:08", "17:43"],         // Sonnenuntergang, Ende der bürgerlichen Dämmerung (MEZ)
+  daemmerung: ["16:40", "17:45"],    // Dämmerung auf der Karte (nur auf Wunsch)
+  dwd_station: "Köln/Bonn",
+  dichte: true,
+}, window.STADT || {});
+const TAG = STADT.tag;
+const FOLGETAG = new Date(Date.parse(TAG) + 86400000).toISOString().slice(0, 10);
+// tag = „1.11.“ o. ä. (Ereignisse) legt den Tag fest; sonst gehören Uhrzeiten vor nacht_bis zum Folgetag
+const TAG_KURZ = `${+TAG.slice(8)}.${+TAG.slice(5, 7)}.`;
+const ortsZeit = (hhmm, tag) => Cesium.JulianDate.fromIso8601(
+  `${(tag ? tag !== TAG_KURZ : +hhmm.slice(0, 2) < STADT.nacht_bis) ? FOLGETAG : TAG}T${hhmm}:00+01:00`);
+const start = ortsZeit(STADT.start);
+const ende = ortsZeit(STADT.ende);
 const sek = (jd) => Cesium.JulianDate.toDate(jd).getTime() / 1000;   // Unix-Sekunden
 const startS = sek(start), endeS = sek(ende);
 
@@ -79,7 +98,7 @@ if (viewer.scene.moon) viewer.scene.moon.show = false;
 window.viewer = viewer;  // zum Messen in der Browser-Konsole
 viewer.clock.startTime = start.clone();
 viewer.clock.stopTime = ende.clone();
-viewer.clock.currentTime = ortsZeit("16:30");
+viewer.clock.currentTime = ortsZeit(STADT.jetzt);
 viewer.clock.clockRange = Cesium.ClockRange.CLAMPED;
 viewer.clock.multiplier = 60;
 viewer.clock.shouldAnimate = false;
@@ -334,7 +353,7 @@ function schild(text, { farbe = Cesium.Color.WHITE, versatz = -14, amBoden = fal
 }
 
 // in der Übersicht beschriftet; die übrigen Orte erst beim Heranzoomen (sie liegen dicht beieinander am Ufer)
-const HAUPTORTE = new Set(["Bastei", "Musical Dome", "Breslauer Platz", "Ebertplatz", "Domplatte", "Heumarkt", "Theodor-Heuss-Ring"]);
+const HAUPTORTE = new Set(STADT.hauptorte);
 function zeigeOrte() {
   const liste = $("orte");
   for (const o of window.ORTE) {
@@ -366,7 +385,7 @@ function fliegeZu(lat, lon, hoehe) {
 }
 
 // ---------- Ereignisse ----------
-const EREIGNISSE = window.EREIGNISSE.map((e) => ({ ...e, s: sek(ortsZeit(e.von)) }));
+const EREIGNISSE = window.EREIGNISSE.map((e) => ({ ...e, s: sek(ortsZeit(e.von, e.tag)) }));
 const ANSAGE = { polizei: "Ansage der Polizei", leitung: "Ansage der Versammlungsleitung" };
 const ANSAGE_FARBE = { polizei: "#4d8bff", leitung: "#3ecf8e" };
 const FENSTER = 20 * 60;  // Ereignis gilt 20 min als "aktuell"
@@ -911,7 +930,7 @@ function aktualisiereMenge() {
       pp.position = Cesium.Cartesian3.fromDegrees(lon, lat, hoehe);
       pp.show = true;
     }
-    mengeZahlen[p.name] = { n, gruppe: p.gruppe, quelle: p.quelle };
+    mengeZahlen[p.name] = { n: n * STADT.figur_je, gruppe: p.gruppe, quelle: p.quelle };
   }
   zeigeMengeZahlen();
   viewer.scene.requestRender();  // Punkte haben sich bewegt
@@ -929,24 +948,25 @@ function zeigeMengeZahlen() {
 
 // ---------- Licht und Wetter (aus öffentlichen Webcam-Bildern vom 31.10., dokumentation/webcams-auswertung.md) ----------
 // Die Karte wird ab 16:45 dämmrig und ist ab 17:45 dunkel; „Jetzt“ zeigt das Wetter. Abschaltbar unter „Steuerung“.
-const WETTER = [["12:00", "leicht bewölkt, 11–12 °C"], ["13:00", "bewölkt, 13 °C"], ["14:45", "kurz sonnig"],
+const WETTER = window.STADT ? STADT.wetter || [] : [["12:00", "leicht bewölkt, 11–12 °C"], ["13:00", "bewölkt, 13 °C"], ["14:45", "kurz sonnig"],
   ["15:20", "bewölkt, 12–13 °C"], ["16:45", "Dämmerung"], ["17:15", "Straßenbeleuchtung an"], ["17:45", "dunkel"]];
 // Stundenwerte des DWD, Station Köln/Bonn (02667, Flughafen, ca. 15 km südöstlich), in MEZ umgerechnet:
 // [Stunde, Temperatur °C, relative Feuchte %, Niederschlag mm, Wind m/s]. Quelle: DWD Open Data (GeoNutzV).
-const DWD = [[13, 9.5, 76, 0, 4.5], [14, 10.1, 73, 0, 3.7], [15, 10.8, 69, 0, 3.3], [16, 10.5, 71, 0, 2.9], [17, 9.8, 77, 0, 1.3],
+const DWD = window.STADT ? STADT.dwd || [] : [[13, 9.5, 76, 0, 4.5], [14, 10.1, 73, 0, 3.7], [15, 10.8, 69, 0, 3.3], [16, 10.5, 71, 0, 2.9], [17, 9.8, 77, 0, 1.3],
   [18, 9.0, 82, 0, 0.7], [19, 8.3, 88, 0, 0.5], [20, 8.1, 89, 0, 0.6], [21, 7.5, 92, 0, 1.2], [22, 7.7, 93, 0, 1.2], [23, 7.8, 91, 0, 1.4]];
 const komma = (x) => String(x).replace(".", ",");
 let lichtAn = false;  // Dämmerung nur auf Wunsch; Sonnenuntergang steht immer auf der Zeitleiste
 function zeigeLicht() {
-  const m = (sek(viewer.clock.currentTime) - startS) / 60 + 12 * 60;  // Minuten seit Mitternacht
-  const dunkel = m < 16 * 60 + 40 ? 0 : Math.min(1, (m - (16 * 60 + 40)) / 65);  // 16:40 → 17:45
+  const m = (sek(viewer.clock.currentTime) - sek(ortsZeit("00:00", TAG_KURZ))) / 60;  // Minuten seit Mitternacht (Folgetag: über 1440)
+  const [d0, d1] = STADT.daemmerung.map((z) => +z.slice(0, 2) * 60 + +z.slice(3));
+  const dunkel = m < d0 ? 0 : Math.min(1, (m - d0) / (d1 - d0));
   $("nacht").style.opacity = lichtAn ? (dunkel * 0.42).toFixed(3) : 0;
   const w = WETTER.filter(([z]) => m >= +z.slice(0, 2) * 60 + +z.slice(3)).pop();
   // Messwert der nächsten vollen Stunde (DWD), dazu der Himmel laut Webcams
-  const stunde = Math.min(23, Math.max(13, Math.round(m / 60)));
+  const stunde = DWD.length ? Math.min(DWD[DWD.length - 1][0], Math.max(DWD[0][0], Math.round(m / 60))) : 0;  // nach Mitternacht 24, 25 …
   const d = DWD.find((x) => x[0] === stunde);
   const text = (d ? `🌡 <b>${komma(d[1])} °C</b>, Luftfeuchte <b>${d[2]} %</b>, ${d[3] ? komma(d[3]) + " mm Regen" : "kein Regen"},
-      Wind ${komma(d[4])} m/s <small title="DWD-Station Köln/Bonn, Stundenwert ${stunde}:00 MEZ">(DWD, ${stunde} Uhr)</small><br>` : "")
+      Wind ${komma(d[4])} m/s <small title="DWD-Station ${STADT.dwd_station}, Stundenwert ${stunde % 24}:00 MEZ">(DWD, ${stunde % 24} Uhr)</small><br>` : "")
     + (w ? `🌤 ${w[1].replace(/, \d.*°C/, "")} <small>(Himmel laut öffentlichen Webcam-Bildern)</small>` : "");
   if ($("jetzt-wetter").innerHTML !== text) $("jetzt-wetter").innerHTML = text;
 }
@@ -1020,7 +1040,10 @@ $("fluss-knopf").onclick = () => {
   zeigeFluss();
 };
 
+// Ohne simulierte Polizei (z. B. Frankfurt) wäre „100 Demonstrierende, 0 Polizei“ irreführend: dann gar nicht zeigen
+const MIT_POLIZEI = MENGE.populationen.some((p) => p.gruppe === "polizei");
 function zeigeHundert() {
+  if (!MIT_POLIZEI) return;
   let demo = 0, polizei = 0, krawall = 0;
   for (const z of Object.values(mengeZahlen)) {
     if (z.gruppe === "menge") demo += z.n; else if (z.gruppe === "polizei") polizei += z.n; else if (z.gruppe === "krawall") krawall += z.n;
@@ -1058,7 +1081,7 @@ function zaehleGruppen() {
         if (p.wege[(i * p.K + k) * 2] !== FEHLT) n0++;
         if (p.wege[(i * p.K + k + 1) * 2] !== FEHLT) n1++;
       }
-      reihen[p.gruppe][j] += Math.round(n0 + (n1 - n0) * f);
+      reihen[p.gruppe][j] += Math.round(n0 + (n1 - n0) * f) * STADT.figur_je;
     });
   }
   return { raster, reihen };
@@ -1154,11 +1177,10 @@ async function messeUferHoehe() {
 // ---------- Start ----------
 // Übersicht: der ganze Demo-Bereich vom Dom bis zur Bastei, schräg von Süden, das Ufer etwas links der Mitte
 // (rechts liegt die Leiste über dem Rhein)
-const uebersicht = () => viewer.camera.flyTo(SCHMAL.matches
-  ? { destination: Cesium.Cartesian3.fromDegrees(6.9636, 50.9418, 900),   // Handy hochkant: steiler von oben
-      orientation: { heading: Cesium.Math.toRadians(16), pitch: Cesium.Math.toRadians(-58), roll: 0 }, duration: 1.5 }
-  : { destination: Cesium.Cartesian3.fromDegrees(6.9608, 50.9398, 560),
-      orientation: { heading: Cesium.Math.toRadians(16), pitch: Cesium.Math.toRadians(-36), roll: 0 }, duration: 1.5 });
+// (Handy hochkant: steiler von oben)
+const blick = ([lon, lat, h, richtung, neigung], dauer = 1.5) => ({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, h),
+  orientation: { heading: Cesium.Math.toRadians(richtung), pitch: Cesium.Math.toRadians(neigung), roll: 0 }, duration: dauer });
+const uebersicht = () => viewer.camera.flyTo(blick(SCHMAL.matches ? STADT.uebersicht.handy : STADT.uebersicht.breit));
 $("uebersicht").onclick = uebersicht;
 $("tonmodell").onclick = () => setzeTonmodell(!stadt?.customShader);
 $("google-knopf").onclick = () => (stadt && stadt.show ? ladeOsm() : ladeGoogle());
@@ -1450,16 +1472,19 @@ function zeichneZeitleiste() {
       <text x="${x(e.s)}" y="35.5" text-anchor="middle" style="font-size:9px">📢</text></g>`;
   }
   // Sonnenuntergang 17:08 und Ende der bürgerlichen Dämmerung 17:43 (MEZ, Köln): dunkler Verlauf auf der Stundenleiste
-  const su = sek(ortsZeit("17:08")), dunkel = sek(ortsZeit("17:43"));
+  const su = sek(ortsZeit(STADT.sonne[0])), dunkel = sek(ortsZeit(STADT.sonne[1]));
   svg += `<defs><linearGradient id="zl-nacht" x1="0" x2="1"><stop offset="0" stop-color="#1a2a55" stop-opacity="0"/>
       <stop offset="1" stop-color="#1a2a55" stop-opacity=".85"/></linearGradient></defs>
     <rect x="${x(su)}" y="38" width="${x(dunkel) - x(su)}" height="${h - 38}" fill="url(#zl-nacht)"/>
     <rect x="${x(dunkel)}" y="38" width="${w - x(dunkel)}" height="${h - 38}" fill="#1a2a55" opacity=".85"/>
-    <g><title>Sonnenuntergang 17:08 Uhr, dunkel ab etwa 17:43 Uhr</title>
+    <g><title>Sonnenuntergang ${STADT.sonne[0]} Uhr, dunkel ab etwa ${STADT.sonne[1]} Uhr</title>
       <text x="${x(su)}" y="35" text-anchor="middle" style="font-size:11px">🌇</text></g>`;
+  // Beschriftung jede 1, 2, 3, 4 oder 6 Stunden, je nachdem wie viel Platz eine Stunde hat (mindestens 42 px je Zahl)
+  const proStunde = w / ((endeS - startS) / 3600);
+  const schritt = [1, 2, 3, 4, 6].find((n) => n * proStunde >= 42) || 6;
   for (let s = startS; s <= endeS; s += 3600) {
     svg += `<line x1="${x(s)}" x2="${x(s)}" y1="40" y2="46" stroke="#888"/>`;
-    if (w > 500 || (s - startS) % 7200 === 0) svg += `<text class="stunde" x="${x(s)}" y="${h - 4}" text-anchor="middle">${uhr(s).slice(0, 2)} Uhr</text>`;
+    if ((s - startS) % (schritt * 3600) === 0) svg += `<text class="stunde" x="${x(s)}" y="${h - 4}" text-anchor="middle">${uhr(s).slice(0, 2)} Uhr</text>`;
   }
   $("zl-svg").innerHTML = svg;
   zeigeZeitleistenZeit();
@@ -1506,7 +1531,7 @@ function normaleSicht() {
 }
 function mitteOderUfer() {
   const m = kartenmitte();
-  return m ? m.map(Number) : [50.9475, 6.9640];
+  return m ? m.map(Number) : STADT.mitte;
 }
 $("ansicht-oben").onclick = () => {
   const [lat, lon] = mitteOderUfer();
@@ -1527,8 +1552,7 @@ $("ansicht-schraeg").onclick = () => { const [lat, lon] = mitteOderUfer(); norma
 $("ansicht-rhein").onclick = () => {
   normaleSicht();
   // über dem Wasser östlich des Konrad-Adenauer-Ufers, Blick nach Westen auf Bastei, Weckschnapp und Vincenz-Haus
-  viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(6.9722, 50.9472, 140),
-    orientation: { heading: Cesium.Math.toRadians(282), pitch: Cesium.Math.toRadians(-14), roll: 0 }, duration: 1.5 });
+  viewer.camera.flyTo(blick(STADT.wasserblick));
 };
 
 // Öffentlich zeigt der Start die Tour-Auswahl (nicht bei Links auf einen Moment), lokal nichts
@@ -1574,7 +1598,8 @@ const DICHTE_STUFEN = [[0.05, "#fde68a"], [0.1, "#fbbf24"], [0.2, "#f97316"], [0
 const dichteFarbe = (d) => DICHTE_STUFEN.find(([g]) => d < g)[1];
 const zahl = (x) => Math.round(x).toLocaleString("de-DE");
 let dichteSichtbar = false, dichteZeitpunkte = [], dichteAktiv = null, dichteBlass = null;
-fetch("dichte-flaechen.json").then((a) => a.json()).then((d) => {
+if (!STADT.dichte) $("modus").hidden = true;
+if (STADT.dichte) fetch("dichte-flaechen.json").then((a) => a.json()).then((d) => {
   dichteZeitpunkte = d.zeitpunkte.map((z) => ({ ...z, s: sek(ortsZeit(z.zeit)), von: sek(ortsZeit(z.von)), bis: sek(ortsZeit(z.bis)),
     ebenen: {} }));
   zeigeDichte(true);
