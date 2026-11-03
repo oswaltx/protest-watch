@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Protest-Watch">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="Wie wurde über die Gen-Z-Demo in Köln berichtet?">
+<meta property="og:description" content="Auswertung von 305 Überschriften und 173 Beiträgen: Wie viel Gewalt, wie viel Anliegen – vor und nach der Demo am 31.10.2026.">
+<meta property="og:url" content="https://protest-watch.org/berichterstattung/">
+<meta property="og:image" content="https://protest-watch.org/teilen.jpg?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Wie wurde berichtet? – Protest-Watch</title>
+<meta name="description" content="Medienanalyse zur Gen-Z-Demo in Köln am 31. Oktober 2026: Überschriften, Anteile von Gewalt und Anliegen, Unterschiede nach Medientyp, vorher und nachher.">
+<style>
+  :root { --text: #1d1d1f; --leise: #5c5c63; --grund: #fbfaf7; --karte: #ffffff; --linie: #e4e1da;
+          --akzent: #b4421f; --warn-grund: #fff3e0; --warn-rand: #e08a1e;
+          --vorher: #2a78d6; --nachher: #b4421f; --spur: #efece6;
+          --f0: #c9c5bc; --f1: #eb6834; --f2: #2a78d6; --f3: #1baf7a; --f4: #6250d6; --f5: #eda100; --auf: #fff;
+          color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #ecebe8; --leise: #a4a3a0; --grund: #151517; --karte: #1e1e21; --linie: #333338;
+            --akzent: #f08a63; --warn-grund: #3a2a12; --warn-rand: #ffb347;
+            --vorher: #3987e5; --nachher: #d95926; --spur: #2a2a2e;
+            --f0: #4a4a50; --f1: #d95926; --f2: #3987e5; --f3: #199e70; --f4: #9085e9; --f5: #c98500; --auf: #fff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--grund); color: var(--text);
+         font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; }
+  h1 { font-size: 2.1rem; line-height: 1.15; margin: 0 0 .3rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.2rem; margin: 2.4rem 0 .5rem; }
+  h3 { font-size: 1rem; margin: 1.4rem 0 .3rem; }
+  .unterzeile { color: var(--leise); margin: 0 0 1.4rem; font-size: 1.1rem; }
+  .klein { font-size: .9rem; color: var(--leise); }
+  .warnung { background: var(--warn-grund); border: 1px solid var(--warn-rand); border-left-width: 6px; border-radius: 10px;
+             padding: .9rem 1.1rem; margin: 1.4rem 0; }
+  .warnung b:first-child { display: block; margin-bottom: .2rem; }
+  a { color: var(--akzent); }
+  ul { padding-left: 1.2rem; } li { margin: .3rem 0; }
+  .zahlen { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .8rem; margin: 1rem 0; }
+  .zahlen div { background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: .8rem 1rem; }
+  .zahlen b { display: block; font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .zahlen span { font-size: .92rem; color: var(--leise); }
+  .zahlen b span { font-size: inherit; color: inherit; }
+  .vorlaeufig { font-size: .9rem; border-left: 4px solid var(--warn-rand); padding: .3rem .7rem; background: var(--warn-grund); border-radius: 0 6px 6px 0; }
+  .grau { opacity: .55; } tr.grau td { font-style: italic; }
+
+  /* Balken: Wert als Breite, Zahl steht direkt daneben */
+  .diagramm { background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: 1rem 1.1rem; margin: .8rem 0; }
+  .legende { display: flex; gap: 1.2rem; font-size: .9rem; color: var(--leise); margin-bottom: .6rem; flex-wrap: wrap; }
+  .legende i { display: inline-block; width: .8rem; height: .8rem; border-radius: 3px; margin-right: .35rem; vertical-align: -.05rem; }
+  .zeile { margin: .7rem 0; }
+  .zeile > .name { font-size: .95rem; margin-bottom: .2rem; }
+  .balken { display: grid; grid-template-columns: 1fr 3.2rem; align-items: center; gap: .5rem; margin: 2px 0; }
+  .spur { background: var(--spur); border-radius: 0 4px 4px 0; height: .85rem; }
+  .spur i { display: block; height: 100%; border-radius: 0 4px 4px 0; min-width: 2px; }
+  .balken b { font-weight: 600; font-size: .9rem; font-variant-numeric: tabular-nums; text-align: right; }
+  .v { background: var(--vorher); } .n { background: var(--nachher); }
+
+  /* Gestapelte 100-%-Leisten (Themen, Sprecher, Bezeichnungen); 2px Fuge zwischen den Segmenten */
+  .f0 { background: var(--f0); } .f1 { background: var(--f1); } .f2 { background: var(--f2); }
+  .f3 { background: var(--f3); } .f4 { background: var(--f4); } .f5 { background: var(--f5); }
+  .gruppe { margin: .9rem 0; } .gruppe .name { font-size: .95rem; margin-bottom: .15rem; }
+  .reihe { display: grid; grid-template-columns: 4.2rem 1fr 4.6rem; align-items: center; gap: .5rem; margin: 3px 0; }
+  .reihe.breit { grid-template-columns: 11rem 1fr 6.5rem; }
+  .reihe .ph { font-size: .85rem; color: var(--leise); }
+  .reihe .anz { font-size: .8rem; color: var(--leise); text-align: right; font-variant-numeric: tabular-nums; }
+  .stapel { display: flex; gap: 2px; height: 1.35rem; }
+  .stapel i { display: flex; align-items: center; justify-content: center; font-style: normal; font-size: .75rem;
+              font-weight: 600; color: var(--auf); min-width: 2px; overflow: hidden; white-space: nowrap; }
+  .stapel i:first-child { border-radius: 4px 0 0 4px; } .stapel i:last-child { border-radius: 0 4px 4px 0; }
+  .stapel i.f0, .stapel i.f1, .stapel i.f5, .stapel i.f3 { color: #111; }
+  .legende span { white-space: nowrap; }
+  details { margin: .6rem 0; } summary { cursor: pointer; color: var(--akzent); }
+
+  /* Kurzübersicht, Geschichten, Zeitverlauf */
+  .kurz { background: var(--karte); border: 1px solid var(--linie); border-left: 6px solid var(--akzent); border-radius: 10px;
+          padding: .9rem 1.1rem; margin: 1.4rem 0; }
+  .kurz p { margin: .3rem 0 0; }
+  /* Medientyp-Farben (eigene Reihe, damit sie nicht mit den Themenfarben verwechselt werden) */
+  .t1 { background: #2a78d6; } .t2 { background: #eda100; } .t3 { background: #6250d6; }
+  .t4 { background: #008300; } .t5 { background: #e87ba4; }
+  @media (prefers-color-scheme: dark) {
+    .t1 { background: #3987e5; } .t2 { background: #c98500; } .t3 { background: #9085e9; } .t5 { background: #d55181; }
+  }
+  .stapel i.t2, .stapel i.t5 { color: #111; } .stapel i.t1, .stapel i.t3, .stapel i.t4 { color: #fff; }
+  .legende b { font-weight: 600; margin-right: .3rem; }
+  /* Filter (nur mit JavaScript sichtbar, eingefügt von filter.js) */
+  .filter { background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: .4rem 1rem .6rem; margin: 2rem 0 1rem; }
+  .filter h2 { margin: .6rem 0 .2rem; }
+  .filter fieldset { border: 0; padding: 0; margin: .5rem 0; } .filter legend { font-size: .85rem; color: var(--leise); padding: 0; }
+  .chip { font: inherit; font-size: .85rem; border: 1px solid var(--linie); background: var(--grund); color: var(--leise);
+          border-radius: 999px; padding: .3rem .75rem; margin: .15rem .1rem; cursor: pointer; text-decoration: line-through; }
+  .chip[aria-pressed="true"] { background: var(--akzent); border-color: var(--akzent); color: #fff; text-decoration: none; }
+  .chip:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  #filter-reset { text-decoration: none; }
+  .filter summary { cursor: pointer; list-style-position: outside; } .filter summary h2 { display: inline; }
+  @media (prefers-color-scheme: dark) { .chip[aria-pressed="true"] { color: #111; } }
+  @media (max-width: 34rem) {
+    .saeulen.std .wert { visibility: hidden; }
+    .saeulen.std .saeule:nth-child(even) .tag { visibility: hidden; }
+    .saeulen { gap: 2px; }
+  }
+  .geschichte { border-top: 1px solid var(--linie); padding: .7rem 0 .2rem; }
+  .geschichte .kopf { display: flex; justify-content: space-between; gap: .8rem; flex-wrap: wrap; margin-bottom: .2rem; }
+  .geschichte .anz { font-size: .82rem; color: var(--leise); }
+  .zuwort { margin: .25rem 0 .2rem; } .fleck { font-weight: 600; color: var(--text); }
+  .fleck::before { content: "◐ "; color: var(--akzent); }
+  .saeulen { display: flex; gap: 3px; align-items: flex-end; height: 11rem; margin-top: .6rem; }
+  .saeule { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
+  .saeule .turm { flex: 1; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 1px; }
+  .saeule .turm i { display: block; width: 100%; }
+  .saeule .turm i:first-child { border-radius: 4px 4px 0 0; }
+  .saeule .wert, .saeule .tag { font-size: .7rem; color: var(--leise); font-variant-numeric: tabular-nums; line-height: 1.4; }
+  @media (max-width: 34rem) {
+    .reihe, .reihe.breit { grid-template-columns: 1fr 4rem; }
+    .reihe .ph { grid-column: 1 / -1; } .reihe .stapel { grid-column: 1; }
+  }
+
+  .tabelle { overflow-x: auto; margin: .8rem 0; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: .35rem .5rem; border-bottom: 1px solid var(--linie); }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--leise); }
+  td.urteil { text-align: left; }
+  footer { margin-top: 2.6rem; border-top: 1px solid var(--linie); padding-top: .8rem; font-size: .9rem; color: var(--leise); }
+</style>
+</head>
+<body>
+<main>
+  <p class="klein"><a href="/">← Protest-Watch</a></p>
+  <h1>Wie wurde über die Demo berichtet?</h1>
+  <p class="unterzeile">Gewalt oder Anliegen: eine Auswertung der Berichte über die Gen-Z-Demo in Köln am
+    31. Oktober 2026, vor und nach der Demo.</p>
+
+  <div class="warnung" role="note">
+    <b>Vorläufige Ergebnisse, Stand <span data-k="stand">3.11.2026</span></b>
+    Eine unabhängige Zweitcodierung von 20 % der Beiträge läuft noch. Berichte nach dem <span data-k="datenende">3.11.</span> sind
+    nicht enthalten. Die Zahlen können sich noch ändern.
+  </div>
+
+  <!-- kurz -->
+  <div class="kurz"><b>Das Wichtigste in Kürze</b><p>Vor der Demo ging es in den Berichten noch oft darum, was die jungen Leute wollen. Ab dem Nachmittag des 31. Oktober drehte sich das Bild: Danach handelte gut jeder zweite Satz von Gewalt oder Polizei, nur noch etwa jeder dreizehnte von den Forderungen (8 %). Kein einzelnes Kölner Ereignis bekam so viele Beiträge wie der Wasserwerfer-Einsatz am Ufer (48); über die Anliegen der Demonstrierenden gab es 26. </p></div>
+  <!-- /kurz -->
+
+  <h2>In Kürze</h2>
+  <div class="zahlen">
+    <div><b><span data-k="hl_gp_n">58 %</span></b><span>der Überschriften nach der Demo stellen Gewalt oder Polizeieinsatz in den Vordergrund</span></div>
+    <div><b><span data-k="hl_anl_n">4 %</span></b><span>der Überschriften nach der Demo nennen ein Anliegen der Demonstrierenden</span></div>
+    <div><b><span data-k="bt_ausf_n">9 %</span></b><span>der Beiträge nach der Demo stellen die Forderungen ausführlich dar</span></div>
+  </div>
+  <p>Nach der Demo handelte ein Beitrag im Schnitt zu <span data-k="bt_gew_n">65 %</span> von Gewalt, Polizei und Sicherheit und zu
+    <span data-k="bt_anl_n">8 %</span> von dem, wofür demonstriert wurde. <span data-k="bt_gen_n">58 %</span> der Beiträge nennen zwar mindestens eine
+    Forderung, meist aber nur als Halbsatz. Selbst zu Wort kamen Demonstrierende mit ihren Anliegen in <span data-k="bt_demo2_n">9 %</span> der Beiträge.</p>
+
+  <h2>Vorher und nachher</h2>
+  <p>Vor der Demo standen die Forderungen deutlich öfter im Text. Schon da drehte sich aber viel um
+    Krawall-Befürchtungen, verrammelte Läden und das Polizeiaufgebot.</p>
+  <div class="diagramm" role="figure" aria-labelledby="d1">
+    <div class="legende" id="d1"><span><i class="v"></i>vorher (bis 31.10., 14 Uhr)</span><span><i class="n"></i>nachher</span></div>
+    <div class="zeile"><div class="name">Überschrift: Gewalt oder Polizei im Vordergrund</div>
+      <div class="balken"><div class="spur"><i class="v" data-w="hl_gp_v" style="width:26%"></i></div><b><span data-k="hl_gp_v">26 %</span></b></div>
+      <div class="balken"><div class="spur"><i class="n" data-w="hl_gp_n" style="width:58%"></i></div><b><span data-k="hl_gp_n">58 %</span></b></div></div>
+    <div class="zeile"><div class="name">Überschrift nennt ein Anliegen</div>
+      <div class="balken"><div class="spur"><i class="v" data-w="hl_anl_v" style="width:15%"></i></div><b><span data-k="hl_anl_v">15 %</span></b></div>
+      <div class="balken"><div class="spur"><i class="n" data-w="hl_anl_n" style="width:4%"></i></div><b><span data-k="hl_anl_n">4 %</span></b></div></div>
+    <div class="zeile"><div class="name">Text nennt mindestens eine Forderung</div>
+      <div class="balken"><div class="spur"><i class="v" data-w="bt_gen_v" style="width:83%"></i></div><b><span data-k="bt_gen_v">83 %</span></b></div>
+      <div class="balken"><div class="spur"><i class="n" data-w="bt_gen_n" style="width:58%"></i></div><b><span data-k="bt_gen_n">58 %</span></b></div></div>
+    <div class="zeile"><div class="name">Text stellt Forderungen ausführlich dar</div>
+      <div class="balken"><div class="spur"><i class="v" data-w="bt_ausf_v" style="width:37%"></i></div><b><span data-k="bt_ausf_v">37 %</span></b></div>
+      <div class="balken"><div class="spur"><i class="n" data-w="bt_ausf_n" style="width:9%"></i></div><b><span data-k="bt_ausf_n">9 %</span></b></div></div>
+    <div class="zeile"><div class="name">Anteil des Textes über Gewalt, Polizei, Sicherheit (Durchschnitt)</div>
+      <div class="balken"><div class="spur"><i class="v" data-w="bt_gew_v" style="width:40%"></i></div><b><span data-k="bt_gew_v">40 %</span></b></div>
+      <div class="balken"><div class="spur"><i class="n" data-w="bt_gew_n" style="width:65%"></i></div><b><span data-k="bt_gew_n">65 %</span></b></div></div>
+    <div class="zeile"><div class="name">Anteil des Textes über die Anliegen (Durchschnitt)</div>
+      <div class="balken"><div class="spur"><i class="v" data-w="bt_anl_v" style="width:17%"></i></div><b><span data-k="bt_anl_v">17 %</span></b></div>
+      <div class="balken"><div class="spur"><i class="n" data-w="bt_anl_n" style="width:8%"></i></div><b><span data-k="bt_anl_n">8 %</span></b></div></div>
+    <p class="klein">Überschriften: <span data-k="n_hl_v">88</span> vorher, <span data-k="n_hl_n">243</span> nachher (nur Redaktionen). Texte: <span data-k="n_bt_v">60</span> vorher, <span data-k="n_bt_n">149</span> nachher.</p>
+  </div>
+
+  
+  
+  <p class="vorlaeufig">Vergleiche zwischen Medientypen (öffentlich-rechtlich, Boulevard, lokal, überregional, Agenturen)
+    erscheinen hier erst, wenn die menschliche Zweitcodierung abgeschlossen ist und zeigt, wie verlässlich die Codierung ist.
+    Bei kleinen Gruppen steckt hinter einem Medientyp oft im Wesentlichen ein einzelnes Haus; solche Aussagen sollen
+    besonders gut abgesichert sein.</p>
+  
+
+  <!-- gegenueberstellung -->
+  <h2 id="themen">Worüber berichtet wurde</h2>
+  <p>Jeder Satz der 209 Beiträge (bei Videos: jeder Satz der Tonspur) ist einem Thema zugeordnet. Die Leisten zeigen, wie sich ein durchschnittlicher Beitrag auf die Themen verteilt, vor und nach der Demo. Die sechs Forderungs-Themen (Bildung, Mieten, Klima, Wehrpflicht, Gesundheit, allgemeine Anliegen) sind zusammengefasst.</p>
+  <p class="vorlaeufig">Vorläufig: Diese Werte beruhen auf der automatischen Satzanalyse (Trefferquote 73 %) und sind noch nicht durch eine menschliche Zweitcodierung geprüft.</p>
+  <div class="diagramm"><div class="legende"><span><i class="f1"></i>Gewalt, Krawall</span><span><i class="f2"></i>Polizeieinsatz</span><span><i class="f3"></i>Forderungen</span><span><i class="f4"></i>Politik-Reaktionen</span><span><i class="f5"></i>Ablauf, Teilnehmende</span><span><i class="f0"></i>Sonstiges</span></div>
+  <div class="gruppe"><div class="name"><b>Alle Redaktionen</b></div>
+  <div class="reihe"><span class="ph">vorher</span><div class="stapel" role="img" aria-label="Alle Redaktionen vorher: Gewalt, Krawall 18 %, Polizeieinsatz 13 %, Forderungen 15 %, Politik-Reaktionen 8 %, Ablauf, Teilnehmende 28 %, Sonstiges 18 %"><i class="f1" style="width:18.2%" title="Gewalt, Krawall: 18 %">18</i><i class="f2" style="width:12.7%" title="Polizeieinsatz: 13 %">13</i><i class="f3" style="width:15.1%" title="Forderungen: 15 %">15</i><i class="f4" style="width:7.9%" title="Politik-Reaktionen: 8 %">8</i><i class="f5" style="width:27.8%" title="Ablauf, Teilnehmende: 28 %">28</i><i class="f0" style="width:18.4%" title="Sonstiges: 18 %">18</i></div><span class="anz">n = 60</span></div>
+  <div class="reihe"><span class="ph">nachher</span><div class="stapel" role="img" aria-label="Alle Redaktionen nachher: Gewalt, Krawall 34 %, Polizeieinsatz 18 %, Forderungen 8 %, Politik-Reaktionen 7 %, Ablauf, Teilnehmende 20 %, Sonstiges 13 %"><i class="f1" style="width:33.5%" title="Gewalt, Krawall: 34 %">34</i><i class="f2" style="width:18.4%" title="Polizeieinsatz: 18 %">18</i><i class="f3" style="width:7.5%" title="Forderungen: 8 %">8</i><i class="f4" style="width:6.9%" title="Politik-Reaktionen: 7 %"></i><i class="f5" style="width:20.4%" title="Ablauf, Teilnehmende: 20 %">20</i><i class="f0" style="width:13.2%" title="Sonstiges: 13 %">13</i></div><span class="anz">n = 135</span></div>
+  </div>
+  
+  
+  
+  
+  
+  
+  </div>
+  <p>Nach der Demo handelte in einem durchschnittlichen Redaktionsbeitrag gut jeder zweite Satz von Gewalt oder Polizei (52 %, vorher 31 %), etwa jeder dreizehnte von Forderungen (8 %, vorher 15 %). Von den Sätzen über Gewalt und Polizei nach der Demo betreffen etwa 20 % ausdrücklich den Abend, die Nacht oder die Domplatte.</p>
+  <p class="klein">Wenn es um Forderungen ging, dann so (Anteil an den Forderungs-Sätzen der von Hand geprüften Stichprobe, n = 185): allgemeine Anliegen (Zukunft, Gerechtigkeit, mehrere Forderungen) 66 %, Bildung 11 %, Wehrpflicht 8 %, Mieten und Kosten 8 %, Psychotherapie, Sucht, Gesundheit 5 %, Klima 2 %.</p>
+  <details><summary>Als Tabelle</summary><div class="tabelle"><table><thead><tr><th>Medientyp</th><th>Phase</th><th>n</th><th>Gewalt, Krawall</th><th>Polizeieinsatz</th><th>Forderungen</th><th>Politik-Reaktionen</th><th>Ablauf, Teilnehmende</th><th>Sonstiges</th></tr></thead><tbody>
+  <tr><td>Alle Redaktionen</td><td>vorher</td><td>60</td><td>18 %</td><td>13 %</td><td>15 %</td><td>8 %</td><td>28 %</td><td>18 %</td></tr>
+  <tr><td>Alle Redaktionen</td><td>nachher</td><td>135</td><td>34 %</td><td>18 %</td><td>8 %</td><td>7 %</td><td>20 %</td><td>13 %</td></tr>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  </tbody></table></div></details>
+  <h3>Wer kommt zu Wort?</h3>
+  <p>Anteil an allen Sätzen, die eine Aussage wiedergeben (Zitat oder „sagte“, „laut“ …).</p>
+  <p class="vorlaeufig">Vorläufig: Diese Werte beruhen auf der automatischen Satzanalyse (Trefferquote 80 %) und sind noch nicht durch eine menschliche Zweitcodierung geprüft.</p>
+  <div class="diagramm"><div class="legende"><span><i class="f2"></i>Polizei</span><span><i class="f4"></i>Politik, Behörden</span><span><i class="f3"></i>Demonstrierende, Orga</span><span><i class="f5"></i>Fachleute</span><span><i class="f0"></i>Andere</span></div>
+  <div class="reihe breit"><span class="ph">Alle Redaktionen, vorher</span><div class="stapel" role="img" aria-label="Alle Redaktionen, vorher: Polizei 18 %, Politik, Behörden 16 %, Demonstrierende, Orga 36 %, Fachleute 6 %, Andere 23 %"><i class="f2" style="width:18.2%" title="Polizei: 18 %">18</i><i class="f4" style="width:16.4%" title="Politik, Behörden: 16 %">16</i><i class="f3" style="width:35.8%" title="Demonstrierende, Orga: 36 %">36</i><i class="f5" style="width:6.4%" title="Fachleute: 6 %"></i><i class="f0" style="width:23.2%" title="Andere: 23 %">23</i></div><span class="anz">671 Aussagen</span></div>
+  <div class="reihe breit"><span class="ph">Alle Redaktionen, nachher</span><div class="stapel" role="img" aria-label="Alle Redaktionen, nachher: Polizei 40 %, Politik, Behörden 18 %, Demonstrierende, Orga 25 %, Fachleute 1 %, Andere 17 %"><i class="f2" style="width:39.7%" title="Polizei: 40 %">40</i><i class="f4" style="width:17.8%" title="Politik, Behörden: 18 %">18</i><i class="f3" style="width:24.7%" title="Demonstrierende, Orga: 25 %">25</i><i class="f5" style="width:1.2%" title="Fachleute: 1 %"></i><i class="f0" style="width:16.5%" title="Andere: 17 %">17</i></div><span class="anz">1.541 Aussagen</span></div>
+  
+  
+  
+  
+  
+  
+  </div>
+  <p>Nach der Demo stammte mehr als jede dritte wiedergegebene Aussage von der Polizei (40 %, vorher 18 %). Demonstrierende und Organisator*innen kamen auf 25 % (vorher 36 %). In ihren Aussagen ging es nach der Demo am häufigsten um den Ablauf (40 %), um ihre Anliegen in 28 % (vorher 44 %) und um Gewalt in 12 %.</p>
+  
+  <h3>Wie die Satzanalyse funktioniert</h3><ul>
+  <li>Eine KI (Claude) hat 1.454 zufällig gezogene Sätze nach festen Regeln einem Thema und, wo eine Aussage wiedergegeben wird, einem Sprecher zugeordnet. Die Stichprobe ist nach Medientyp und vorher/nachher geschichtet.</li>
+  <li>Alle 8.334 Sätze wurden mit einem frei verfügbaren Sprachmodell (multilingual-e5-base) auf dem eigenen Rechner in Bedeutungsvektoren übersetzt. Ein einfacher Klassifikator hat aus den 1.454 Beispielen gelernt, welches Thema zu welchem Vektor gehört, und die übrigen Sätze eingeordnet. Das erfasst Bedeutung, nicht nur Schlüsselwörter.</li>
+  <li>Geprüft an zurückgehaltenen Sätzen trifft der Klassifikator das Thema in 73 % und den Sprecher in 80 % der Fälle. Für die Anteile oben zählt die Summe: Dort weicht er um höchstens 1.5 Prozentpunkte von der Codierung ab. Kleine Themen (Klima, Gesundheit) erkennt er schlecht; deshalb sind die Forderungen oben zusammengefasst.</li>
+  
+  <li><details><summary>Genauigkeit je Thema</summary><div class="tabelle"><table><thead><tr><th>Thema</th><th>Beispiele</th><th>Präzision</th><th>Trefferquote</th></tr></thead><tbody><tr><td>Gewalt</td><td>372</td><td>79 %</td><td>75 %</td></tr><tr><td>Polizei</td><td>191</td><td>73 %</td><td>74 %</td></tr><tr><td>Bildung</td><td>20</td><td>42 %</td><td>55 %</td></tr><tr><td>Mieten/Kosten</td><td>15</td><td>92 %</td><td>80 %</td></tr><tr><td>Klima</td><td>3</td><td>0 %</td><td>0 %</td></tr><tr><td>Wehrpflicht</td><td>15</td><td>89 %</td><td>53 %</td></tr><tr><td>Gesundheit</td><td>9</td><td>60 %</td><td>33 %</td></tr><tr><td>Anliegen allgemein</td><td>123</td><td>67 %</td><td>75 %</td></tr><tr><td>Politik</td><td>75</td><td>57 %</td><td>73 %</td></tr><tr><td>Ablauf</td><td>323</td><td>80 %</td><td>77 %</td></tr><tr><td>Sonstiges</td><td>308</td><td>67 %</td><td>68 %</td></tr></tbody></table></div><p class="klein">Präzision: Anteil der vom Klassifikator so eingeordneten Sätze, die laut Codierung stimmen. Trefferquote: Anteil der so codierten Sätze, die der Klassifikator findet. Gemessen per 5-facher Kreuzvalidierung.</p></details></li>
+  <li>Diese Werte sind ebenfalls vorläufig: 150 der Sätze werden zusätzlich von einem Menschen codiert (siehe Übereinstimmung unten).</li></ul>
+  <!-- /gegenueberstellung -->
+
+  <!-- zeitverlauf -->
+  <h2 id="zeitverlauf">Wie sich die Überschriften im Lauf des Tages änderten</h2>
+  <p>Zahl der Beiträge, nach dem Rahmen ihrer Überschrift. Oben je Tag (23. Oktober bis 3. November), darunter stündlich für den Demotag.</p>
+  <div class="diagramm"><div class="legende"><span><i class="f1"></i>Gewalt</span><span><i class="f2"></i>Polizeieinsatz</span><span><i class="f3"></i>Anliegen</span><span><i class="f4"></i>Politik-Reaktion</span><span><i class="f0"></i>neutral, Ablauf</span></div>
+  <div class="saeulen tage" role="img" aria-label="Beiträge je Tag vom 23.10. bis 3.11."><div class="saeule" title="23.: 0 Beiträge"><span class="wert"></span><div class="turm"></div><span class="tag">23.</span></div><div class="saeule" title="24.: 0 Beiträge"><span class="wert"></span><div class="turm"></div><span class="tag">24.</span></div><div class="saeule" title="25.: 0 Beiträge"><span class="wert"></span><div class="turm"></div><span class="tag">25.</span></div><div class="saeule" title="26.: 1 Beiträge"><span class="wert">1</span><div class="turm"><i class="f1" style="height:0.5%" title="Gewalt: 1"></i></div><span class="tag">26.</span></div><div class="saeule" title="27.: 5 Beiträge"><span class="wert">5</span><div class="turm"><i class="f0" style="height:1.0%" title="neutral, Ablauf: 2"></i><i class="f1" style="height:1.5%" title="Gewalt: 3"></i></div><span class="tag">27.</span></div><div class="saeule" title="28.: 6 Beiträge"><span class="wert">6</span><div class="turm"><i class="f0" style="height:1.0%" title="neutral, Ablauf: 2"></i><i class="f4" style="height:0.5%" title="Politik-Reaktion: 1"></i><i class="f1" style="height:1.5%" title="Gewalt: 3"></i></div><span class="tag">28.</span></div><div class="saeule" title="29.: 23 Beiträge"><span class="wert">23</span><div class="turm"><i class="f0" style="height:8.9%" title="neutral, Ablauf: 18"></i><i class="f3" style="height:1.5%" title="Anliegen: 3"></i><i class="f1" style="height:1.0%" title="Gewalt: 2"></i></div><span class="tag">29.</span></div><div class="saeule" title="30.: 36 Beiträge"><span class="wert">36</span><div class="turm"><i class="f0" style="height:5.9%" title="neutral, Ablauf: 12"></i><i class="f4" style="height:1.5%" title="Politik-Reaktion: 3"></i><i class="f3" style="height:4.0%" title="Anliegen: 8"></i><i class="f2" style="height:2.5%" title="Polizeieinsatz: 5"></i><i class="f1" style="height:4.0%" title="Gewalt: 8"></i></div><span class="tag">30.</span></div><div class="saeule" title="31.: 202 Beiträge"><span class="wert">202</span><div class="turm"><i class="f0" style="height:44.6%" title="neutral, Ablauf: 90"></i><i class="f4" style="height:4.5%" title="Politik-Reaktion: 9"></i><i class="f3" style="height:3.5%" title="Anliegen: 7"></i><i class="f2" style="height:13.4%" title="Polizeieinsatz: 27"></i><i class="f1" style="height:34.2%" title="Gewalt: 69"></i></div><span class="tag">31.</span></div><div class="saeule" title="1.: 79 Beiträge"><span class="wert">79</span><div class="turm"><i class="f0" style="height:6.4%" title="neutral, Ablauf: 13"></i><i class="f4" style="height:6.4%" title="Politik-Reaktion: 13"></i><i class="f3" style="height:0.5%" title="Anliegen: 1"></i><i class="f2" style="height:2.0%" title="Polizeieinsatz: 4"></i><i class="f1" style="height:23.8%" title="Gewalt: 48"></i></div><span class="tag">1.</span></div><div class="saeule" title="2.: 45 Beiträge"><span class="wert">45</span><div class="turm"><i class="f0" style="height:4.5%" title="neutral, Ablauf: 9"></i><i class="f4" style="height:6.9%" title="Politik-Reaktion: 14"></i><i class="f3" style="height:1.0%" title="Anliegen: 2"></i><i class="f2" style="height:1.0%" title="Polizeieinsatz: 2"></i><i class="f1" style="height:8.9%" title="Gewalt: 18"></i></div><span class="tag">2.</span></div><div class="saeule" title="3.: 3 Beiträge"><span class="wert">3</span><div class="turm"><i class="f2" style="height:0.5%" title="Polizeieinsatz: 1"></i><i class="f1" style="height:1.0%" title="Gewalt: 2"></i></div><span class="tag">3.</span></div></div>
+  <p class="klein" style="margin-top:1rem">31.10., 12 Uhr bis 1.11., 11 Uhr (je Stunde)</p>
+  <div class="saeulen std" role="img" aria-label="Beiträge je Stunde am Demotag"><div class="saeule" title="12: 0 Beiträge"><span class="wert"></span><div class="turm"></div><span class="tag">12</span></div><div class="saeule" title="13: 2 Beiträge"><span class="wert">2</span><div class="turm"><i class="f0" style="height:2.7%" title="neutral, Ablauf: 1"></i><i class="f1" style="height:2.7%" title="Gewalt: 1"></i></div><span class="tag">13</span></div><div class="saeule" title="14: 8 Beiträge"><span class="wert">8</span><div class="turm"><i class="f0" style="height:16.2%" title="neutral, Ablauf: 6"></i><i class="f1" style="height:5.4%" title="Gewalt: 2"></i></div><span class="tag">14</span></div><div class="saeule" title="15: 14 Beiträge"><span class="wert">14</span><div class="turm"><i class="f0" style="height:35.1%" title="neutral, Ablauf: 13"></i><i class="f1" style="height:2.7%" title="Gewalt: 1"></i></div><span class="tag">15</span></div><div class="saeule" title="16: 19 Beiträge"><span class="wert">19</span><div class="turm"><i class="f0" style="height:10.8%" title="neutral, Ablauf: 4"></i><i class="f3" style="height:2.7%" title="Anliegen: 1"></i><i class="f2" style="height:32.4%" title="Polizeieinsatz: 12"></i><i class="f1" style="height:5.4%" title="Gewalt: 2"></i></div><span class="tag">16</span></div><div class="saeule" title="17: 37 Beiträge"><span class="wert">37</span><div class="turm"><i class="f0" style="height:37.8%" title="neutral, Ablauf: 14"></i><i class="f2" style="height:27.0%" title="Polizeieinsatz: 10"></i><i class="f1" style="height:35.1%" title="Gewalt: 13"></i></div><span class="tag">17</span></div><div class="saeule" title="18: 20 Beiträge"><span class="wert">20</span><div class="turm"><i class="f0" style="height:27.0%" title="neutral, Ablauf: 10"></i><i class="f3" style="height:2.7%" title="Anliegen: 1"></i><i class="f2" style="height:5.4%" title="Polizeieinsatz: 2"></i><i class="f1" style="height:18.9%" title="Gewalt: 7"></i></div><span class="tag">18</span></div><div class="saeule" title="19: 26 Beiträge"><span class="wert">26</span><div class="turm"><i class="f0" style="height:24.3%" title="neutral, Ablauf: 9"></i><i class="f3" style="height:8.1%" title="Anliegen: 3"></i><i class="f2" style="height:2.7%" title="Polizeieinsatz: 1"></i><i class="f1" style="height:35.1%" title="Gewalt: 13"></i></div><span class="tag">19</span></div><div class="saeule" title="20: 12 Beiträge"><span class="wert">12</span><div class="turm"><i class="f0" style="height:13.5%" title="neutral, Ablauf: 5"></i><i class="f2" style="height:5.4%" title="Polizeieinsatz: 2"></i><i class="f1" style="height:13.5%" title="Gewalt: 5"></i></div><span class="tag">20</span></div><div class="saeule" title="21: 13 Beiträge"><span class="wert">13</span><div class="turm"><i class="f0" style="height:24.3%" title="neutral, Ablauf: 9"></i><i class="f1" style="height:10.8%" title="Gewalt: 4"></i></div><span class="tag">21</span></div><div class="saeule" title="22: 22 Beiträge"><span class="wert">22</span><div class="turm"><i class="f0" style="height:13.5%" title="neutral, Ablauf: 5"></i><i class="f4" style="height:13.5%" title="Politik-Reaktion: 5"></i><i class="f1" style="height:32.4%" title="Gewalt: 12"></i></div><span class="tag">22</span></div><div class="saeule" title="23: 14 Beiträge"><span class="wert">14</span><div class="turm"><i class="f0" style="height:13.5%" title="neutral, Ablauf: 5"></i><i class="f4" style="height:2.7%" title="Politik-Reaktion: 1"></i><i class="f1" style="height:21.6%" title="Gewalt: 8"></i></div><span class="tag">23</span></div><div class="saeule" title="0: 4 Beiträge"><span class="wert">4</span><div class="turm"><i class="f0" style="height:2.7%" title="neutral, Ablauf: 1"></i><i class="f1" style="height:8.1%" title="Gewalt: 3"></i></div><span class="tag">0</span></div><div class="saeule" title="1: 0 Beiträge"><span class="wert"></span><div class="turm"></div><span class="tag">1</span></div><div class="saeule" title="2: 0 Beiträge"><span class="wert"></span><div class="turm"></div><span class="tag">2</span></div><div class="saeule" title="3: 1 Beiträge"><span class="wert">1</span><div class="turm"><i class="f0" style="height:2.7%" title="neutral, Ablauf: 1"></i></div><span class="tag">3</span></div><div class="saeule" title="4: 1 Beiträge"><span class="wert">1</span><div class="turm"><i class="f1" style="height:2.7%" title="Gewalt: 1"></i></div><span class="tag">4</span></div><div class="saeule" title="5: 0 Beiträge"><span class="wert"></span><div class="turm"></div><span class="tag">5</span></div><div class="saeule" title="6: 4 Beiträge"><span class="wert">4</span><div class="turm"><i class="f1" style="height:10.8%" title="Gewalt: 4"></i></div><span class="tag">6</span></div><div class="saeule" title="7: 6 Beiträge"><span class="wert">6</span><div class="turm"><i class="f0" style="height:10.8%" title="neutral, Ablauf: 4"></i><i class="f1" style="height:5.4%" title="Gewalt: 2"></i></div><span class="tag">7</span></div><div class="saeule" title="8: 6 Beiträge"><span class="wert">6</span><div class="turm"><i class="f0" style="height:2.7%" title="neutral, Ablauf: 1"></i><i class="f2" style="height:2.7%" title="Polizeieinsatz: 1"></i><i class="f1" style="height:10.8%" title="Gewalt: 4"></i></div><span class="tag">8</span></div><div class="saeule" title="9: 7 Beiträge"><span class="wert">7</span><div class="turm"><i class="f3" style="height:2.7%" title="Anliegen: 1"></i><i class="f2" style="height:2.7%" title="Polizeieinsatz: 1"></i><i class="f1" style="height:13.5%" title="Gewalt: 5"></i></div><span class="tag">9</span></div><div class="saeule" title="10: 7 Beiträge"><span class="wert">7</span><div class="turm"><i class="f4" style="height:10.8%" title="Politik-Reaktion: 4"></i><i class="f1" style="height:8.1%" title="Gewalt: 3"></i></div><span class="tag">10</span></div><div class="saeule" title="11: 8 Beiträge"><span class="wert">8</span><div class="turm"><i class="f0" style="height:2.7%" title="neutral, Ablauf: 1"></i><i class="f4" style="height:10.8%" title="Politik-Reaktion: 4"></i><i class="f1" style="height:8.1%" title="Gewalt: 3"></i></div><span class="tag">11</span></div></div>
+  </div>
+  <p class="klein">Zeiten laut Google News bzw. Veröffentlichungszeit des Videos. Bei Livetickern und aktualisierten Beiträgen kann die angezeigte Zeit von der ersten Veröffentlichung abweichen.</p>
+  <p>Bis zum frühen Nachmittag des 31.10. ging es in den Überschriften fast nur um Ablauf und Teilnehmerzahl. Ab etwa 16 Uhr überwogen Überschriften, in denen Gewalt oder Polizei im Vordergrund steht; in dieser Zeit wurde laut Agenturberichten der Demozug untersagt (<a href="https://www.wz.de/nrw/demonstrationszug-von-gen-z-regelt-in-koeln-abgesagt_aid-157590483" rel="noopener noreferrer">dpa, hier bei der WZ</a>) und ein Wasserwerfer eingesetzt (<a href="https://www.wz.de/nrw/wasserwerfereinsatz-gegen-gewaltbereite-demonstranten_aid-157591421" rel="noopener noreferrer">dpa, hier bei der WZ</a>). Danach war das in 10 von 15 Stunden mit mindestens drei Beiträgen so. Von den als neutral gezählten Überschriften dieser Zeit enthielten 21 von 69 trotzdem ein Wort für Gewalt (etwa „erst friedlich, dann Krawall“).</p>
+  <details><summary>Als Tabelle</summary><div class="tabelle"><table><thead><tr><th>Tag</th><th>Gewalt</th><th>Polizeieinsatz</th><th>Anliegen</th><th>Politik-Reaktion</th><th>neutral, Ablauf</th><th>gesamt</th></tr></thead><tbody><tr><td>23.10.</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>24.10.</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>25.10.</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>26.10.</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>27.10.</td><td>3</td><td>0</td><td>0</td><td>0</td><td>2</td><td>5</td></tr><tr><td>28.10.</td><td>3</td><td>0</td><td>0</td><td>1</td><td>2</td><td>6</td></tr><tr><td>29.10.</td><td>2</td><td>0</td><td>3</td><td>0</td><td>18</td><td>23</td></tr><tr><td>30.10.</td><td>8</td><td>5</td><td>8</td><td>3</td><td>12</td><td>36</td></tr><tr><td>31.10.</td><td>69</td><td>27</td><td>7</td><td>9</td><td>90</td><td>202</td></tr><tr><td>1.11.</td><td>48</td><td>4</td><td>1</td><td>13</td><td>13</td><td>79</td></tr><tr><td>2.11.</td><td>18</td><td>2</td><td>2</td><td>14</td><td>9</td><td>45</td></tr><tr><td>3.11.</td><td>2</td><td>1</td><td>0</td><td>0</td><td>0</td><td>3</td></tr></tbody></table></div></details>
+  <!-- /zeitverlauf -->
+
+  <!-- geschichten -->
+  <h2 id="geschichten">Geschichte für Geschichte</h2>
+  <p>Die Beiträge sind zu acht Geschichten gebündelt. Für jede zeigt eine Leiste, wie die Überschriften sie gerahmt haben.</p>
+  <p class="vorlaeufig">Vorläufig: Die Zuordnung zu Geschichten und die Angaben „Zu Wort“ stammen aus der KI-Codierung bzw. der automatischen Satzanalyse und sind noch nicht durch eine menschliche Zweitcodierung geprüft.</p>
+  <div class="diagramm"><div class="legende"><b>Rahmung:</b><span><i class="f1"></i>Gewalt oder Polizei</span><span><i class="f3"></i>Anliegen</span><span><i class="f0"></i>neutral, Ablauf, Politik</span></div>
+  <div class="geschichte"><div class="kopf"><b>Sicherheitslage vor der Demo</b><span class="anz">36 Beiträge · 27.10.–31.10.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Sicherheitslage vor der Demo, Rahmung der Überschriften: Gewalt oder Polizei 83 %, Anliegen 0 %, neutral, Ablauf, Politik 17 %"><i class="f1" style="width:83.3%" title="Gewalt oder Polizei: 83 %">83</i><i class="f0" style="width:16.7%" title="neutral, Ablauf, Politik: 17 %">17</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Polizei 21 %, Politik 19 %, Demonstrierende/Orga 24 %, Andere 33 % (313 Aussagen)</p></div>
+  <div class="geschichte"><div class="kopf"><b>Worum es der Gen Z geht</b><span class="anz">26 Beiträge · 26.10.–2.11.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Worum es der Gen Z geht, Rahmung der Überschriften: Gewalt oder Polizei 8 %, Anliegen 69 %, neutral, Ablauf, Politik 23 %"><i class="f1" style="width:7.7%" title="Gewalt oder Polizei: 8 %"></i><i class="f3" style="width:69.2%" title="Anliegen: 69 %">69</i><i class="f0" style="width:23.1%" title="neutral, Ablauf, Politik: 23 %">23</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Politik 15 %, Demonstrierende/Orga 57 %, Fachleute 14 %, Andere 10 % (169 Aussagen)</p></div>
+  <div class="geschichte"><div class="kopf"><b>Ankündigung und Organisation in Köln</b><span class="anz">34 Beiträge · 28.10.–1.11.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Ankündigung und Organisation in Köln, Rahmung der Überschriften: Gewalt oder Polizei 0 %, Anliegen 3 %, neutral, Ablauf, Politik 97 %"><i class="f3" style="width:2.9%" title="Anliegen: 3 %"></i><i class="f0" style="width:97.1%" title="neutral, Ablauf, Politik: 97 %">97</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Polizei 23 %, Politik 15 %, Demonstrierende/Orga 37 %, Fachleute 6 %, Andere 20 % (179 Aussagen)</p></div>
+  <div class="geschichte"><div class="kopf"><b>Die Kundgebung am 31.10.</b><span class="anz">31 Beiträge · 31.10.–1.11.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Die Kundgebung am 31.10., Rahmung der Überschriften: Gewalt oder Polizei 45 %, Anliegen 3 %, neutral, Ablauf, Politik 52 %"><i class="f1" style="width:45.2%" title="Gewalt oder Polizei: 45 %">45</i><i class="f3" style="width:3.2%" title="Anliegen: 3 %"></i><i class="f0" style="width:51.6%" title="neutral, Ablauf, Politik: 52 %">52</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Polizei 62 %, Politik 7 %, Demonstrierende/Orga 23 %, Andere 7 % (56 Aussagen)</p></div>
+  <div class="geschichte"><div class="kopf"><b>Wasserwerfer und Kessel am Ufer</b><span class="anz">48 Beiträge · 31.10.–3.11.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Wasserwerfer und Kessel am Ufer, Rahmung der Überschriften: Gewalt oder Polizei 90 %, Anliegen 0 %, neutral, Ablauf, Politik 10 %"><i class="f1" style="width:89.6%" title="Gewalt oder Polizei: 90 %">90</i><i class="f0" style="width:10.4%" title="neutral, Ablauf, Politik: 10 %">10</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Polizei 47 %, Demonstrierende/Orga 18 %, Andere 28 % (78 Aussagen)</p></div>
+  <div class="geschichte"><div class="kopf"><b>Randale am Abend und in der Nacht</b><span class="anz">31 Beiträge · 31.10.–2.11.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Randale am Abend und in der Nacht, Rahmung der Überschriften: Gewalt oder Polizei 84 %, Anliegen 0 %, neutral, Ablauf, Politik 16 %"><i class="f1" style="width:83.9%" title="Gewalt oder Polizei: 84 %">84</i><i class="f0" style="width:16.1%" title="neutral, Ablauf, Politik: 16 %">16</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Polizei 54 %, Politik 12 %, Demonstrierende/Orga 20 %, Andere 12 % (96 Aussagen)</p></div>
+  <div class="geschichte"><div class="kopf"><b>Bundesweiter Überblick</b><span class="anz">98 Beiträge · 31.10.–2.11.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Bundesweiter Überblick, Rahmung der Überschriften: Gewalt oder Polizei 61 %, Anliegen 0 %, neutral, Ablauf, Politik 39 %"><i class="f1" style="width:61.2%" title="Gewalt oder Polizei: 61 %">61</i><i class="f0" style="width:38.8%" title="neutral, Ablauf, Politik: 39 %">39</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Polizei 38 %, Politik 16 %, Demonstrierende/Orga 30 %, Andere 15 % (787 Aussagen)</p></div>
+  <div class="geschichte"><div class="kopf"><b>Reaktionen und Folgen</b><span class="anz">62 Beiträge · 31.10.–3.11.</span></div>
+  
+  <div class="reihe breit"><span class="ph">Rahmung</span><div class="stapel" role="img" aria-label="Reaktionen und Folgen, Rahmung der Überschriften: Gewalt oder Polizei 84 %, Anliegen 2 %, neutral, Ablauf, Politik 15 %"><i class="f1" style="width:83.9%" title="Gewalt oder Polizei: 84 %">84</i><i class="f3" style="width:1.6%" title="Anliegen: 2 %"></i><i class="f0" style="width:14.5%" title="neutral, Ablauf, Politik: 15 %">15</i></div><span class="anz"></span></div>
+  <p class="klein zuwort">Zu Wort: Polizei 35 %, Politik 32 %, Demonstrierende/Orga 20 %, Andere 12 % (370 Aussagen)</p></div>
+  </div>
+  <p class="klein">34 Beiträge (vor allem Videos, deren Titel nur aus Hashtags besteht) ließen sich keiner Geschichte zuordnen und fehlen hier.</p>
+  <!-- /geschichten -->
+
+  <h2>Kundgebung und Abend: getrennt oder vermischt?</h2>
+  <p>Die Randale am späten Abend in der Innenstadt und auf der Domplatte fand Stunden nach dem Ende der
+    Kundgebung statt. Mehrere Berichte geben die Polizei so wieder, dass die Randale zeitlich und räumlich von
+    der Demo getrennt gewesen sei
+    (<a href="https://koeln.t-online.de/region/koeln/id_101509038/gen-z-proteste-in-koeln-polizei-verteidigt-wasserwerfer-einsatz.html" rel="noopener noreferrer">t-online Köln, 2.11.</a>)
+    und teils eher mit Halloween zu tun gehabt habe
+    (<a href="https://www.sueddeutsche.de/politik/gen-z-proteste-koelner-polizei-randale-hatte-zum-teil-eher-halloween-bezug-dpa.urn-newsml-dpa-com-20090101-261102-930-931387" rel="noopener noreferrer">dpa, hier bei der SZ, 2.11.</a>).</p>
+  <ul>
+    <li><b>Im Text</b> trennen die meisten Berichte das sauber: <span data-k="dom_getrennt">88 %</span> von <span data-k="dom_n">96</span> Beiträgen, die den Abend erwähnen,
+      machen klar, dass er später war oder andere Gruppen beteiligt waren.</li>
+    <li><b>In den Überschriften</b> sieht es anders aus: <span data-k="hl_demo">87 %</span> der Überschriften mit Gewalt verbinden sie mit der
+      „Gen-Z-Demo“. Nur <span data-k="hl_trenn">40 %</span> davon enthalten einen Hinweis wie „nach“, „in der Nacht“ oder „Halloween“.
+      Ein Teil meint allerdings den Wasserwerfer-Einsatz am Rheinufer am Nachmittag, der zur Kundgebung gehörte.</li>
+  </ul>
+
+  <h2>Wofür demonstriert wurde – laut den Berichten</h2>
+  <p>Wenn Forderungen genannt wurden, dann am häufigsten diese (Zahl der Beiträge nach der Demo):
+    Bildung und Schulen <span data-k="f_bildung">84</span>, Lebenshaltungskosten und Mieten <span data-k="f_kosten">72</span>, Klima <span data-k="f_klima">67</span>, gegen die Wehrpflicht <span data-k="f_wehrpflicht">64</span>,
+    soziale Gerechtigkeit <span data-k="f_gerechtigkeit">44</span>, Psychotherapie <span data-k="f_psychotherapie">24</span>, Suchthilfe <span data-k="f_sucht">23</span>.</p>
+
+  <h2>Wie viel Gewalt gab es im Verhältnis?</h2>
+  <p>In den Berichten selbst ist von etwa 200 bis 300 Personen die Rede, die am Abend und in der Nacht im
+    Stadtgebiet randaliert haben. Bei der Kundgebung waren nach Schätzungen von Reportern 3.000 bis 6.000 Menschen.
+    Selbst wenn man alle Randalierenden der Demo zurechnet, wären das etwa 3 bis 10 %. Beide Zahlen sind
+    Schätzungen aus verschiedenen Quellen; die Spanne zeigt, wie unsicher die Rechnung ist. Die Berichterstattung
+    danach handelte im Schnitt zu <span data-k="bt_gew_n2">65 %</span> von Gewalt, Polizei und Sicherheit.</p>
+
+  <h2>Was erwartet war</h2>
+  <p>Bevor der erste Beitrag ausgewertet wurde, habe ich die Erwartungen schriftlich festgehalten (Präregistrierung,
+    2.11.2026, 20:48 Uhr; Prüfsumme SHA-256 der Datei beginnt mit <code>0a1ca418</code>). So lässt sich prüfen, ob die
+    Ergebnisse nur bestätigen, was man ohnehin glaubte. <span data-k="u_satz">Von den vier Erwartungen mit fester Zahl oder Richtung trafen 2 zu. Ausführlich dargestellt wurden die Anliegen sogar noch seltener als erwartet.</span> Eine weitere nur teilweise: Im Fließtext wurde der Abend meist sauber von der Demo getrennt. Die Erwartung zu den Medientypen wird nach der Zweitcodierung ausgewertet.</p>
+  <div class="tabelle">
+  <table>
+    <thead><tr><th>Erwartung</th><th>Ergebnis</th></tr></thead>
+    <tbody>
+      <tr><td class="urteil">60–75 % der Überschriften mit Gewalt im Vordergrund</td><td class="urteil"><span data-k="hl_gp_n2">58 %</span> (bis <span data-k="hl_weit_n">71 %</span> mit Politik-Reaktionen) – <span data-k="u_h1">knapp darunter, mit Politik-Reaktionen im Bereich</span></td></tr>
+      <tr><td class="urteil">Anliegen in etwa der Hälfte erwähnt, meist als Halbsatz</td><td class="urteil"><span data-k="bt_gen_n2">58 %</span>, davon <span data-k="bt_kurz_anteil">4 von 5</span> nur kurz – <span data-k="u_h2">bestätigt</span></td></tr>
+      <tr><td class="urteil">Anliegen ernsthaft dargestellt in 10–20 %</td><td class="urteil"><span data-k="bt_ausf_n2">9 %</span> – <span data-k="u_h3">knapp darunter</span></td></tr>
+      <tr><td class="urteil">Boulevard und Agenturen fast nur Gewalt, Lokales und WDR ausgewogener</td><td class="urteil">wird nach der Zweitcodierung ausgewertet</td></tr>
+      <tr><td class="urteil">Der Abend auf der Domplatte wird oft der Demo zugerechnet</td><td class="urteil">im Text selten (<span data-k="dom_zuger">12 %</span>), in Überschriften häufig – gemischt</td></tr>
+      <tr><td class="urteil">Vorher stehen die Anliegen stärker im Vordergrund</td><td class="urteil"><span data-k="u_h7">bestätigt</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Wie ausgewertet wurde</h2>
+  <ul>
+    <li><b>Was:</b> deutschsprachige Online-Artikel, Liveticker, Fernseh- und Radiobeiträge und Videos mit Bezug zur
+      Kölner Demo, vom 23.10. bis <span data-k="datenende2">3.11.2026</span>. Gefunden über die Google-News-Suche, die Mediatheken der Sender und
+      die für die Karte gesammelten Videos. <span data-k="n_hl">400</span> Überschriften, <span data-k="n_bt">209</span> Beiträge im Volltext.</li>
+    <li><b>Wie:</b> Jeder Beitrag wurde nach festen Regeln eingeordnet: Was steht in der Überschrift im
+      Vordergrund? Werden Forderungen genannt, und wie ausführlich? Wer kommt zu Wort? Wie viel des Textes
+      handelt von Gewalt, wie viel von den Anliegen?</li>
+    <li><b>KI-Anteil:</b> Die gesamte Erstcodierung (alle <span data-k="n_hl2">400</span> Überschriften und <span data-k="n_bt2">209</span> Beiträge) hat eine KI
+      (Claude) nach dem festen Codierbuch gemacht. Ein Mensch codiert eine Zufallsstichprobe von 20 %
+      (<span data-k="d_hl">80</span> Überschriften, <span data-k="d_bt">43</span> Beiträge, <span data-k="d_s">150</span> Sätze) unabhängig noch einmal; erst daran zeigt sich, wie verlässlich die
+      KI-Codierung ist. Eine Doppelcodierung durch die KI selbst (14 Beiträge) ergab fast volle Übereinstimmung,
+      das sagt aber wenig, weil dasselbe System zweimal urteilt.</li>
+    <li><b>Grenzen:</b> Keine Vollerhebung, Bezahlartikel nur teilweise lesbar, die taz fehlt. Bundesweite
+      Überblicke zählen mit, wenn Köln darin vorkommt; ihr Gewaltanteil stammt teils aus anderen Städten.
+      Zahlen zu Teilnehmenden und Randalierenden sind Schätzungen aus den Berichten.</li>
+  </ul>
+  <h3>Wie viele Beiträge in jede Zahl eingehen</h3>
+  <!-- stichprobe -->
+  <div class="tabelle"><table><thead><tr><th>Medientyp</th><th>Überschriften vorher</th><th>Überschriften nachher</th><th>Volltexte vorher</th><th>Volltexte nachher</th></tr></thead><tbody><tr><td>Öffentlich-rechtlich</td><td>18</td><td>44</td><td>8</td><td>18</td></tr><tr><td>Lokal und regional</td><td>45</td><td>89</td><td>31</td><td>51</td></tr><tr><td>Überregional online</td><td>4</td><td>46</td><td>3</td><td>32</td></tr><tr><td>Boulevard</td><td>17</td><td>35</td><td>15</td><td>24</td></tr><tr><td>Agenturmeldungen</td><td>4</td><td>29</td><td>3</td><td>10</td></tr><tr><td>Social Media</td><td>2</td><td>67</td><td>0</td><td>14</td></tr><tr><td><b>Alle</b></td><td><b>90</b></td><td><b>310</b></td><td><b>60</b></td><td><b>149</b></td></tr></tbody></table></div><p class="klein">„Vorher“ heißt veröffentlicht bis 31.10., 14 Uhr. Prozentwerte für Gruppen mit weniger als 5 Beiträgen werden nicht gezeigt.</p>
+  <!-- /stichprobe -->
+  <h3>Übereinstimmung von KI und menschlicher Codierung</h3>
+  <!-- uebereinstimmung: Werte nach Davids Zweitcodierung aus dokumentation/medienanalyse/daten/reliabilitaet_*.json eintragen -->
+  <div class="tabelle">
+  <table>
+    <thead><tr><th>Kategorie</th><th>Krippendorffs α</th><th>Übereinstimmung</th><th>n doppelt codiert</th></tr></thead>
+    <tbody>
+      <tr><td>Rahmen der Überschrift</td><td>ausstehend</td><td>–</td><td>61</td></tr>
+      <tr><td>Gewaltwort in der Überschrift</td><td>ausstehend</td><td>–</td><td>61</td></tr>
+      <tr><td>Anliegen in der Überschrift</td><td>ausstehend</td><td>–</td><td>61</td></tr>
+      <tr><td>Forderungen genannt / ausführlich</td><td>ausstehend</td><td>–</td><td>35</td></tr>
+      <tr><td>Demonstrierende zitiert</td><td>ausstehend</td><td>–</td><td>35</td></tr>
+      <tr><td>Abend von Demo getrennt</td><td>ausstehend</td><td>–</td><td>35</td></tr>
+      <tr><td>Anteil Gewalt / Anliegen am Text</td><td>ausstehend</td><td>–</td><td>35</td></tr>
+      <tr><td>Zuordnung zu einer Geschichte</td><td>ausstehend</td><td>–</td><td>61</td></tr>
+      <tr><td>Thema eines Satzes (Satzanalyse)</td><td>ausstehend</td><td>–</td><td>150</td></tr>
+      <tr><td>Sprecher einer Aussage (Satzanalyse)</td><td>ausstehend</td><td>–</td><td>150</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="klein">Bis diese Werte vorliegen, sind alle Zahlen auf dieser Seite vorläufig. Änderungen nach der
+    Erstveröffentlichung werden hier mit Datum vermerkt.</p>
+
+  <h3>Fehler gefunden?</h3>
+  <p>Wenn eine Zahl oder Aussage auf dieser Seite nicht stimmt, schreib an protest-watch@pm.me. Ich prüfe Hinweise innerhalb
+    von 3 Tagen; Korrekturen werden hier mit Datum vermerkt.</p>
+  <p class="klein">Keine Personen werden genannt oder erkennbar gemacht. Die ausgewerteten Texte liegen nicht auf
+    dieser Seite; sie gehören den jeweiligen Medien.</p>
+
+  <footer>
+    <a href="/">Startseite</a> · <a href="/karte/">Karte</a> ·
+    <a href="/datenschutz.html#impressum">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> · Daten Stand <span data-k="stand2">3.11.2026</span>, Seite Stand <span data-k="seitenstand">3.11.2026</span>
+  </footer>
+</main>
+<script src="daten.js"></script>
+<script src="filter.js"></script>
+</body>
+</html>
