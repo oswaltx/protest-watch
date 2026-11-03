@@ -914,6 +914,12 @@ function zeigeFluss() {
   });
 }
 viewer.clock.onTick.addEventListener(zeigeFluss);
+$("saeulen-knopf").onclick = () => {
+  dichteSaeulen = !dichteSaeulen;
+  if (dichteSaeulen && !dichteSichtbar) setzeModus("beides");  // Säulen ergeben nur mit eingeblendeter Dichte Sinn
+  $("saeulen-knopf").textContent = dichteSaeulen ? "▦ Dichte wieder flach zeigen" : "▦ Dichte als 3D-Säulen";
+  zeigeDichte(true);
+};
 $("fluss-knopf").onclick = () => {
   flussAn = !flussAn; flussMinute = -1;
   $("fluss-knopf").textContent = flussAn ? "➜ Bewegungspfeile ausblenden" : "➜ Bewegungspfeile zeigen (nächste 10 Minuten)";
@@ -1474,20 +1480,24 @@ fetch("dichte-flaechen.json").then((a) => a.json()).then((d) => {
 // Eine Ebene (Primitive) je Zeitpunkt und Deckkraft, erst bei Bedarf gebaut: 5-m-Felder nur auf Straßen, Wegen und
 // Plätzen (skripte/dichte_zuschneiden.py). Kräftig = oft gesehen; „blass“ = nächste Zählung liegt zeitlich daneben.
 const KLEIN_M2 = 3000;  // darunter ist der gefilmte Ausschnitt zu klein für eine Aussage über die Menge (z. B. Domplatte abends)
+// Säulen: Höhe proportional zur gezählten Dichte (1 Person/m² = 100 m), nur zur Anschauung, die Zahlen bleiben dieselben
+let dichteSaeulen = false;
 function dichteEbene(z, blass) {
-  if (z.ebenen[blass]) return z.ebenen[blass];
+  const schluessel = `${blass}-${dichteSaeulen}`;
+  if (z.ebenen[schluessel]) return z.ebenen[schluessel];
   const ring = (r) => Cesium.Cartesian3.fromDegreesArray(r.flatMap(([lat, lon]) => [lon, lat]));
   const instanzen = z.flaechen.flatMap((f) => f.teile.map((teil) => new Cesium.GeometryInstance({
     geometry: new Cesium.PolygonGeometry({
       polygonHierarchy: new Cesium.PolygonHierarchy(ring(teil.aussen), teil.loecher.map((l) => new Cesium.PolygonHierarchy(ring(l)))),
-      height: GRUND + 1, vertexFormat: Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
+      height: GRUND + 1, extrudedHeight: dichteSaeulen ? GRUND + 1 + Math.max(0.5, f.d * 100) : undefined,
+      vertexFormat: dichteSaeulen ? Cesium.PerInstanceColorAppearance.VERTEX_FORMAT : Cesium.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
     }),
     attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(
-      Cesium.Color.fromCssColorString(dichteFarbe(f.d)).withAlpha((0.3 + 0.4 * f.a) * (blass ? 0.4 : 1))) },
+      Cesium.Color.fromCssColorString(dichteFarbe(f.d)).withAlpha((dichteSaeulen ? 0.75 : 0.3 + 0.4 * f.a) * (blass ? 0.4 : 1))) },
   })));
-  z.ebenen[blass] = viewer.scene.primitives.add(new Cesium.Primitive({ geometryInstances: instanzen, show: false,
-    appearance: new Cesium.PerInstanceColorAppearance({ flat: true, translucent: true }) }));
-  return z.ebenen[blass];
+  z.ebenen[schluessel] = viewer.scene.primitives.add(new Cesium.Primitive({ geometryInstances: instanzen, show: false,
+    appearance: new Cesium.PerInstanceColorAppearance({ flat: !dichteSaeulen, translucent: true }) }));
+  return z.ebenen[schluessel];
 }
 function zeigeDichte(erzwingen) {
   const t = sek(viewer.clock.currentTime);
