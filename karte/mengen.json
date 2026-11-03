@@ -1266,17 +1266,22 @@
  "fahrzeuge": [
   {
    "name": "Wasserwerfer K1",
-   "quelle": "Livestream A, AP, WELT, t-online, YouTube-Video; Anfahrt von Süden laut Augenzeugenbericht",
+   "quelle": "Livestream A, AP, WELT, t-online, YouTube-Video; Anfahrt von Süden laut Augenzeugenbericht; Positionen 16:30–16:55 aus Videos verortet (objekte-verortet.json)",
    "wege": [
     {
      "zeit": "16:30",
-     "lat": 50.947,
-     "lon": 6.9642
+     "lat": 50.947634,
+     "lon": 6.964715
     },
     {
-     "zeit": "16:49",
-     "lat": 50.949,
-     "lon": 6.9653
+     "zeit": "16:38",
+     "lat": 50.94866,
+     "lon": 6.96531
+    },
+    {
+     "zeit": "16:55",
+     "lat": 50.94866,
+     "lon": 6.96531
     },
     {
      "zeit": "17:15",
@@ -1292,7 +1297,7 @@
   },
   {
    "name": "Wasserwerfer K2",
-   "quelle": "TikTok 16:30 (Upload 16:43), TikTok Breslauer Platz, Essen112 Ebertplatz; Anfahrt von Süden laut Augenzeugenbericht; 15:24 am Musical Dome, danach zügig nach Norden (Einsendung per Mail + Angabe der einsendenden Person; welcher Wasserwerfer es war, ist unsicher)",
+   "quelle": "TikTok 16:30 (Upload 16:43), TikTok Breslauer Platz, Essen112 Ebertplatz; Anfahrt von Süden laut Augenzeugenbericht; 15:24 am Musical Dome, danach zügig nach Norden (Einsendung per Mail + Angabe der einsendenden Person; welcher Wasserwerfer es war, ist unsicher); Positionen 16:20 und 16:45 aus Videos verortet (objekte-verortet.json)",
    "wege": [
     {
      "zeit": "15:24",
@@ -1306,13 +1311,13 @@
     },
     {
      "zeit": "16:20",
-     "lat": 50.9468,
-     "lon": 6.9641
+     "lat": 50.947604,
+     "lon": 6.96452
     },
     {
      "zeit": "16:45",
-     "lat": 50.9488,
-     "lon": 6.9652
+     "lat": 50.948744,
+     "lon": 6.965294
     },
     {
      "zeit": "17:05",

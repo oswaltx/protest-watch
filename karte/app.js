@@ -1277,7 +1277,11 @@ viewer.clock.onTick.addEventListener(() => zeigeDichte(false));
 // Genauer als die Schätzungen: Kamerastandort aus dem Bild bestimmt, Entfernung aus bekannten Größen. Kreis = Unsicherheit.
 fetch("objekte-verortet.json").then((a) => a.json()).then((d) => {
   const BLAU = Cesium.Color.fromCssColorString("#2d5fd6");
+  const beschriftet = [];  // nur ein Schild je Stelle und Zeit, sonst liegen sie am Vincenz-Haus übereinander
   for (const o of d.objekte) {
+    const schildNoetig = o.art !== "Polizeigruppe" && !beschriftet.some((b) => b.von < o.zeit_bis && o.zeit_von < b.bis
+      && Math.hypot((b.lat - o.lat) * 111320, (b.lon - o.lon) * 70000) < 30);
+    if (schildNoetig) beschriftet.push({ lat: o.lat, lon: o.lon, von: o.zeit_von, bis: o.zeit_bis });
     const zeitraum = new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: ortsZeit(o.zeit_von), stop: ortsZeit(o.zeit_bis) })]);
     const u = o.unsicherheit_m || {}, radius = Math.max(u.laengs || 10, u.quer || 0);
     const text = `<p><b>Aus einem öffentlichen Video verortet</b>, ${o.zeit_von}–${o.zeit_bis} Uhr (Zeitfenster des Videos).</p>
@@ -1293,7 +1297,7 @@ fetch("objekte-verortet.json").then((a) => a.json()).then((d) => {
         outline: true, outlineColor: BLAU.withAlpha(0.6) },
       point: o.linie ? undefined : { pixelSize: 11, color: BLAU, outlineColor: Cesium.Color.WHITE, outlineWidth: 3,
         disableDepthTestDistance: Number.POSITIVE_INFINITY },
-      label: schild(`${o.art} (aus Video)`, { versatz: -20, amBoden: false }) });
+      label: schildNoetig ? schild(`${o.art} (aus Video)`, { versatz: -20, amBoden: false }) : undefined });
   }
   viewer.scene.requestRender();
 }).catch(() => {});
