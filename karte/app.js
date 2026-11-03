@@ -21,7 +21,9 @@ const sek = (jd) => Cesium.JulianDate.toDate(jd).getTime() / 1000;   // Unix-Sek
 const startS = sek(start), endeS = sek(ende);
 
 // Handys und schwache Rechner: weniger Kantenglättung, weniger Bilder pro Sekunde, nur jeder dritte simulierte Punkt
-const SCHWACH = matchMedia("(pointer: coarse)").matches || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+// ?voll in der Adresse erzwingt die volle Darstellung (für Aufnahmen von Zeitraffern)
+const SCHWACH = !new URLSearchParams(location.search).has("voll") &&
+  (matchMedia("(pointer: coarse)").matches || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4);
 const SCHMAL = matchMedia("(max-width: 700px)");  // Handy-Layout (wie die CSS-Regel in index.html)
 const viewer = new Cesium.Viewer("karte", {
   globe: false,                 // Google-Kacheln enthalten Gelände schon
