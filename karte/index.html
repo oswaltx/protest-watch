@@ -219,7 +219,10 @@
     <button id="streifen-knopf">▤ Übersichtsstreifen an der Zeitleiste zeigen</button>
     <button id="google-knopf">📷 Google-Fotokacheln</button>
     <button id="tonmodell">◻ Fotos aus (Tonmodell)</button>
-      </section>
+    <button id="kulisse-knopf" title="Leere Straße um 12:32 Uhr, vor der Demo">🏙 3D-Kulisse (berechnet) zeigen</button>
+    <p class="klein">Leere Straße am Weckschnapp um 12:32 Uhr, vor der Demo. 3D-Kulisse berechnet aus einem öffentlichen
+      Livestream (Livestream A, siehe <a href="/quellen/">Quellen</a>), Personen und Fahrzeuge entfernt.</p>
+  </section>
   <section id="reiter-legende" hidden>
     <h2>Auf der Karte</h2>
     <ul class="legende">
@@ -378,6 +381,15 @@
 <div id="warnung" role="note"><b>⚠ Simulation, keine Abbildung der Wirklichkeit.</b> Die Punkte sind
   <b>keine einzelnen Personen</b> und keine echten Positionen. Personenzahlen, Wege und Abläufe sind
   <b>Schätzungen</b> aus Videos und Berichten und können falsch sein. Belegt sind nur die verlinkten Quellen.</div>
+<div id="kulisse-streifen" role="note" hidden><b>Kulisse: leere Straße um 12:32 Uhr, vor der Demo.</b>
+  Personen, Fahrzeuge und Ereignisse der angezeigten Uhrzeit sind nicht Teil der Kulisse.</div>
+<style>
+  /* Hinweis, solange die 3D-Kulisse eingeblendet ist (Auflage recht-b0 3.11.): fest über der Zeitleiste */
+  #kulisse-streifen { position: absolute; z-index: 8; left: 0; right: 0; bottom: 64px; padding: 6px 12px;
+    background: rgba(20, 20, 24, .9); color: #fff; border-top: 2px solid #ffb347; font-size: 13px; line-height: 1.35;
+    text-align: center; pointer-events: none; }
+  @media (max-width: 700px) { #kulisse-streifen { bottom: auto; top: 46px; font-size: 11px; padding: 4px 8px; } }
+</style>
 <a id="impressum-link" href="/datenschutz.html#impressum">Impressum · Datenschutz</a>
 <script src="oeffentlich.js?v=1f9abd1b3a"></script><script src="gebaeude.js?v=bae32de228"></script>
 <script src="cesium/Cesium.js?v=fb0f46e6da"></script>
@@ -389,6 +401,7 @@
 <script src="menge.js?v=7a666416c1"></script>
 <script src="tour.js?v=759083d611"></script>
 <script src="grundkarte.js?v=0bb0fb78dc"></script>
-<script src="app.js?v=fe3b56d590"></script>
+<script src="3d/kulisse.js?v=2be1e0d18c"></script>
+<script src="app.js?v=03ce2a169a"></script>
 </body>
 </html>

@@ -151,6 +151,37 @@ $("sichtfeld-knopf").onclick = () => {
   $("sichtfeld-knopf").textContent = an ? "📷 Sichtfelder ausblenden" : "📷 Sichtfelder der Kameras zeigen";
   viewer.scene.requestRender();
 };
+// 3D-Kulisse Weckschnapp (Gaussian Splats aus einem Livestream vor der Demo, Personen und Fahrzeuge entfernt;
+// szene/3d/kulisse.js). Knopf und Skript stehen in index.html zwischen <!-- kulisse -->-Markierungen; sie und dieser
+// Block fehlen im Export, solange KULISSE_FREIGEGEBEN = False. Lädt erst beim ersten Klick; Handys bekommen die kleine Fassung.
+// Solange die Kulisse zu sehen ist, sind die OSM-Gebäude aus (ihre weißen Wände verdecken die Fassaden der Kulisse)
+// und der Hinweisstreifen #kulisse-streifen ist an: die Kulisse zeigt 12:32 Uhr, nicht die eingestellte Uhrzeit.
+let kulisse = null, gebaeudeVorher = true;
+if ($("kulisse-knopf") && window.kulisseLaden) $("kulisse-knopf").onclick = async () => {
+  const knopf = $("kulisse-knopf");
+  if (!kulisse) {
+    knopf.disabled = true;
+    knopf.textContent = "🏙 3D-Kulisse lädt …";
+    try {
+      kulisse = await window.kulisseLaden(viewer, { klein: SCHWACH || SCHMAL.matches });
+    } catch (e) {
+      knopf.disabled = false;
+      knopf.textContent = "🏙 3D-Kulisse (Laden fehlgeschlagen)";
+      return;
+    }
+    knopf.disabled = false;
+    // Start erhöht und seitlich versetzt über der Fahrbahn, nicht auf dem Weg der Aufnahme (Auflage recht-b0 3.11.)
+    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(6.964843, 50.948396, 10),
+      orientation: { heading: Cesium.Math.toRadians(230), pitch: Cesium.Math.toRadians(-18), roll: 0 } });
+  } else kulisse.show = !kulisse.show;
+  if (osmGebaeude) {
+    if (kulisse.show) gebaeudeVorher = osmGebaeude.show;
+    osmGebaeude.show = kulisse.show ? false : gebaeudeVorher;
+  }
+  $("kulisse-streifen").hidden = !kulisse.show;
+  knopf.textContent = kulisse.show ? "🏙 3D-Kulisse (berechnet) ausblenden" : "🏙 3D-Kulisse (berechnet) zeigen";
+  viewer.scene.requestRender();
+};
 
 // Gebäude aus gebaeude.js (OpenStreetMap, Höhe aus height bzw. Geschossen): weiß mit schwarzen Kanten, ohne Schattierung,
 // damit sie wie eine gezeichnete Karte wirken; als je ein Primitive für Flächen und Kanten
