@@ -663,6 +663,8 @@ const populationen = MENGE.populationen.map((p) => {
   const farbe = FARBE_GRUPPE[p.gruppe], bilder = BILDER[p.gruppe], fz = p.gruppe === "fahrzeug";
   const punkte = [], figuren = [];
   for (let i = 0; i < p.personen; i++) {
+    // schwache Geräte: nur jede dritte Person bekommt Punkt und Figur (spart Speicher und Rechenzeit; gezählt werden alle)
+    if (SCHWACH && i % 3 && !fz) { punkte.push(null); figuren.push(null); continue; }
     punkte.push(punkteSammlung.add({ show: false, color: farbe, pixelSize: { polizei: 5, fahrzeug: 9, krawall: 5 }[p.gruppe] || 4,
       scaleByDistance: new Cesium.NearFarScalar(50, 2.0, 2000, 0.6) }));
     figuren.push(figurenSammlung.add({ show: false, image: bilder[i % bilder.length], sizeInMeters: true,
@@ -723,9 +725,10 @@ function aktualisiereMenge() {
     for (let i = 0; i < punkte.length; i++) {
       const pp = punkte[i], fig = figuren[i];
       const a = (i * K + k) * 2, b = a + 2;
-      if (k < 0 || wege[a] === FEHLT || wege[b] === FEHLT) { pp.show = false; fig.show = false; continue; }
+      if (k < 0 || wege[a] === FEHLT || wege[b] === FEHLT) { if (pp) { pp.show = false; fig.show = false; } continue; }
       n++;
-      if ((SCHWACH && i % 3) || !mengeSichtbar || (nurPolizei && p.gruppe !== "polizei" && p.gruppe !== "fahrzeug")) { pp.show = false; fig.show = false; continue; }
+      if (!pp) continue;
+      if (!mengeSichtbar || (nurPolizei && p.gruppe !== "polizei" && p.gruppe !== "fahrzeug")) { pp.show = false; fig.show = false; continue; }
       // leichte Eigenbewegung im Stand (±0,3 m), damit die Menge nicht wie eingefroren wirkt
       const wackeln = p.gruppe === "fahrzeug" ? 0 : 3 * Math.sin(t / 7 + i * 1.7);
       const x = wege[a] + (wege[b] - wege[a]) * f + wackeln;
