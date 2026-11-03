@@ -24,8 +24,9 @@
       const h = Math.floor(minuten(e.von) / 60);
       if (h !== stunde) { html += `<h2 class="stunde">${h} Uhr</h2>`; stunde = h; }
       const genau = e.zeit_sicher === "genau" ? "" : `<small>${e.zeit_sicher === "ca." ? "ca." : "Reihenfolge"}</small>`;
-      html += `<article class="eintrag"><div class="zeit">${e.von}${genau}</div><div>
+      html += `<article class="eintrag${e.ansage ? " mit-ansage" : ""}"><div class="zeit">${e.von}${genau}</div><div>
         <div class="ort"><span class="art ${k}">${NAME[k]}</span><a href="${kartenlink(e)}">${e.ort} auf der Karte ↗</a></div>
+        ${e.ansage ? `<div class="ansage ${e.ansage}">📢 ${e.ansage === "polizei" ? "Ansage der Polizei" : "Ansage der Versammlungsleitung"}</div>` : ""}
         <div>${e.text}</div><div class="quelle">Quelle: ${e.quelle}</div></div></article>`;
     }
     document.getElementById("blog").innerHTML = html || "<p>Keine Einträge für diesen Filter.</p>";

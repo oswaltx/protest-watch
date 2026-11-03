@@ -288,6 +288,8 @@ function fliegeZu(lat, lon, hoehe) {
 
 // ---------- Ereignisse ----------
 const EREIGNISSE = window.EREIGNISSE.map((e) => ({ ...e, s: sek(ortsZeit(e.von)) }));
+const ANSAGE = { polizei: "Ansage der Polizei", leitung: "Ansage der Versammlungsleitung" };
+const ANSAGE_FARBE = { polizei: "#4d8bff", leitung: "#3ecf8e" };
 const FENSTER = 20 * 60;  // Ereignis gilt 20 min als "aktuell"
 
 // ---------- Videos ----------
@@ -350,7 +352,8 @@ function aktualisiereJetzt() {
     ent.point.pixelSize = an ? 15 : 9;
   }
   $("jetzt-ereignisse").innerHTML = aktiv.length
-    ? aktiv.map((e) => `<div class="ev"><b>${e.von}</b> <a href="#" data-ort="${e.ort}">${e.ort}</a>
+    ? aktiv.map((e) => `<div class="ev${e.ansage ? " ansage " + e.ansage : ""}">${e.ansage ? `<div class="ansage-kopf">📢 ${ANSAGE[e.ansage]}</div>` : ""}
+        <b>${e.von}</b> <a href="#" data-ort="${e.ort}">${e.ort}</a>
         <span class="sicher">${e.zeit_sicher}</span><br>${e.text}<br><small>${e.quelle}</small></div>`).join("")
     : "<i>keine gemeldeten Ereignisse</i>";
 
@@ -1234,6 +1237,12 @@ function zeichneZeitleiste() {
     const farbe = e.zeit_sicher === "genau" ? "#ffb000" : "#a07020";
     svg += `<polygon points="${x(e.s) - 4},36 ${x(e.s) + 4},36 ${x(e.s)},28" fill="${farbe}"><title>${uhr(e.s)} ${e.ort}: ${e.text}</title></polygon>`;
   }
+  // zentrale Ansagen von Polizei und Versammlungsleitung: farbiger Kreis mit Megafon, Klick setzt die Zeit
+  for (const e of EREIGNISSE.filter((e) => e.ansage)) {
+    svg += `<g class="ansage-marke" data-s="${e.s}" style="cursor:pointer"><title>${uhr(e.s)} ${ANSAGE[e.ansage]}: ${e.text}</title>
+      <circle cx="${x(e.s)}" cy="32" r="7.5" fill="${ANSAGE_FARBE[e.ansage]}" stroke="#111" stroke-width="1"/>
+      <text x="${x(e.s)}" y="35.5" text-anchor="middle" style="font-size:9px">📢</text></g>`;
+  }
   for (let s = startS; s <= endeS; s += 3600) {
     svg += `<line x1="${x(s)}" x2="${x(s)}" y1="40" y2="46" stroke="#888"/>`;
     if (w > 500 || (s - startS) % 7200 === 0) svg += `<text class="stunde" x="${x(s)}" y="${h - 4}" text-anchor="middle">${uhr(s).slice(0, 2)} Uhr</text>`;
@@ -1261,6 +1270,11 @@ $("zl-spur").addEventListener("pointerdown", (ev) => {
     const p = PHASEN[+phase.dataset.i], o = ortNach[p.ort];
     viewer.clock.currentTime = ortsZeit(p.zeit); zlLetzte = -1; zeigeZeitleistenZeit();
     if (o) { normaleSicht(); fliegeZu(o.lat, o.lon, p.hoehe); }
+    return;
+  }
+  const ansage = ev.target.closest?.(".ansage-marke");
+  if (ansage) {  // Ansage: genau auf ihre Uhrzeit springen
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date(+ansage.dataset.s * 1000)); zlLetzte = -1; zeigeZeitleistenZeit();
     return;
   }
   $("zl-spur").setPointerCapture(ev.pointerId);

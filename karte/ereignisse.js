@@ -2,6 +2,7 @@
 // zeit_sicher: "genau" = Uhrzeit im Bericht genannt, "ca." = ungefähr genannt,
 // "Reihenfolge" = nur aus der Abfolge im Newsblog geschätzt.
 // ort = Name aus orte.js
+// ansage: "polizei" bzw. "leitung" = zentrale Durchsage von Polizei oder Versammlungsleitung (auf der Zeitleiste hervorgehoben)
 // quelle: Medien und Polizei mit Link und Datum (Prüfung recht-db 1.11.); Streams und Einsendungen ohne Link
 (() => {
 const a = (url, text) => `<a href="${url}" target="_blank" rel="noopener">${text}</a>`;
@@ -34,7 +35,7 @@ window.EREIGNISSE = [
     text: "Kundgebung am Lautsprecherwagen südlich der Bastei beginnt" },
   { von: "14:06", ort: "Musical Dome", zeit_sicher: "genau", quelle: "Livestream B (unsicher, ob Panik)",
     text: "Mögliche Paniksituation: „Hey, warum rennen die jetzt auf einmal los da alle?“ – Bildprüfung: Leute gehen/rennen schnell über die Kreuzung zum Zug – eher Aufbruch als Panik." },
-  { von: "16:37", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A (unsicher, ob Panik)",
+  { ansage: "polizei", von: "16:37", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A (unsicher, ob Panik)",
     text: "Mögliche Paniksituation: Flaschen und Farbbeutel fliegen („das fliegt jetzt langsam schon in unsere Richtung“), kurz darauf Durchsagen „Räumen Sie die Straße“. Bildprüfung: Polizeikette quer, Menge steht – keine Panik im Bild (evtl. außerhalb)." },
   { von: "17:24", ort: "Kreuzung KAU/Theodor-Heuss-Ring", zeit_sicher: "genau", quelle: "Livestream A und Livestream D (unsicher, ob Panik)",
     text: "Mögliche Paniksituation: Polizei schiebt die Solidaritätskundgebung weg („Gehen Sie jetzt zurück!“), Gruppen rennen („die rennen ja von einer Ecke zur anderen“). Bildprüfung: Streamer läuft selbst einer Gruppe hinterher (Bahnunterführung) – keine Panik in einer Menge erkennbar." },
@@ -48,7 +49,7 @@ window.EREIGNISSE = [
     text: "Rauch über der Menge; viele Einsatzkräfte an der Straße. Über die kleine Seitenstraße am Vincenz-Haus werden Leute noch hinausgelassen" },
   { von: "16:00", ort: "St. Vincenz-Haus", zeit_sicher: "ca.", quelle: "Augenzeugenbericht",
     text: "Kessel wird geschlossen – die kleine Seitenstraße am Vincenz-Haus ist danach zu (früher als in anderen Quellen sichtbar)" },
-  { von: "16:00", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "ca.", quelle: `${TONLINE}; ${TAZ()}`,
+  { ansage: "leitung", von: "16:00", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "ca.", quelle: `${TONLINE}; ${TAZ()}`,
     text: "Versammlungsleiterin beendet die Kundgebung (laut taz nach Druck der Polizei)" },
   { von: "16:30", ort: "Kundgebung Konrad-Adenauer-Ufer", zeit_sicher: "genau", quelle: `${TAZ()}; ${TONLINE}; ${WZ}`,
     text: "Wasserwerfer gegen Gruppen am Ufer, laut taz in die Menge; Polizei beginnt einzukesseln; mind. eine Festnahme" },
@@ -62,7 +63,7 @@ window.EREIGNISSE = [
     text: "Laut Innenministerium richtete sich der Wasserwerfer gegen „gewaltbereite Demonstranten“, die die Standkundgebung verlassen wollten; dpa: nach mehreren Böllern. WDR-Reporter (Aktuelle Stunde): Einsatz führte „sofort zur Eskalation“" },
   { von: "16:34", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A",
     text: "„Da stehen die Wasserwerfer, drei Stück!“; 16:37 „der tropft schon“; 16:41 Blick zur Zoobrücke: „da steht scheinbar auch alles voll“" },
-  { von: "16:41", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A",
+  { ansage: "polizei", von: "16:41", ort: "Weckschnapp", zeit_sicher: "genau", quelle: "Livestream A",
     text: "Polizeidurchsagen: „Bitte räumen Sie die Straße … Begeben Sie sich auf den Gehweg“, 16:45 „Verlassen Sie die Fahrbahnen“; 16:47 Wasserwerfer zieht sich zurück" },
   { von: "17:12", ort: "Kreuzung KAU/Theodor-Heuss-Ring", zeit_sicher: "genau", quelle: "Livestream A",
     text: "Redner am Lautsprecher: „Macht die Kessel auf“; ab 17:14 Reden der spontanen Solidaritätskundgebung (u. a. aus Gewerkschaft und MLPD): „Wir bleiben hier stehen, bis ihr freigelassen werdet“" },
@@ -92,7 +93,7 @@ window.EREIGNISSE = [
     text: "Polizei: „polizeiliche Umschließung“ am Konrad-Adenauer-Ufer auf Höhe Thürmchenswall; Personalien von „knapp 1000 Personen“ festgestellt (Maßnahmen bis in die Nacht). 23 verletzte Polizisten in der gesamten Nacht; sichergestellt u. a. Molotow-Cocktails, Stichwaffen, Pyrotechnik" },
   { von: "17:20", ort: "Kreuzung KAU/Theodor-Heuss-Ring", zeit_sicher: "ca.", quelle: "Augenzeugenbericht",
     text: "Während ca. 400 Menschen eingekesselt sind, wird verbal eine 2. Kundgebung angekündigt (ohne echte Kooperation mit der Polizei). Sie steht beim 2. Kessel an der Kreuzung und geht fließend in eine Solidaritätskundgebung über, u. a. mit einer pro-palästinensischen Gruppe" },
-  { von: "17:29", ort: "Kreuzung KAU/Theodor-Heuss-Ring", zeit_sicher: "genau", quelle: `Livestream A; ${TAZ("17:40")}`,
+  { ansage: "polizei", von: "17:29", ort: "Kreuzung KAU/Theodor-Heuss-Ring", zeit_sicher: "genau", quelle: `Livestream A; ${TAZ("17:40")}`,
     text: "Polizeidurchsage „Die Versammlung ist aufgelöst“ – die Solidaritätskundgebung wird nach ca. 15 min aufgelöst; ab 17:24 schiebt die Polizei sie weg, danach Fahrbahn bis zur Bastei geräumt. 17:28 Drohne über der Szene" },
   { von: "18:00", ort: "Hohe Straße", zeit_sicher: "Reihenfolge", quelle: `${TONLINE} (Video)`,
     text: "Böller bei Polizeieinsatz vor dem MediaMarkt" },

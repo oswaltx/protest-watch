@@ -51,6 +51,9 @@
   ul.legende i.dreieck { width: 0; height: 0; border: 5px solid transparent; border-bottom: 9px solid #ffb000; border-top: 0; }
   #jetzt-uhr { font-size: 22px; font-weight: 600; }
   .ev { margin: 6px 0; padding-left: 6px; border-left: 3px solid #ffb000; }
+  .ev.ansage { border-left-width: 5px; background: rgba(255,255,255,.05); padding: 4px 6px; border-radius: 0 4px 4px 0; }
+  .ev.ansage.polizei { border-left-color: #4d8bff; } .ev.ansage.leitung { border-left-color: #3ecf8e; }
+  .ansage-kopf { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #ddd; }
   .sicher { font-size: 10px; background: #444; padding: 0 4px; border-radius: 3px; }
   #jetzt-videos button.clip { background: #2a2a30; }
   #streifen { position: absolute; z-index: 4; cursor: pointer; background: rgba(20,20,24,.75); }
@@ -233,6 +236,8 @@
       <li><i style="background:#3a8ee6"></i>Livestream läuft (je Zeile ein Stream)</li>
       <li><i class="strich" style="background:#ddd"></i>YouTube-Video hochgeladen <i class="strich" style="background:#e64a8b"></i>TikTok</li>
       <li><i class="dreieck"></i>Gemeldetes Ereignis (hell: genaue Uhrzeit, dunkel: ungefähr)</li>
+      <li><i class="rund" style="background:#4d8bff"></i><i class="rund" style="background:#3ecf8e"></i>📢 auf der Zeitleiste: zentrale Ansage
+        der Polizei (blau) bzw. der Versammlungsleitung (grün), Klick springt hin</li>
     </ul>
     <p class="klein">Alle Zahlen und Positionen der Menge sind Schätzungen aus Videos und Berichten. Belegt ist nur, was
       mit einer Quelle verlinkt ist.</p>
@@ -364,13 +369,13 @@
 <script src="oeffentlich.js?v=1f9abd1b3a"></script><script src="gebaeude.js?v=bae32de228"></script>
 <script src="cesium/Cesium.js?v=fb0f46e6da"></script>
 <script src="orte.js?v=b741566acb"></script>
-<script src="ereignisse.js?v=3f1e14bbec"></script>
+<script src="ereignisse.js?v=c89c48e4ca"></script>
 <script src="videos.js?v=939022c059"></script>
 <script src="wege.js?v=4803f24957"></script>
-<script src="kameras.js?v=a7485105df"></script>
+<script src="kameras.js?v=f661f01e0c"></script>
 <script src="menge.js?v=7a666416c1"></script>
 <script src="tour.js?v=759083d611"></script>
 <script src="grundkarte.js?v=0bb0fb78dc"></script>
-<script src="app.js?v=8ffc2fdaa8"></script>
+<script src="app.js?v=86268a9eeb"></script>
 </body>
 </html>

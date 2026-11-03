@@ -52,6 +52,20 @@ if os.path.exists(korrektur):
             n += 1
     print(f"{n} Kameraorte korrigiert")
 
+# Zeitfenster aus dem Lichtverlauf der Webcams verkleinert (szene/zeit-korrektur.json): Sonne, Dämmerung, Dunkelheit
+zeitkorrektur = os.path.join(basis, "szene/zeit-korrektur.json")
+if os.path.exists(zeitkorrektur):
+    neu = {(z["id"], z["sek_von"], z["sek_bis"]): z for z in json.load(open(zeitkorrektur))["kameras"]}
+    n = 0
+    for k in kameras:
+        z = neu.get((k["id"], k["sek_von"], k["sek_bis"]))
+        if z:
+            von, bis = uhr(z["neu"]["zeit_von"]), uhr(z["neu"]["zeit_bis"])
+            k.update(von=von, bis=max(bis or von, von + 60), zeit_sicher=z["neu"]["zeit_sicher"])
+            k["zeit_grund"] += f" Zeitfenster nach dem Licht eingegrenzt: {z['begruendung']}."
+            n += 1
+    print(f"{n} Zeitfenster nach dem Licht eingegrenzt")
+
 # Im Rendering eingepasste Kameraposen (szene/kameras-verfeinert.json) gehen vor: Ort und Blickrichtung der Szene,
 # in der die eingepasste Sekunde liegt
 verfeinert = os.path.join(basis, "szene/kameras-verfeinert.json")
