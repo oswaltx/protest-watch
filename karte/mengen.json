@@ -1,5 +1,5 @@
 {
- "_hinweis": "Geschätzte Mengen. Eine Population sind dieselben Personen über die Zeit: Zwischen zwei Zeitpunkten geht jede Person den kürzesten Weg zu ihrer neuen Position (optimale Zuordnung). Wächst die Population, kommen Leute über den nächsten Zugang; schrumpft sie, gehen Leute über den nächsten Zugang weg. Formen: korridor = Abschnitt des Konrad-Adenauer-Ufers (KAU) [lat_von, lat_bis, links_m, rechts_m], rechts = Richtung Rhein; kreis = [lat, lon, radius_m]; linie = Kette quer über den KAU [lat, links_m, rechts_m]; ring = Kette um einen Korridor; ring_kreis = Kette um einen Kreis; strecke = Band [lat1, lon1, lat2, lon2, breite_m].",
+ "_hinweis": "Geschätzte Mengen. Eine Population sind dieselben Personen über die Zeit: Zwischen zwei Zeitpunkten geht jede Person den kürzesten Weg zu ihrer neuen Position (optimale Zuordnung). Wächst die Population, kommen Leute über den nächsten Zugang; schrumpft sie, gehen Leute über den nächsten Zugang weg. Formen: korridor = Abschnitt des Konrad-Adenauer-Ufers (KAU) [lat_von, lat_bis, links_m, rechts_m], rechts = Richtung Rhein; kreis = [lat, lon, radius_m]; linie = Kette quer über den KAU [lat, links_m, rechts_m]; ring = Kette um einen Korridor; ring_kreis = Kette um einen Kreis; strecke = Band [lat1, lon1, lat2, lon2, breite_m]. Kessel ab 17:15 auf der Fahrbahn: Ostseite bei +14 m (obere Böschungskante laut DGM1), nicht unten an der Promenade (David 04.11.).",
  "populationen": [
   {
    "name": "Demonstrierende",
@@ -217,7 +217,7 @@
         50.9482,
         50.9493,
         -12,
-        30
+        14
        ]
       },
       {
@@ -247,7 +247,7 @@
         50.9482,
         50.9492,
         -12,
-        30
+        14
        ]
       },
       {
@@ -269,7 +269,7 @@
         50.9483,
         50.9491,
         -12,
-        28
+        14
        ]
       },
       {
@@ -291,7 +291,7 @@
         50.9483,
         50.9491,
         -12,
-        25
+        14
        ]
       }
      ]
@@ -305,7 +305,7 @@
         50.9484,
         50.949,
         -10,
-        20
+        14
        ]
       }
      ]
@@ -533,7 +533,7 @@
         50.9483,
         50.9492,
         -12,
-        28
+        14
        ]
       },
       {
@@ -555,7 +555,7 @@
         50.9483,
         50.9491,
         -12,
-        25
+        14
        ]
       }
      ]
@@ -569,7 +569,7 @@
         50.9484,
         50.949,
         -10,
-        20
+        14
        ]
       }
      ]
@@ -885,7 +885,7 @@
        "linie": [
         50.9477,
         -15,
-        45
+        14
        ]
       },
       {
@@ -916,7 +916,7 @@
         50.9481,
         50.9494,
         -14,
-        37
+        14
        ]
       },
       {
@@ -941,7 +941,7 @@
        "linie": [
         50.9479,
         -15,
-        40
+        14
        ]
       },
       {
@@ -963,7 +963,7 @@
         50.9482,
         50.9492,
         -14,
-        30
+        14
        ]
       },
       {
@@ -1002,7 +1002,7 @@
         50.9482,
         50.9492,
         -14,
-        27
+        14
        ]
       },
       {
@@ -1033,7 +1033,7 @@
         50.9483,
         50.9491,
         -12,
-        22
+        14
        ]
       },
       {
