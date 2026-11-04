@@ -449,11 +449,13 @@ function aktualisiereJetzt() {
     ent.point.color = an ? Cesium.Color.RED : Cesium.Color.ORANGE;
     ent.point.pixelSize = an ? 15 : 9;
   }
-  $("jetzt-ereignisse").innerHTML = aktiv.length
+  // feste Hinweise ab einer Uhrzeit (STADT.hinweise, z. B. nach Auflösung einer Versammlung)
+  const hinweis = (STADT.hinweise || []).filter((h) => jetzt >= sek(ortsZeit(h.ab))).map((h) => `<div class="ev hinweis">ℹ️ ${h.text}</div>`).join("");
+  $("jetzt-ereignisse").innerHTML = hinweis + (aktiv.length
     ? aktiv.map((e) => `<div class="ev${e.ansage ? " ansage " + e.ansage : ""}">${e.ansage ? `<div class="ansage-kopf">📢 ${ANSAGE[e.ansage]}</div>` : ""}
         <b>${e.von}</b> <a href="#" data-ort="${e.ort}">${e.ort}</a>
         <span class="sicher">${e.zeit_sicher}</span><br>${e.text}<br><small>${e.quelle}</small></div>`).join("")
-    : "<i>keine gemeldeten Ereignisse</i>";
+    : "<i>keine gemeldeten Ereignisse</i>");
 
   const live = LIVES.filter((v) => jetzt >= v.start && jetzt <= v.ende);
   // Clips nur als verortete Köln-Szenen (aus kameras.js), Start an der passenden Sekunde.
@@ -810,7 +812,9 @@ function zeigeKameras() {
 const MENGE = window.MENGE;
 const [LAT0, LON0] = MENGE.ursprung, [MX, MY] = MENGE.m_pro_grad;
 const FEHLT = MENGE.fehlt;
+// nacht: Gruppen nach Auflösung einer Demo (Frankfurt), bewusst nicht Rot und nicht Teil der Demonstrierenden (recht 03.11.)
 const FARBE_GRUPPE = { menge: Cesium.Color.fromCssColorString("#ffcf66"), polizei: Cesium.Color.fromCssColorString("#4d8bff"),
+                       nacht: Cesium.Color.fromCssColorString("#b98cff"),
                        fahrzeug: Cesium.Color.fromCssColorString("#2d5fd6"), krawall: Cesium.Color.fromCssColorString("#ff3b3b") };
 let bodenHoehe = GRUND;  // Ellipsoid-Höhe Uferstraße, nach Laden der Kacheln gemessen
 
@@ -824,7 +828,7 @@ const populationen = MENGE.populationen.map((p) => {
   for (let i = 0; i < p.personen; i++) {
     // schwache Geräte: nur jede dritte Person bekommt einen Punkt (spart Speicher und Rechenzeit; gezählt werden alle)
     if (SCHWACH && i % 3 && !fz) { punkte.push(null); continue; }
-    punkte.push(punkteSammlung.add({ show: false, color: farbe, pixelSize: { polizei: 5, fahrzeug: 9, krawall: 5 }[p.gruppe] || 4,
+    punkte.push(punkteSammlung.add({ show: false, color: farbe, pixelSize: { polizei: 5, fahrzeug: 9, krawall: 5, nacht: 5 }[p.gruppe] || 4,
       scaleByDistance: new Cesium.NearFarScalar(50, 2.0, 2000, 0.6) }));
   }
   return { ...p, wege, K: p.T.length, punkte };
@@ -936,11 +940,13 @@ function aktualisiereMenge() {
   viewer.scene.requestRender();  // Punkte haben sich bewegt
 }
 
+// Mit figur_je > 1 sind die Zahlen Vielfache davon (z. B. 1004): auf Zehner runden, sonst Scheingenauigkeit
+const rund = (n) => (STADT.figur_je > 1 && n >= 100 ? Math.round(n / 10) * 10 : n);
 // Zahlen im "Jetzt"-Feld, direkt nach jeder Berechnung (nur neu schreiben, wenn sich etwas ändert)
 function zeigeMengeZahlen() {
   const zonen = Object.entries(mengeZahlen).filter(([, z]) => z.n > 0);
   const html = zonen.length
-    ? zonen.map(([name, z]) => `<div title="${z.quelle}">${{ polizei: "🔵", krawall: "🔴", fahrzeug: "🚐" }[z.gruppe] || "🟡"} ${name}: ~${z.n}</div>`).join("")
+    ? zonen.map(([name, z]) => `<div title="${z.quelle}">${{ polizei: "🔵", krawall: "🔴", fahrzeug: "🚐", nacht: "🟣" }[z.gruppe] || "🟡"} ${name}: ~${rund(z.n)}</div>`).join("")
     : "<i>keine geschätzte Menge</i>";
   if ($("jetzt-menge").innerHTML !== html) $("jetzt-menge").innerHTML = html;
   zeigeHundert();
@@ -1044,16 +1050,22 @@ $("fluss-knopf").onclick = () => {
 const MIT_POLIZEI = MENGE.populationen.some((p) => p.gruppe === "polizei");
 function zeigeHundert() {
   if (!MIT_POLIZEI) return;
-  let demo = 0, polizei = 0, krawall = 0;
+  let demo = 0, polizei = 0, krawall = 0, nacht = 0;
   for (const z of Object.values(mengeZahlen)) {
-    if (z.gruppe === "menge") demo += z.n; else if (z.gruppe === "polizei") polizei += z.n; else if (z.gruppe === "krawall") krawall += z.n;
+    if (z.gruppe === "menge") demo += z.n; else if (z.gruppe === "polizei") polizei += z.n;
+    else if (z.gruppe === "krawall") krawall += z.n; else if (z.gruppe === "nacht") nacht += z.n;
   }
-  const gesamt = demo + krawall + polizei;  // Gewaltbereite sind eigene Figuren (Frankfurt nachts: nur sie und Polizei)
+  const gesamt = demo + krawall + nacht + polizei;  // Gewaltbereite und Nacht-Gruppen sind eigene Figuren
   if (gesamt < 20) { if ($("jetzt-hundert").innerHTML) $("jetzt-hundert").innerHTML = ""; return; }
-  const p = Math.round(polizei / gesamt * 100), k = Math.min(Math.round(krawall / gesamt * 100) || (krawall ? 1 : 0), 100 - p);
-  const kaestchen = Array.from({ length: 100 }, (_, i) => (i < p ? "p" : i < p + k ? "k" : "d"));
-  const html = `<div class="hundert-text">Von 100 Menschen auf der Straße sind gerade etwa <b>${100 - p}</b> Demonstrierende
-      (davon ${k} gewaltbereit) und <b>${p}</b> Polizei – geschätzt.</div>
+  const p = Math.round(polizei / gesamt * 100), n = Math.round(nacht / gesamt * 100);
+  const k = Math.min(Math.round(krawall / gesamt * 100) || (krawall ? 1 : 0), 100 - p - n), d = 100 - p - n - k;
+  const kaestchen = Array.from({ length: 100 }, (_, i) => (i < p ? "p" : i < p + n ? "n" : i < p + n + k ? "k" : "d"));
+  const teile = [];
+  if (d + k) teile.push(`<b>${d + k}</b> Demonstrierende${k ? ` (davon ${k} laut Polizei gewaltbereit)` : ""}`);
+  if (n) teile.push(`<b>${n}</b> in Gruppen in der Innenstadt (Nacht)`);
+  teile.push(`<b>${p}</b> Polizei`);
+  const html = `<div class="hundert-text">Von 100 Menschen auf der Straße sind gerade etwa
+      ${teile.slice(0, -1).join(", ")} und ${teile[teile.length - 1]} – geschätzt.</div>
     <div class="hundert">${kaestchen.map((c) => `<i class="${c}"></i>`).join("")}</div>`;
   if ($("jetzt-hundert").innerHTML !== html) $("jetzt-hundert").innerHTML = html;
 }
@@ -1062,7 +1074,7 @@ function zeigeHundert() {
 // Zählt pro 5 min die anwesenden Personen aller Populationen derselben Gruppe
 // (Fahrzeuge ausgenommen) und zeigt zusätzliche Kennzahlen (z. B. Gewaltbereite) aus MENGE.reihen.
 const GRUPPEN = { menge: ["Demonstrierende", "#ffcf66"], polizei: ["Polizei", "#4d8bff"],
-                  krawall: ["Gewaltbereite (Teil der Demo)", "#ff3b3b"] };
+                  krawall: ["Gewaltbereite (Teil der Demo)", "#ff3b3b"], nacht: ["Gruppen in der Innenstadt (Nacht)", "#b98cff"] };
 let diagrammX = null;
 
 function zaehleGruppen() {
