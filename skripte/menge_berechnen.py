@@ -4,8 +4,11 @@
 # (OpenStreetMap, suche/osm/building.json und wasser.json). Zwischen zwei Zeitpunkten ordnet
 # eine optimale Zuordnung (kürzeste Gesamtwege) die Personen einander zu. Überzählige gehen zum
 # nächsten Zugang und verschwinden dort, neue kommen vom nächsten Zugang.
-# Aufruf: .venv/bin/python skripte/menge_berechnen.py
-import json, math, os
+# Aufruf: .venv/bin/python skripte/menge_berechnen.py [--stadt NAME]
+# Andere Städte (staedte/NAME/stadt.json): Ursprung = "bezug", Rasterausschnitt = "ausschnitt", Achse für die Formen
+# korridor/laengs/linie = "achse" (Straßennamen, Richtung lat = Süd→Nord wie das KAU, lon = West→Ost wie der Mainkai;
+# "rechts" ist rechts von der Achsrichtung), Uhrzeiten vor "nacht_bis" gehören zum Folgetag.
+import json, math, os, sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -17,9 +20,16 @@ from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import polygonize, unary_union
 from shapely.validation import make_valid
 
-basis = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from stadt import angaben, basis_fuer
+
+basis = basis_fuer(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+STADT = angaben(basis)  # leer für Köln
 berlin = ZoneInfo("Europe/Berlin")
 LAT0, LON0 = 50.9460, 6.9630  # Ursprung der lokalen Meter-Koordinaten
+if STADT:
+    LAT0, LON0 = STADT["bezug"]["lat"], STADT["bezug"]["lon"]
+NACHT_BIS = STADT.get("nacht_bis")
 MX = 111320 * math.cos(math.radians(LAT0))
 MY = 110574
 
@@ -30,7 +40,8 @@ def lokal(lat, lon):
 
 def uhr(hhmm):
     h, m = map(int, hhmm.split(":"))
-    return int(datetime(2026, 10, 31, h, m, tzinfo=berlin).timestamp())
+    tag = 1 if NACHT_BIS is not None and h < NACHT_BIS else 0  # nach Mitternacht = 1.11.
+    return int(datetime(2026, 10, 31, h, m, tzinfo=berlin).timestamp()) + tag * 86400
 
 
 def osm(datei):
@@ -62,16 +73,28 @@ for e in osm("building.json") + osm("wasser.json"):
         linien = [LineString([lokal(p["lat"], p["lon"]) for p in m["geometry"]])
                   for m in e.get("members", []) if m.get("role") == "outer" and m.get("geometry")]
         flaechen.extend(polygonize(unary_union(linien)))
+# Steile Flächen aus dem DGM1 (Böschung am Ufer, Mauern; skripte/boeschung_bauen.py): dort steht niemand,
+# Treppen sind ausgespart
+boeschung = os.path.join(basis, "suche", "boeschung.json")
+if os.path.exists(boeschung):
+    for aussen, loecher in json.load(open(boeschung))["umrisse"]:
+        p = Polygon([lokal(lat, lon) for lon, lat in zip(aussen[0::2], aussen[1::2])],
+                    [[lokal(lat, lon) for lon, lat in zip(l[0::2], l[1::2])] for l in loecher])
+        flaechen.append(make_valid(p))
 hindernis = make_valid(unary_union([make_valid(f) for f in flaechen]))
 
-# ---------- Mittellinie Konrad-Adenauer-Ufer ----------
-knoten = [lokal(p["lat"], p["lon"]) for e in osm("strassen.json")
-          if e.get("tags", {}).get("name") == "Konrad-Adenauer-Ufer"
-          and e["tags"].get("highway") in ("primary", "primary_link") for p in e["geometry"]]
-knoten = np.array(sorted(knoten, key=lambda k: k[1]))
-# alle 10 m in Nord-Richtung die mittlere Ost-Position (beide Fahrbahnen gemittelt)
-ys = np.arange(knoten[:, 1].min(), knoten[:, 1].max(), 10)
-xs = np.array([knoten[np.abs(knoten[:, 1] - y) < 15, 0].mean() if np.any(np.abs(knoten[:, 1] - y) < 15) else np.nan
+# ---------- Mittellinie der Achse (Köln: Konrad-Adenauer-Ufer) ----------
+# ys = Längskoordinate (Köln: Nord in m), xs = Querlage der Mitte (Köln: Ost in m); für eine West-Ost-Achse vertauscht
+ACHSE = STADT.get("achse") or {"strassen": ["Konrad-Adenauer-Ufer"], "highway": ["primary", "primary_link"],
+                               "datei": "strassen.json", "richtung": "lat"}
+L = 1 if ACHSE["richtung"] == "lat" else 0   # Index der Längskoordinate in lokal()
+knoten = [lokal(p["lat"], p["lon"]) for e in osm(ACHSE["datei"])
+          if e.get("tags", {}).get("name") in ACHSE["strassen"]
+          and e["tags"].get("highway") in ACHSE["highway"] for p in e["geometry"]]
+knoten = np.array(sorted(knoten, key=lambda k: k[L]))
+# alle 10 m in Achsrichtung die mittlere Querlage (beide Fahrbahnen gemittelt)
+ys = np.arange(knoten[:, L].min(), knoten[:, L].max(), 10)
+xs = np.array([knoten[np.abs(knoten[:, L] - y) < 15, 1 - L].mean() if np.any(np.abs(knoten[:, L] - y) < 15) else np.nan
                for y in ys])
 ok = ~np.isnan(xs)
 ys, xs = ys[ok], np.convolve(xs[ok], np.ones(5) / 5, mode="same")
@@ -80,19 +103,44 @@ ys, xs = ys[ok], np.convolve(xs[ok], np.ones(5) / 5, mode="same")
 def mitte(y):
     x = np.interp(y, ys, xs)
     dx = np.interp(y + 5, ys, xs) - np.interp(y - 5, ys, xs)
-    t = np.array([dx, 10.0]) / math.hypot(dx, 10.0)  # Richtung nach Norden
-    n = np.array([t[1], -t[0]])                       # quer, nach Osten (Rhein)
-    return np.array([x, y]), n
+    if L == 1:
+        t = np.array([dx, 10.0]) / math.hypot(dx, 10.0)  # Richtung nach Norden
+        n = np.array([t[1], -t[0]])                       # quer, nach Osten (Rhein)
+        return np.array([x, y]), n
+    t = np.array([10.0, dx]) / math.hypot(dx, 10.0)      # Richtung nach Osten
+    n = np.array([t[1], -t[0]])                           # quer, rechts davon = nach Süden (Main)
+    return np.array([y, x]), n
+
+
+def laenge_m(wert):
+    """Achsposition in Grad (Köln: Breite, West-Ost-Achse: Länge) → Längskoordinate in m."""
+    return lokal(wert, LON0)[1] if L == 1 else lokal(LAT0, wert)[0]
 
 
 def korridor(lat_von, lat_bis, links, rechts):
-    y0, y1 = lokal(lat_von, LON0)[1], lokal(lat_bis, LON0)[1]
+    y0, y1 = laenge_m(lat_von), laenge_m(lat_bis)
     rand_l, rand_r = [], []
     for y in np.linspace(y0, y1, 20):
         m, n = mitte(y)
         rand_l.append(tuple(m + n * links))
         rand_r.append(tuple(m + n * rechts))
     return make_valid(Polygon(rand_l + rand_r[::-1]))
+
+
+# Weitere Städte: Strecken und Routen folgen dem Straßennetz (skripte/strassen_route.py) statt der Luftlinie;
+# "luftlinie": true an einer Strecke/Markierung behält die gerade Verbindung. Köln bleibt unverändert.
+NETZ = None
+if STADT and os.path.exists(os.path.join(basis, "suche", "osm", "strassen-gross.json")):
+    from strassen_route import Netz
+    NETZ = Netz(basis)
+_ROUTEN = {}
+
+
+def strassenweg(punkte, meldung=""):
+    schluessel = json.dumps(punkte)
+    if schluessel not in _ROUTEN:
+        _ROUTEN[schluessel] = NETZ.route(punkte, meldung)
+    return _ROUTEN[schluessel]
 
 
 def form(schritt):
@@ -105,17 +153,20 @@ def form(schritt):
         return korridor(*schritt["ring"]).convex_hull.exterior
     if "strecke" in schritt:  # Band entlang einer Strecke: [lat1, lon1, lat2, lon2, breite_m]
         lat1, lon1, lat2, lon2, breite = schritt["strecke"]
+        if NETZ and not schritt.get("luftlinie"):
+            linie = strassenweg([[lat1, lon1], [lat2, lon2]], "Strecke")
+            return LineString([lokal(a, b) for a, b in linie]).buffer(breite / 2, cap_style="flat", join_style="round")
         return LineString([lokal(lat1, lon1), lokal(lat2, lon2)]).buffer(breite / 2, cap_style="flat")
     if "laengs" in schritt:  # Kette entlang des KAU in festem Abstand: [lat_von, lat_bis, abstand_m]
         lat0, lat1, ab = schritt["laengs"]
-        y0, y1 = lokal(lat0, LON0)[1], lokal(lat1, LON0)[1]
+        y0, y1 = laenge_m(lat0), laenge_m(lat1)
         return LineString([tuple(mitte(y)[0] + mitte(y)[1] * ab) for y in np.linspace(y0, y1, 30)])
     if "ring_kreis" in schritt:
         lat, lon, r = schritt["ring_kreis"]
         return Point(lokal(lat, lon)).buffer(r).exterior
     if "linie" in schritt:
         lat, links, rechts = schritt["linie"]
-        m, n = mitte(lokal(lat, LON0)[1])
+        m, n = mitte(laenge_m(lat))
         return LineString([tuple(m + n * links), tuple(m + n * rechts)])
     raise ValueError(schritt)
 
@@ -156,14 +207,19 @@ def zum_zugang(ziel, zugaenge, rng):
     return np.array([auf_freie_flaeche(p) for p in gestreut])  # Streuung nicht in Hauswände
 
 
+def figuren(anzahl):
+    """Personen → Figuren: mengen.json "figur_je" (Standard 1) Personen je Figur, damit große Mengen rechenbar bleiben."""
+    return anzahl if FIGUR_JE == 1 else round(anzahl / FIGUR_JE)
+
+
 def population(pop, pi):
     zugaenge = np.array([auf_freie_flaeche(np.array(lokal(a, b))) for a, b in pop["zugaenge"]])
     rng = np.random.default_rng(1000 + pi)
     frei = pop["gruppe"] != "fahrzeug"   # Fahrzeuge dürfen auf Brücken über Wasser
     stellen = []
     for si, s in enumerate(pop["schritte"]):
-        teile = [verteile(form(t), t["anzahl"], saat=pi * 1000 + si * 10 + ti, frei_lassen=frei) if frei
-                 else auf_fahrspur(form(t), t["anzahl"]) for ti, t in enumerate(s["teile"])]
+        teile = [verteile(form(t), figuren(t["anzahl"]), saat=pi * 1000 + si * 10 + ti, frei_lassen=frei) if frei
+                 else auf_fahrspur(form(t), t["anzahl"]) for ti, t in enumerate(s["teile"])]  # Fahrzeuge einzeln
         stellen.append(np.vstack([t for t in teile if len(t)]) if any(len(t) for t in teile) else np.zeros((0, 2)))
     zeiten = [uhr(s["zeit"]) for s in pop["schritte"]]
     # Zeitachse: Vorlauf, alle Zeitpunkte, Nachlauf zum Weggehen
@@ -239,14 +295,20 @@ def population(pop, pi):
 ZELLE = 2.0
 ZWISCHEN = 6
 _raster = {}
+GEBIET = None   # Rasterausschnitt der gerade gerechneten Population (stadt.json "demo_gebiete", Feld "gebiet"); Köln: keiner
 
 
 def raster():
-    if _raster:
+    if _raster and _raster.get("gebiet") is GEBIET:
         return _raster
+    _raster.clear()  # nur ein Raster im Speicher; beim Wechsel des Gebiets neu aufbauen
     import shapely
     from scipy.sparse import coo_matrix
     x0, y0, x1, y1 = -700, -800, 1700, 1300   # deckt Domplatte bis Zoobrücke ab
+    if STADT:  # Ausschnitt der Stadt (für die Menge ggf. kleiner, bei mehreren Gebieten das der Population)
+        a = GEBIET or STADT.get("menge_ausschnitt") or STADT["ausschnitt"]
+        (x0, y0), (x1, y1) = [tuple(math.floor(v / ZELLE) * ZELLE for v in lokal(*p)) for p in
+                              ((a["sued"], a["west"]), (a["nord"], a["ost"]))]
     xs_ = np.arange(x0, x1, ZELLE) + ZELLE / 2
     ys_ = np.arange(y0, y1, ZELLE) + ZELLE / 2
     gx, gy = np.meshgrid(xs_, ys_)
@@ -268,7 +330,7 @@ def raster():
     n = int(frei.sum())
     graph = coo_matrix((np.r_[l, l], (np.r_[z, s], np.r_[s, z])), shape=(n, n)).tocsr()
     pos = np.c_[gx[frei], gy[frei]]
-    _raster.update(x0=x0, y0=y0, w=w, h=h, idx=idx, graph=graph, pos=pos)
+    _raster.update(x0=x0, y0=y0, w=w, h=h, idx=idx, graph=graph, pos=pos, gebiet=GEBIET)
     return _raster
 
 
@@ -454,19 +516,34 @@ def nach_grad(xy):
     return [round(LAT0 + y / MY, 6), round(LON0 + x / MX, 6)]
 
 
-daten = json.load(open(os.path.join(basis, "szene/mengen.json")))
+# MENGEN_VARIANTE=5790: Variante szene/mengen_5790.json -> szene/menge_5790.js (Kessel nach Vorlage 18/5790)
+VARIANTE = os.environ.get("MENGEN_VARIANTE", "")
+EIN, AUS = (f"szene/mengen_{VARIANTE}.json", f"szene/menge_{VARIANTE}.js") if VARIANTE else ("szene/mengen.json", "szene/menge.js")
+daten = json.load(open(os.path.join(basis, EIN)))
+FIGUR_JE = daten.get("figur_je", 1)
 aus = {"ursprung": [LAT0, LON0], "m_pro_grad": [MX, MY], "fehlt": FEHLT, "populationen": [],
        "markierungen": [], "fahrzeuge": []}
+if FIGUR_JE != 1:
+    aus["figur_je"] = FIGUR_JE  # die Karte rechnet Figuren × figur_je = Personen (nicht bei gruppe "fahrzeug")
+GEBIETE = {g["name"]: g for g in STADT.get("demo_gebiete", [])}
 for pi, pop in enumerate(daten["populationen"]):
+    GEBIET = GEBIETE[pop["gebiet"]] if pop.get("gebiet") else None
     p = population(pop, pi)
     aus["populationen"].append(p)
     print(f"{pop['name']}: {p['personen']} Personen insgesamt, Zeitpunkte " +
           ", ".join(f"{s['zeit']}={sum(t['anzahl'] for t in s['teile'])}" for s in pop["schritte"]))
 for m in daten.get("markierungen", []):
-    if m["art"] == "flaeche":
+    if "punkte" in m:  # Linie über feste Punkte [[lat, lon], …]
+        punkte = [[round(a, 6), round(b, 6)] for a, b in m["punkte"]]
+        if NETZ and m["art"] == "linie" and not m.get("luftlinie"):
+            punkte = strassenweg(punkte, m["name"])
+    elif "kreis" in m:
+        punkte = [nach_grad(c) for c in form(m).exterior.coords]
+    elif m["art"] == "flaeche":
         punkte = [nach_grad(c) for c in korridor(*m["korridor"]).exterior.coords]
     else:
-        y0, y1 = lokal(m["kau"][0], LON0)[1], lokal(m["kau"][1], LON0)[1]
+        achse = m["kau"] if "kau" in m else m["achse"]
+        y0, y1 = laenge_m(achse[0]), laenge_m(achse[1])
         punkte = [nach_grad(mitte(y)[0]) for y in np.linspace(y0, y1, 30)]
     aus["markierungen"].append({"name": m["name"], "art": m["art"], "quelle": m["quelle"], "punkte": punkte})
 for r in daten.get("zusatzreihen", []):  # Kennzahlen ohne eigene Figuren, nur fürs Diagramm
@@ -475,7 +552,7 @@ for f in daten.get("fahrzeuge", []):
     aus["fahrzeuge"].append({"name": f["name"], "quelle": f["quelle"],
                              "wege": [{"t": uhr(w["zeit"]), "lat": w["lat"], "lon": w["lon"]} for w in f["wege"]]})
 
-with open(os.path.join(basis, "szene/menge.js"), "w") as fh:
-    fh.write("// Automatisch erzeugt von skripte/menge_berechnen.py aus szene/mengen.json, nicht von Hand ändern.\n")
+with open(os.path.join(basis, AUS), "w") as fh:
+    fh.write(f"// Automatisch erzeugt von skripte/menge_berechnen.py aus {EIN}, nicht von Hand ändern.\n")
     fh.write("window.MENGE = " + json.dumps(aus, separators=(",", ":")) + ";\n")
 print(f"-> szene/menge.js ({os.path.getsize(os.path.join(basis, 'szene/menge.js')) // 1024} KB)")

@@ -4,7 +4,7 @@
   {
    "name": "Demonstrierende",
    "gruppe": "menge",
-   "quelle": "taz/t-online-Angaben, Streams (Livestream A, Livestream B, Livestream D), verortete Clips, Augenzeugenbericht; Menge nur oben (Straße + obere Promenade), unten am Wasser Polizeiwall (Augenzeugenbericht); Polizei: 'knapp 1000 Personen' kontrolliert (Pressemitteilung 01.11.)",
+   "quelle": "taz/t-online-Angaben, Streams (Livestream A, Livestream B, Livestream D), verortete Clips, Augenzeugenbericht; Menge nur oben (Straße + obere Promenade), unten am Wasser Polizeiwall (Augenzeugenbericht); Polizei: 'knapp 1000 Personen' kontrolliert (Pressemitteilung 01.11.) Kessel-Verlauf ab 18 Uhr nach Polizeiangaben (19:00 rund 600 und 100, 20:11 „bis zu 700“, Kontrollen bis etwa 1:30 Uhr bzw. Ende 1:42 laut Innenministerium); Abnahme danach eigene, lineare Schätzung (13.11.).",
    "zugaenge": [
     [
      50.94425,
@@ -201,8 +201,8 @@
       {
        "anzahl": 300,
        "kreis": [
-        50.94928,
-        6.96056,
+        50.9488,
+        6.9655,
         45
        ]
       }
@@ -231,8 +231,8 @@
       {
        "anzahl": 200,
        "kreis": [
-        50.94928,
-        6.96056,
+        50.9488,
+        6.9655,
         40
        ]
       }
@@ -242,29 +242,7 @@
      "zeit": "18:00",
      "teile": [
       {
-       "anzahl": 500,
-       "korridor": [
-        50.9482,
-        50.9492,
-        -12,
-        14
-       ]
-      },
-      {
-       "anzahl": 120,
-       "kreis": [
-        50.94985,
-        6.966,
-        20
-       ]
-      }
-     ]
-    },
-    {
-     "zeit": "19:00",
-     "teile": [
-      {
-       "anzahl": 350,
+       "anzahl": 650,
        "korridor": [
         50.9483,
         50.9491,
@@ -273,7 +251,29 @@
        ]
       },
       {
-       "anzahl": 50,
+       "anzahl": 100,
+       "kreis": [
+        50.94985,
+        6.966,
+        15
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "19:00",
+     "teile": [
+      {
+       "anzahl": 600,
+       "korridor": [
+        50.9483,
+        50.9491,
+        -12,
+        14
+       ]
+      },
+      {
+       "anzahl": 100,
        "kreis": [
         50.94985,
         6.966,
@@ -286,7 +286,7 @@
      "zeit": "19:30",
      "teile": [
       {
-       "anzahl": 250,
+       "anzahl": 600,
        "korridor": [
         50.9483,
         50.9491,
@@ -297,14 +297,14 @@
      ]
     },
     {
-     "zeit": "20:00",
+     "zeit": "20:15",
      "teile": [
       {
-       "anzahl": 150,
+       "anzahl": 580,
        "korridor": [
-        50.9484,
-        50.949,
-        -10,
+        50.9483,
+        50.9491,
+        -12,
         14
        ]
       }
@@ -314,12 +314,40 @@
      "zeit": "21:00",
      "teile": [
       {
-       "anzahl": 20,
+       "anzahl": 480,
        "korridor": [
-        50.9485,
-        50.9489,
-        -8,
-        12
+        50.9483,
+        50.9491,
+        -12,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "22:00",
+     "teile": [
+      {
+       "anzahl": 340,
+       "korridor": [
+        50.9483,
+        50.9491,
+        -12,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "23:00",
+     "teile": [
+      {
+       "anzahl": 200,
+       "korridor": [
+        50.9483,
+        50.9491,
+        -12,
+        14
        ]
       }
      ]
@@ -764,7 +792,7 @@
   {
    "name": "Polizei Ufer",
    "gruppe": "polizei",
-   "quelle": "Schätzung: sichtbare Ketten (Videos) + Hundertschaften von Norden, Polizeiwall unten am Wasser und an den Treppen (Augenzeugenbericht), ca. 55 Mannschaftswagen (je ~8 Beamte). Offizielle Gesamtzahl nicht veröffentlicht.",
+   "quelle": "Schätzung: sichtbare Ketten (Videos) + Hundertschaften von Norden, Polizeiwall unten am Wasser und an den Treppen (Augenzeugenbericht), ca. 55 Mannschaftswagen (je ~8 Beamte). Offizielle Gesamtzahl nicht veröffentlicht. Kessel-Verlauf ab 18 Uhr nach Polizeiangaben (19:00 rund 600 und 100, 20:11 „bis zu 700“, Kontrollen bis etwa 1:30 Uhr bzw. Ende 1:42 laut Innenministerium); Abnahme danach eigene, lineare Schätzung (13.11.).",
    "zugaenge": [
     [
      50.9525,
@@ -1028,7 +1056,30 @@
      "zeit": "20:30",
      "teile": [
       {
-       "anzahl": 120,
+       "anzahl": 200,
+       "ring": [
+        50.9483,
+        50.9491,
+        -12,
+        14
+       ]
+      },
+      {
+       "anzahl": 100,
+       "korridor": [
+        50.9502,
+        50.951,
+        -10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "21:00",
+     "teile": [
+      {
+       "anzahl": 180,
        "ring": [
         50.9483,
         50.9491,
@@ -1048,14 +1099,37 @@
      ]
     },
     {
-     "zeit": "21:00",
+     "zeit": "22:00",
      "teile": [
       {
-       "anzahl": 40,
+       "anzahl": 160,
        "ring": [
-        50.9484,
-        50.949,
+        50.9483,
+        50.9491,
+        -12,
+        14
+       ]
+      },
+      {
+       "anzahl": 60,
+       "korridor": [
+        50.9502,
+        50.951,
         -10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "zeit": "23:00",
+     "teile": [
+      {
+       "anzahl": 140,
+       "ring": [
+        50.9483,
+        50.9491,
+        -12,
         14
        ]
       }
@@ -1322,7 +1396,7 @@
      "lon": 6.964715
     },
     {
-     "zeit": "16:38",
+     "zeit": "16:34",
      "lat": 50.948705,
      "lon": 6.965364
     },
@@ -1396,10 +1470,10 @@
   },
   {
    "name": "Räumpanzer",
-   "quelle": "Livestream A ab 16:38, Einsatz-Report24, AP; Anfahrt von Süden laut Augenzeugenbericht",
+   "quelle": "Livestream A ab 16:34, Einsatz-Report24, AP; Anfahrt von Süden laut Augenzeugenbericht",
    "wege": [
     {
-     "zeit": "16:38",
+     "zeit": "16:34",
      "lat": 50.9475,
      "lon": 6.9645
     },

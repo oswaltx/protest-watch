@@ -17,7 +17,7 @@ window.ORTE = [
     info: "Ursprünglich genannter Treffpunkt „nahe der Bastei“" },
   { name: "Theodor-Heuss-Ring", lat: 50.95006, lon: 6.96117, genau: "Straßenmitte",
     info: `Laut taz Beamte mit Schlagstöcken; Rede zu Polizeigewalt (${TAZ})` },
-  { name: "Thürmchenswall", lat: 50.94928, lon: 6.96056, genau: "Straßenmitte",
+  { name: "Thürmchenswall", lat: 50.94880, lon: 6.96550, genau: "ungefähr: Konrad-Adenauer-Ufer in Höhe der Einmündung Thürmchenswall (Ortsangabe der Polizei-PM 31.10.), neben Weckschnapp",
     info: `Laut Polizei Identitätsfeststellung bei knapp 1000 Personen (${POLIZEI}). `
       + "Laut einer Sprecherin der Demonstrierenden soll ein Eingekesselter von einem Beamten ins Gesicht geschlagen worden sein "
       + `(${TONLINE}; ${ANTENNE}). Das ist nicht unabhängig bestätigt und ließ sich laut beiden Medien vor Ort nicht überprüfen. `

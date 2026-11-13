@@ -3,10 +3,13 @@
 # Uhrzeit je Bild = Streamstart (release_timestamp aus .info.json) + (bild-1)*60 s + 30 s.
 # Die 30 s: Der fps-Filter in uebersicht.sh nimmt pro Minute das Bild aus der Minutenmitte
 # (geprüft an Livestream A, Bild 10 = Sekunde ~569, nicht 540).
-# Aufruf aus dem Projektordner: python3 -I skripte/wege_fuer_szene.py
-import glob, json, os, re
+# Aufruf aus dem Projektordner: python3 -I skripte/wege_fuer_szene.py [--stadt NAME]
+import glob, json, os, re, sys
 
-basis = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from stadt import basis_fuer  # --stadt NAME: staedte/NAME/ statt Köln
+
+basis = basis_fuer(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FARBEN = ["#ff4d4d", "#4dd2ff", "#b4ff4d", "#ffb84d", "#d24dff", "#4dffb8"]
 
 infos = {}

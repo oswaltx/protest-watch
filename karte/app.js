@@ -498,7 +498,7 @@ function einbettAdresse(v) {
   const u = new URL(v.url);
   if (v.plattform === "tiktok") return `https://www.tiktok.com/embed/v2/${u.pathname.split("/").pop()}`;
   if (v.plattform === "instagram") return `https://www.instagram.com/p/${u.pathname.split("/").filter(Boolean)[1]}/embed`;
-  if (v.plattform === "telegram") return `https://t.me${u.pathname}?embed=1`;
+  // Telegram nicht einbetten (recht 12.11.: weitergeleitete Fremdvideos), nur „Original öffnen“
   return null;
 }
 const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
@@ -539,6 +539,7 @@ function oeffneVideo(v, ab) {
   if (p === "youtube") return zeigeYoutube(v, ab, gekoppelt);
   $("player-hinweis").textContent = adresse
     ? `Die verortete Szene beginnt bei ${mmss(ab)}. Dieser Player lässt sich nicht mit der Zeitachse koppeln.`
+    : p === "telegram" ? `Videos von Telegram bettet diese Seite nicht ein. Szene ab ${mmss(ab)}: über „Original öffnen“.`
     : `${PLATTFORM_NAME[p] || "Diese Seite"} bietet keine Einbettung. Szene ab ${mmss(ab)}: über „Original öffnen“.`;
   if (adresse) {
     const f = document.createElement("iframe");
@@ -1048,6 +1049,8 @@ $("fluss-knopf").onclick = () => {
 
 // Ohne simulierte Polizei (z. B. Frankfurt) wäre „100 Demonstrierende, 0 Polizei“ irreführend: dann gar nicht zeigen
 const MIT_POLIZEI = MENGE.populationen.some((p) => p.gruppe === "polizei");
+// Bezeichnung der Gruppe „nacht“ aus den Daten (je Stadt anders benannt), für die 100er-Grafik
+const NACHT_NAME = "in " + (MENGE.populationen.find((p) => p.gruppe === "nacht")?.name || "Gruppen in der Innenstadt (Nacht)");
 function zeigeHundert() {
   if (!MIT_POLIZEI) return;
   let demo = 0, polizei = 0, krawall = 0, nacht = 0;
@@ -1062,7 +1065,7 @@ function zeigeHundert() {
   const kaestchen = Array.from({ length: 100 }, (_, i) => (i < p ? "p" : i < p + n ? "n" : i < p + n + k ? "k" : "d"));
   const teile = [];
   if (d + k) teile.push(`<b>${d + k}</b> Demonstrierende${k ? ` (davon ${k} laut Polizei gewaltbereit)` : ""}`);
-  if (n) teile.push(`<b>${n}</b> in Gruppen in der Innenstadt (Nacht)`);
+  if (n) teile.push(`<b>${n}</b> ${NACHT_NAME}`);
   teile.push(`<b>${p}</b> Polizei`);
   const html = `<div class="hundert-text">Von 100 Menschen auf der Straße sind gerade etwa
       ${teile.slice(0, -1).join(", ")} und ${teile[teile.length - 1]} – geschätzt.</div>

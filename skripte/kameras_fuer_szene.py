@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 # Fasst die verorteten Clip-Szenen (szene/clips/<id>.json) zu szene/kameras.js zusammen.
 # Nur Szenen mit Koordinaten und Zeitfenster; Zeiten "HH:MM" = Ortszeit 31.10.2026.
-# Aufruf aus dem Projektordner: python3 -I skripte/kameras_fuer_szene.py
-import glob, json, os
+# Aufruf aus dem Projektordner: python3 -I skripte/kameras_fuer_szene.py [--stadt NAME]
+import glob, json, os, sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-basis = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from stadt import angaben, basis_fuer  # --stadt NAME: staedte/NAME/ statt Köln
+
+basis = basis_fuer(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 berlin = ZoneInfo("Europe/Berlin")
 videos = {v["id"]: v for v in json.loads(
     open(os.path.join(basis, "szene/videos.js")).read().split("=", 1)[1].rstrip().rstrip(";"))}
+
+
+NACHT_BIS = angaben(basis).get("nacht_bis")  # z. B. 6: 00:00–05:59 = Folgetag (Frankfurt); Köln: nur 31.10.
 
 
 def uhr(hhmm):
     if not hhmm or ":" not in str(hhmm):
         return None
     h, m = str(hhmm).split(":")[:2]
-    return int(datetime(2026, 10, 31, int(h), int(m), tzinfo=berlin).timestamp())
+    tag = 1 if NACHT_BIS is not None and int(h) < NACHT_BIS else 0
+    return int(datetime(2026, 10, 31, int(h), int(m), tzinfo=berlin).timestamp()) + tag * 86400
 
 
 kameras, ohne = [], 0
@@ -86,6 +93,23 @@ if os.path.exists(verfeinert):
                                    f" ±{u.get('quer', '?')} m quer).")
                 n += 1
     print(f"{n} eingepasste Kameraposen übernommen")
+
+# Prüfung aller Szenen auf sichtbare Wahrzeichen (szene/kameras-pruefung-*.json, zuletzt angewandt): korrigierte Orte,
+# Blick und Zeit übernehmen, Feld pruefung setzen; nicht belegbare Szenen bleiben lokal, mit pruefung.ausblenden markiert
+for pruef in sorted(glob.glob(os.path.join(basis, "szene/kameras-pruefung-*.json"))):
+    neu = {(t["id"], t["sek"][0], t["sek"][1]): t for t in json.load(open(pruef))["szenen"]}
+    n = 0
+    for k in kameras:
+        t = neu.get((k["id"], k["sek_von"], k["sek_bis"]))
+        if not t:
+            continue
+        o = t["ort_neu"]
+        k.update(lat=o["lat"], lon=o["lon"], ort_sicher=o["ort_sicher"], blick=o["blick"], ort=t["ort"],
+                 von=uhr(o["von"]), bis=uhr(o["bis"]), pruefung=t["pruefung"])
+        k["ort_grund"] += t.get("ort_grund_zusatz", "")
+        k["zeit_grund"] += t.get("zeit_grund_zusatz", "")
+        n += 1
+    print(f"{n} Szenen aus {os.path.basename(pruef)} übernommen")
 
 with open(os.path.join(basis, "szene/kameras.js"), "w") as fh:
     fh.write("// Automatisch erzeugt von skripte/kameras_fuer_szene.py, nicht von Hand ändern.\n")

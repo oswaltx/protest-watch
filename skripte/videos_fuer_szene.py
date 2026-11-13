@@ -3,10 +3,13 @@
 # Livestreams: Start = release_timestamp, Ende = Start + Dauer (genau bis auf Unterbrechungen).
 # Andere Videos: nur Uploadzeit bekannt = spätester Aufnahmezeitpunkt.
 # Handangaben aus quellen.csv (Spalte aufnahmezeit, Format HH:MM) haben Vorrang.
-# Aufruf aus dem Projektordner: python3 -I skripte/videos_fuer_szene.py
-import csv, glob, json, os
+# Aufruf aus dem Projektordner: python3 -I skripte/videos_fuer_szene.py [--stadt NAME]
+import csv, glob, json, os, sys
 
-basis = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from stadt import basis_fuer  # --stadt NAME: staedte/NAME/ statt Köln
+
+basis = basis_fuer(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 hand = {}
 with open(os.path.join(basis, "quellen.csv"), newline="") as fh:
     for z in csv.DictReader(fh):
